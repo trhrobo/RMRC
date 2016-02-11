@@ -55,9 +55,9 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 add_message_files(
     FILES
-    Motor.msg
-    Plan.msg
-    Motor.msg
+#    Motor.msg
+#    Plan.msg
+#    Motor.msg
     Button.msg
 )
 
@@ -143,8 +143,8 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/dozap_node.cpp)
 
-add_executable(/catkin_ws/src/dozap src/plan.cpp)
-add_executable(/home/ubuntu/catkin_ws/src/dozap src/md.cpp)
+#add_executable(/catkin_ws/src/dozap src/plan.cpp)
+#add_executable(/home/ubuntu/catkin_ws/src/dozap src/md.cpp)
 add_executable(/home/ubuntu/catkin_ws/src/dozap src/controller.cpp)
 
 ## Rename C++ executable without prefix
@@ -164,12 +164,12 @@ add_executable(/home/ubuntu/catkin_ws/src/dozap src/controller.cpp)
 target_link_libraries(controller
    ${catkin_LIBRARIES}
 )
-target_link_libraries(md
-   ${catkin_LIBRARIES}
-)
-target_link_libraries(plan
-   ${catkin_LIBRARIES}
-)
+#target_link_libraries(md
+#   ${catkin_LIBRARIES}
+#)
+#target_link_libraries(plan
+#   ${catkin_LIBRARIES}
+#)
 
 
 #############
