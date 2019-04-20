@@ -1,4 +1,2 @@
-float64 flont
-float64 back
-float64 right
-float64 left
+int64 motor_right
+int64 motor_left

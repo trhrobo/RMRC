@@ -1,10 +1,13 @@
 #include<ros/ros.h>
 #include<sensor_msgs/Joy.h>
 #include"Dozap/msg/button.h"
-void joy_callback(const sensor_msgs::Joy& joy_msgs){
+
+Dozap::button data;
+
+void joy_callback(const sensor_msgs::Joy &joy_msgs){
     data.move = joy_msg.axes[3];
-    data.rotation_right = joy_msg[9];
-    data.rotation_left = joy_msg[8];
+    data.rotation_right = joy_msg.buttons[9];
+    data.rotation_left = joy_msg.buttons[8];
 }
 
 int main(int argc, char **argv){
@@ -15,7 +18,6 @@ int main(int argc, char **argv){
     ros::Rate loop_rate(10);
 
     while(ros::ok()){
-        Dozap::button data;
         controller_pub.publish(data);
         ros::SpinOnce();
         loop_rate.sleep();
