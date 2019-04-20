@@ -1,4 +1,4 @@
-float64 front
-float64 back
-float64 right
-float64 left
+float64 move
+float64 rotation_right
+float64 rotation_left
+
