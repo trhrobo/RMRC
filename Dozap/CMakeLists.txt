@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  message_generation
 )
 
 ## System dependencies are found with CMake's conventions
@@ -52,6 +53,13 @@ find_package(catkin REQUIRED COMPONENTS
 #   Message1.msg
 #   Message2.msg
 # )
+add_message_files(
+    FILES
+    Motor.msg
+    Plan.msg
+    Motor.msg
+    Button.msg
+)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -105,7 +113,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES Dozap
-#  CATKIN_DEPENDS roscpp rospy std_msgs
+CATKIN_DEPENDS roscpp rospy std_msgs
 #  DEPENDS system_lib
 )
 
@@ -135,6 +143,11 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/Dozap_node.cpp)
 
+add_executable(Dozap src/plan.cpp)
+add_executable(Dozap src/md.cpp)
+add_executable(Dozap src/controller.cpp)
+add_executable(Dozap src/md.hpp)
+
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -149,6 +162,16 @@ include_directories(
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
+target_link_libraries(controller_info
+   ${catkin_LIBRARIES}
+)
+target_link_libraries(motor_info
+   ${catkin_LIBRARIES}
+)
+target_link_libraries(motor_info
+   ${catkin_LIBRARIES}
+)
+
 
 #############
 ## Install ##

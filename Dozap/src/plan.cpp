@@ -3,7 +3,7 @@
 
 Dozap::Plan data;
 
-void motor_callback(const Dozap::button &point){
+void motor_callback(const Dozap::Button &point){
     if(point.move){
         data.motor_right = (int)point.move;
         data.motor_left = (int)point.move;
