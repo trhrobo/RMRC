@@ -146,7 +146,6 @@ include_directories(
 add_executable(Dozap src/plan.cpp)
 add_executable(Dozap src/md.cpp)
 add_executable(Dozap src/controller.cpp)
-add_executable(Dozap src/md.hpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -162,13 +161,13 @@ add_executable(Dozap src/md.hpp)
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
-target_link_libraries(controller_info
+target_link_libraries(controller
    ${catkin_LIBRARIES}
 )
-target_link_libraries(motor_info
+target_link_libraries(md
    ${catkin_LIBRARIES}
 )
-target_link_libraries(motor_info
+target_link_libraries(plan
    ${catkin_LIBRARIES}
 )
 
@@ -195,6 +194,11 @@ target_link_libraries(motor_info
 # )
 
 ## Mark cpp header files for installation
+# install(DIRECTORY include/${PROJECT_NAME}/
+#   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+#   FILES_MATCHING PATTERN "*.h"
+#   PATTERN ".svn" EXCLUDE
+# )
 # install(DIRECTORY include/${PROJECT_NAME}/
 #   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 #   FILES_MATCHING PATTERN "*.h"
