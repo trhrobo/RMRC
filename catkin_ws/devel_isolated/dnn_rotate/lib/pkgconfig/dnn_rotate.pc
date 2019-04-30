@@ -1,0 +1,8 @@
+prefix=/home/ubuntu/catkin_ws/devel_isolated/dnn_rotate
+
+Name: dnn_rotate
+Description: Description of dnn_rotate
+Version: 0.0.0
+Cflags: -I/home/ubuntu/catkin_ws/devel_isolated/dnn_rotate/include
+Libs: -L/home/ubuntu/catkin_ws/devel_isolated/dnn_rotate/lib 
+Requires: dnn_detect

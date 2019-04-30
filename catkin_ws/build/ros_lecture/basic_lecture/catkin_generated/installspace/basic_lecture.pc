@@ -1,0 +1,8 @@
+prefix=/home/ubuntu/catkin_ws/install
+
+Name: basic_lecture
+Description: Description of basic_lecture
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/ubuntu/catkin_ws/install/lib 
+Requires: 

@@ -1,0 +1,2 @@
+demos/dnn_rotate:demos/fiducial_follow:demos/move_demo:dozap:dozap_second:ros_lecture/basic_lecture
+-G Unix Makefiles -DCATKIN_DEVEL_PREFIX=/home/ubuntu/catkin_ws/devel_isolated -DCMAKE_INSTALL_PREFIX=/home/ubuntu/catkin_ws/install_isolated

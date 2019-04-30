@@ -1,0 +1,8 @@
+prefix=/home/ubuntu/catkin_ws/devel_isolated/dozap
+
+Name: dozap
+Description: Description of dozap
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/ubuntu/catkin_ws/devel_isolated/dozap/lib 
+Requires: roscpp rospy std_msgs
