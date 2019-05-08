@@ -4,8 +4,6 @@
 dozap/dozap_second/CMakeFiles/controller.dir/src/controller.cpp.o
  /home/ubuntu/catkin_ws/devel/include/dozap_second/Button.h
  /home/ubuntu/catkin_ws/src/dozap/dozap_second/src/controller.cpp
- /opt/ros/kinetic/include/geometry_msgs/Twist.h
- /opt/ros/kinetic/include/geometry_msgs/Vector3.h
  /opt/ros/kinetic/include/ros/advertise_options.h
  /opt/ros/kinetic/include/ros/advertise_service_options.h
  /opt/ros/kinetic/include/ros/assert.h
