@@ -1,6 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/dozap_second_generate_messages_lisp"
   "/home/ubuntu/catkin_ws/devel/share/common-lisp/ros/dozap_second/msg/Button.lisp"
+  "/home/ubuntu/catkin_ws/devel/share/common-lisp/ros/dozap_second/msg/Main.lisp"
 )
 
 # Per-language clean rules from dependency scanning.

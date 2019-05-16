@@ -1,6 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/dozap_second_generate_messages_cpp"
   "/home/ubuntu/catkin_ws/devel/include/dozap_second/Button.h"
+  "/home/ubuntu/catkin_ws/devel/include/dozap_second/Main.h"
 )
 
 # Per-language clean rules from dependency scanning.

@@ -1,6 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/dozap_second_generate_messages_py"
   "/home/ubuntu/catkin_ws/devel/lib/python2.7/dist-packages/dozap_second/msg/_Button.py"
+  "/home/ubuntu/catkin_ws/devel/lib/python2.7/dist-packages/dozap_second/msg/_Main.py"
   "/home/ubuntu/catkin_ws/devel/lib/python2.7/dist-packages/dozap_second/msg/__init__.py"
 )
 

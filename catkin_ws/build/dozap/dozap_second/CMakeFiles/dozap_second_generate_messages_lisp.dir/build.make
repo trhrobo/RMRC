@@ -54,6 +54,7 @@ CMAKE_BINARY_DIR = /home/ubuntu/catkin_ws/build
 include dozap/dozap_second/CMakeFiles/dozap_second_generate_messages_lisp.dir/progress.make
 
 dozap/dozap_second/CMakeFiles/dozap_second_generate_messages_lisp: /home/ubuntu/catkin_ws/devel/share/common-lisp/ros/dozap_second/msg/Button.lisp
+dozap/dozap_second/CMakeFiles/dozap_second_generate_messages_lisp: /home/ubuntu/catkin_ws/devel/share/common-lisp/ros/dozap_second/msg/Main.lisp
 
 
 /home/ubuntu/catkin_ws/devel/share/common-lisp/ros/dozap_second/msg/Button.lisp: /opt/ros/kinetic/lib/genlisp/gen_lisp.py
@@ -61,8 +62,14 @@ dozap/dozap_second/CMakeFiles/dozap_second_generate_messages_lisp: /home/ubuntu/
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/ubuntu/catkin_ws/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating Lisp code from dozap_second/Button.msg"
 	cd /home/ubuntu/catkin_ws/build/dozap/dozap_second && ../../catkin_generated/env_cached.sh /usr/bin/python /opt/ros/kinetic/share/genlisp/cmake/../../../lib/genlisp/gen_lisp.py /home/ubuntu/catkin_ws/src/dozap/dozap_second/msg/Button.msg -Idozap_second:/home/ubuntu/catkin_ws/src/dozap/dozap_second/msg -Istd_msgs:/opt/ros/kinetic/share/std_msgs/cmake/../msg -Isensor_msgs:/opt/ros/kinetic/share/sensor_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/kinetic/share/geometry_msgs/cmake/../msg -p dozap_second -o /home/ubuntu/catkin_ws/devel/share/common-lisp/ros/dozap_second/msg
 
+/home/ubuntu/catkin_ws/devel/share/common-lisp/ros/dozap_second/msg/Main.lisp: /opt/ros/kinetic/lib/genlisp/gen_lisp.py
+/home/ubuntu/catkin_ws/devel/share/common-lisp/ros/dozap_second/msg/Main.lisp: /home/ubuntu/catkin_ws/src/dozap/dozap_second/msg/Main.msg
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/ubuntu/catkin_ws/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Generating Lisp code from dozap_second/Main.msg"
+	cd /home/ubuntu/catkin_ws/build/dozap/dozap_second && ../../catkin_generated/env_cached.sh /usr/bin/python /opt/ros/kinetic/share/genlisp/cmake/../../../lib/genlisp/gen_lisp.py /home/ubuntu/catkin_ws/src/dozap/dozap_second/msg/Main.msg -Idozap_second:/home/ubuntu/catkin_ws/src/dozap/dozap_second/msg -Istd_msgs:/opt/ros/kinetic/share/std_msgs/cmake/../msg -Isensor_msgs:/opt/ros/kinetic/share/sensor_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/kinetic/share/geometry_msgs/cmake/../msg -p dozap_second -o /home/ubuntu/catkin_ws/devel/share/common-lisp/ros/dozap_second/msg
+
 dozap_second_generate_messages_lisp: dozap/dozap_second/CMakeFiles/dozap_second_generate_messages_lisp
 dozap_second_generate_messages_lisp: /home/ubuntu/catkin_ws/devel/share/common-lisp/ros/dozap_second/msg/Button.lisp
+dozap_second_generate_messages_lisp: /home/ubuntu/catkin_ws/devel/share/common-lisp/ros/dozap_second/msg/Main.lisp
 dozap_second_generate_messages_lisp: dozap/dozap_second/CMakeFiles/dozap_second_generate_messages_lisp.dir/build.make
 
 .PHONY : dozap_second_generate_messages_lisp

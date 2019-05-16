@@ -54,6 +54,7 @@ CMAKE_BINARY_DIR = /home/ubuntu/catkin_ws/build
 include dozap/dozap_second/CMakeFiles/dozap_second_generate_messages_cpp.dir/progress.make
 
 dozap/dozap_second/CMakeFiles/dozap_second_generate_messages_cpp: /home/ubuntu/catkin_ws/devel/include/dozap_second/Button.h
+dozap/dozap_second/CMakeFiles/dozap_second_generate_messages_cpp: /home/ubuntu/catkin_ws/devel/include/dozap_second/Main.h
 
 
 /home/ubuntu/catkin_ws/devel/include/dozap_second/Button.h: /opt/ros/kinetic/lib/gencpp/gen_cpp.py
@@ -62,8 +63,15 @@ dozap/dozap_second/CMakeFiles/dozap_second_generate_messages_cpp: /home/ubuntu/c
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/ubuntu/catkin_ws/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating C++ code from dozap_second/Button.msg"
 	cd /home/ubuntu/catkin_ws/src/dozap/dozap_second && /home/ubuntu/catkin_ws/build/catkin_generated/env_cached.sh /usr/bin/python /opt/ros/kinetic/share/gencpp/cmake/../../../lib/gencpp/gen_cpp.py /home/ubuntu/catkin_ws/src/dozap/dozap_second/msg/Button.msg -Idozap_second:/home/ubuntu/catkin_ws/src/dozap/dozap_second/msg -Istd_msgs:/opt/ros/kinetic/share/std_msgs/cmake/../msg -Isensor_msgs:/opt/ros/kinetic/share/sensor_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/kinetic/share/geometry_msgs/cmake/../msg -p dozap_second -o /home/ubuntu/catkin_ws/devel/include/dozap_second -e /opt/ros/kinetic/share/gencpp/cmake/..
 
+/home/ubuntu/catkin_ws/devel/include/dozap_second/Main.h: /opt/ros/kinetic/lib/gencpp/gen_cpp.py
+/home/ubuntu/catkin_ws/devel/include/dozap_second/Main.h: /home/ubuntu/catkin_ws/src/dozap/dozap_second/msg/Main.msg
+/home/ubuntu/catkin_ws/devel/include/dozap_second/Main.h: /opt/ros/kinetic/share/gencpp/msg.h.template
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/ubuntu/catkin_ws/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Generating C++ code from dozap_second/Main.msg"
+	cd /home/ubuntu/catkin_ws/src/dozap/dozap_second && /home/ubuntu/catkin_ws/build/catkin_generated/env_cached.sh /usr/bin/python /opt/ros/kinetic/share/gencpp/cmake/../../../lib/gencpp/gen_cpp.py /home/ubuntu/catkin_ws/src/dozap/dozap_second/msg/Main.msg -Idozap_second:/home/ubuntu/catkin_ws/src/dozap/dozap_second/msg -Istd_msgs:/opt/ros/kinetic/share/std_msgs/cmake/../msg -Isensor_msgs:/opt/ros/kinetic/share/sensor_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/kinetic/share/geometry_msgs/cmake/../msg -p dozap_second -o /home/ubuntu/catkin_ws/devel/include/dozap_second -e /opt/ros/kinetic/share/gencpp/cmake/..
+
 dozap_second_generate_messages_cpp: dozap/dozap_second/CMakeFiles/dozap_second_generate_messages_cpp
 dozap_second_generate_messages_cpp: /home/ubuntu/catkin_ws/devel/include/dozap_second/Button.h
+dozap_second_generate_messages_cpp: /home/ubuntu/catkin_ws/devel/include/dozap_second/Main.h
 dozap_second_generate_messages_cpp: dozap/dozap_second/CMakeFiles/dozap_second_generate_messages_cpp.dir/build.make
 
 .PHONY : dozap_second_generate_messages_cpp

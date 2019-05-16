@@ -3,5 +3,7 @@
   (:export
    "<BUTTON>"
    "BUTTON"
+   "<MAIN>"
+   "MAIN"
   ))
 

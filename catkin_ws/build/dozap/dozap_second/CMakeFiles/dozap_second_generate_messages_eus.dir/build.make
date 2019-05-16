@@ -54,6 +54,7 @@ CMAKE_BINARY_DIR = /home/ubuntu/catkin_ws/build
 include dozap/dozap_second/CMakeFiles/dozap_second_generate_messages_eus.dir/progress.make
 
 dozap/dozap_second/CMakeFiles/dozap_second_generate_messages_eus: /home/ubuntu/catkin_ws/devel/share/roseus/ros/dozap_second/msg/Button.l
+dozap/dozap_second/CMakeFiles/dozap_second_generate_messages_eus: /home/ubuntu/catkin_ws/devel/share/roseus/ros/dozap_second/msg/Main.l
 dozap/dozap_second/CMakeFiles/dozap_second_generate_messages_eus: /home/ubuntu/catkin_ws/devel/share/roseus/ros/dozap_second/manifest.l
 
 
@@ -62,12 +63,18 @@ dozap/dozap_second/CMakeFiles/dozap_second_generate_messages_eus: /home/ubuntu/c
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/ubuntu/catkin_ws/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating EusLisp code from dozap_second/Button.msg"
 	cd /home/ubuntu/catkin_ws/build/dozap/dozap_second && ../../catkin_generated/env_cached.sh /usr/bin/python /opt/ros/kinetic/share/geneus/cmake/../../../lib/geneus/gen_eus.py /home/ubuntu/catkin_ws/src/dozap/dozap_second/msg/Button.msg -Idozap_second:/home/ubuntu/catkin_ws/src/dozap/dozap_second/msg -Istd_msgs:/opt/ros/kinetic/share/std_msgs/cmake/../msg -Isensor_msgs:/opt/ros/kinetic/share/sensor_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/kinetic/share/geometry_msgs/cmake/../msg -p dozap_second -o /home/ubuntu/catkin_ws/devel/share/roseus/ros/dozap_second/msg
 
+/home/ubuntu/catkin_ws/devel/share/roseus/ros/dozap_second/msg/Main.l: /opt/ros/kinetic/lib/geneus/gen_eus.py
+/home/ubuntu/catkin_ws/devel/share/roseus/ros/dozap_second/msg/Main.l: /home/ubuntu/catkin_ws/src/dozap/dozap_second/msg/Main.msg
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/ubuntu/catkin_ws/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Generating EusLisp code from dozap_second/Main.msg"
+	cd /home/ubuntu/catkin_ws/build/dozap/dozap_second && ../../catkin_generated/env_cached.sh /usr/bin/python /opt/ros/kinetic/share/geneus/cmake/../../../lib/geneus/gen_eus.py /home/ubuntu/catkin_ws/src/dozap/dozap_second/msg/Main.msg -Idozap_second:/home/ubuntu/catkin_ws/src/dozap/dozap_second/msg -Istd_msgs:/opt/ros/kinetic/share/std_msgs/cmake/../msg -Isensor_msgs:/opt/ros/kinetic/share/sensor_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/kinetic/share/geometry_msgs/cmake/../msg -p dozap_second -o /home/ubuntu/catkin_ws/devel/share/roseus/ros/dozap_second/msg
+
 /home/ubuntu/catkin_ws/devel/share/roseus/ros/dozap_second/manifest.l: /opt/ros/kinetic/lib/geneus/gen_eus.py
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/ubuntu/catkin_ws/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Generating EusLisp manifest code for dozap_second"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/ubuntu/catkin_ws/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Generating EusLisp manifest code for dozap_second"
 	cd /home/ubuntu/catkin_ws/build/dozap/dozap_second && ../../catkin_generated/env_cached.sh /usr/bin/python /opt/ros/kinetic/share/geneus/cmake/../../../lib/geneus/gen_eus.py -m -o /home/ubuntu/catkin_ws/devel/share/roseus/ros/dozap_second dozap_second std_msgs sensor_msgs geometry_msgs
 
 dozap_second_generate_messages_eus: dozap/dozap_second/CMakeFiles/dozap_second_generate_messages_eus
 dozap_second_generate_messages_eus: /home/ubuntu/catkin_ws/devel/share/roseus/ros/dozap_second/msg/Button.l
+dozap_second_generate_messages_eus: /home/ubuntu/catkin_ws/devel/share/roseus/ros/dozap_second/msg/Main.l
 dozap_second_generate_messages_eus: /home/ubuntu/catkin_ws/devel/share/roseus/ros/dozap_second/manifest.l
 dozap_second_generate_messages_eus: dozap/dozap_second/CMakeFiles/dozap_second_generate_messages_eus.dir/build.make
 

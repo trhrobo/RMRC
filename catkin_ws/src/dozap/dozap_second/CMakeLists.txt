@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(dozap_second)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
+add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -58,6 +58,7 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
   FILES
   Button.msg
+  Main.msg
 ) 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -145,6 +146,8 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/dozap_second_node.cpp)
 add_executable(controller src/controller.cpp)
+add_executable(main src/main.cpp)
+add_executable(md src/md.cpp)
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -155,12 +158,21 @@ add_executable(controller src/controller.cpp)
 ## same as for the library above
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(controller ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(main ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(md ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
 target_link_libraries(controller
    ${catkin_LIBRARIES}
+)
+target_link_libraries(main
+   ${catkin_LIBRARIES}
+)
+target_link_libraries(md
+   ${catkin_LIBRARIES}
+   pigpiod_if2
 )
 #############
 ## Install ##

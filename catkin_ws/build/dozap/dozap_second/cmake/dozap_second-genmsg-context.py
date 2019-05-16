@@ -1,6 +1,6 @@
 # generated from genmsg/cmake/pkg-genmsg.context.in
 
-messages_str = "/home/ubuntu/catkin_ws/src/dozap/dozap_second/msg/Button.msg"
+messages_str = "/home/ubuntu/catkin_ws/src/dozap/dozap_second/msg/Button.msg;/home/ubuntu/catkin_ws/src/dozap/dozap_second/msg/Main.msg"
 services_str = ""
 pkg_name = "dozap_second"
 dependencies_str = "std_msgs;sensor_msgs;geometry_msgs"
