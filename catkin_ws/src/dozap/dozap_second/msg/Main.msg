@@ -1,4 +1,6 @@
 int32 motor_right
 int32 motor_left
-int32 rotation_right
-int32 rotation_left
+int32 rotation_a_right
+int32 rotation_a_left
+int32 rotation_b_right
+int32 rotation_b_left

@@ -26,14 +26,18 @@ struct Main_
   Main_()
     : motor_right(0)
     , motor_left(0)
-    , rotation_right(0)
-    , rotation_left(0)  {
+    , rotation_a_right(0)
+    , rotation_a_left(0)
+    , rotation_b_right(0)
+    , rotation_b_left(0)  {
     }
   Main_(const ContainerAllocator& _alloc)
     : motor_right(0)
     , motor_left(0)
-    , rotation_right(0)
-    , rotation_left(0)  {
+    , rotation_a_right(0)
+    , rotation_a_left(0)
+    , rotation_b_right(0)
+    , rotation_b_left(0)  {
   (void)_alloc;
     }
 
@@ -45,11 +49,17 @@ struct Main_
    typedef int32_t _motor_left_type;
   _motor_left_type motor_left;
 
-   typedef int32_t _rotation_right_type;
-  _rotation_right_type rotation_right;
+   typedef int32_t _rotation_a_right_type;
+  _rotation_a_right_type rotation_a_right;
 
-   typedef int32_t _rotation_left_type;
-  _rotation_left_type rotation_left;
+   typedef int32_t _rotation_a_left_type;
+  _rotation_a_left_type rotation_a_left;
+
+   typedef int32_t _rotation_b_right_type;
+  _rotation_b_right_type rotation_b_right;
+
+   typedef int32_t _rotation_b_left_type;
+  _rotation_b_left_type rotation_b_left;
 
 
 
@@ -129,12 +139,12 @@ struct MD5Sum< ::dozap_second::Main_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "7a83861f39451721eaac1e365039256f";
+    return "83aace50d71246340a8e7cc2d2789279";
   }
 
   static const char* value(const ::dozap_second::Main_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0x7a83861f39451721ULL;
-  static const uint64_t static_value2 = 0xeaac1e365039256fULL;
+  static const uint64_t static_value1 = 0x83aace50d7124634ULL;
+  static const uint64_t static_value2 = 0x0a8e7cc2d2789279ULL;
 };
 
 template<class ContainerAllocator>
@@ -155,8 +165,10 @@ struct Definition< ::dozap_second::Main_<ContainerAllocator> >
   {
     return "int32 motor_right\n\
 int32 motor_left\n\
-int32 rotation_right\n\
-int32 rotation_left\n\
+int32 rotation_a_right\n\
+int32 rotation_a_left\n\
+int32 rotation_b_right\n\
+int32 rotation_b_left\n\
 ";
   }
 
@@ -177,8 +189,10 @@ namespace serialization
     {
       stream.next(m.motor_right);
       stream.next(m.motor_left);
-      stream.next(m.rotation_right);
-      stream.next(m.rotation_left);
+      stream.next(m.rotation_a_right);
+      stream.next(m.rotation_a_left);
+      stream.next(m.rotation_b_right);
+      stream.next(m.rotation_b_left);
     }
 
     ROS_DECLARE_ALLINONE_SERIALIZER
@@ -201,10 +215,14 @@ struct Printer< ::dozap_second::Main_<ContainerAllocator> >
     Printer<int32_t>::stream(s, indent + "  ", v.motor_right);
     s << indent << "motor_left: ";
     Printer<int32_t>::stream(s, indent + "  ", v.motor_left);
-    s << indent << "rotation_right: ";
-    Printer<int32_t>::stream(s, indent + "  ", v.rotation_right);
-    s << indent << "rotation_left: ";
-    Printer<int32_t>::stream(s, indent + "  ", v.rotation_left);
+    s << indent << "rotation_a_right: ";
+    Printer<int32_t>::stream(s, indent + "  ", v.rotation_a_right);
+    s << indent << "rotation_a_left: ";
+    Printer<int32_t>::stream(s, indent + "  ", v.rotation_a_left);
+    s << indent << "rotation_b_right: ";
+    Printer<int32_t>::stream(s, indent + "  ", v.rotation_b_right);
+    s << indent << "rotation_b_left: ";
+    Printer<int32_t>::stream(s, indent + "  ", v.rotation_b_left);
   }
 };
 

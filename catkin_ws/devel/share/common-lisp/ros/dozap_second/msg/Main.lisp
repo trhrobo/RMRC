@@ -17,14 +17,24 @@
     :initarg :motor_left
     :type cl:integer
     :initform 0)
-   (rotation_right
-    :reader rotation_right
-    :initarg :rotation_right
+   (rotation_a_right
+    :reader rotation_a_right
+    :initarg :rotation_a_right
     :type cl:integer
     :initform 0)
-   (rotation_left
-    :reader rotation_left
-    :initarg :rotation_left
+   (rotation_a_left
+    :reader rotation_a_left
+    :initarg :rotation_a_left
+    :type cl:integer
+    :initform 0)
+   (rotation_b_right
+    :reader rotation_b_right
+    :initarg :rotation_b_right
+    :type cl:integer
+    :initform 0)
+   (rotation_b_left
+    :reader rotation_b_left
+    :initarg :rotation_b_left
     :type cl:integer
     :initform 0))
 )
@@ -47,15 +57,25 @@
   (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader dozap_second-msg:motor_left-val is deprecated.  Use dozap_second-msg:motor_left instead.")
   (motor_left m))
 
-(cl:ensure-generic-function 'rotation_right-val :lambda-list '(m))
-(cl:defmethod rotation_right-val ((m <Main>))
-  (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader dozap_second-msg:rotation_right-val is deprecated.  Use dozap_second-msg:rotation_right instead.")
-  (rotation_right m))
+(cl:ensure-generic-function 'rotation_a_right-val :lambda-list '(m))
+(cl:defmethod rotation_a_right-val ((m <Main>))
+  (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader dozap_second-msg:rotation_a_right-val is deprecated.  Use dozap_second-msg:rotation_a_right instead.")
+  (rotation_a_right m))
 
-(cl:ensure-generic-function 'rotation_left-val :lambda-list '(m))
-(cl:defmethod rotation_left-val ((m <Main>))
-  (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader dozap_second-msg:rotation_left-val is deprecated.  Use dozap_second-msg:rotation_left instead.")
-  (rotation_left m))
+(cl:ensure-generic-function 'rotation_a_left-val :lambda-list '(m))
+(cl:defmethod rotation_a_left-val ((m <Main>))
+  (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader dozap_second-msg:rotation_a_left-val is deprecated.  Use dozap_second-msg:rotation_a_left instead.")
+  (rotation_a_left m))
+
+(cl:ensure-generic-function 'rotation_b_right-val :lambda-list '(m))
+(cl:defmethod rotation_b_right-val ((m <Main>))
+  (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader dozap_second-msg:rotation_b_right-val is deprecated.  Use dozap_second-msg:rotation_b_right instead.")
+  (rotation_b_right m))
+
+(cl:ensure-generic-function 'rotation_b_left-val :lambda-list '(m))
+(cl:defmethod rotation_b_left-val ((m <Main>))
+  (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader dozap_second-msg:rotation_b_left-val is deprecated.  Use dozap_second-msg:rotation_b_left instead.")
+  (rotation_b_left m))
 (cl:defmethod roslisp-msg-protocol:serialize ((msg <Main>) ostream)
   "Serializes a message object of type '<Main>"
   (cl:let* ((signed (cl:slot-value msg 'motor_right)) (unsigned (cl:if (cl:< signed 0) (cl:+ signed 4294967296) signed)))
@@ -70,13 +90,25 @@
     (cl:write-byte (cl:ldb (cl:byte 8 16) unsigned) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 24) unsigned) ostream)
     )
-  (cl:let* ((signed (cl:slot-value msg 'rotation_right)) (unsigned (cl:if (cl:< signed 0) (cl:+ signed 4294967296) signed)))
+  (cl:let* ((signed (cl:slot-value msg 'rotation_a_right)) (unsigned (cl:if (cl:< signed 0) (cl:+ signed 4294967296) signed)))
     (cl:write-byte (cl:ldb (cl:byte 8 0) unsigned) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 8) unsigned) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 16) unsigned) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 24) unsigned) ostream)
     )
-  (cl:let* ((signed (cl:slot-value msg 'rotation_left)) (unsigned (cl:if (cl:< signed 0) (cl:+ signed 4294967296) signed)))
+  (cl:let* ((signed (cl:slot-value msg 'rotation_a_left)) (unsigned (cl:if (cl:< signed 0) (cl:+ signed 4294967296) signed)))
+    (cl:write-byte (cl:ldb (cl:byte 8 0) unsigned) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 8) unsigned) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 16) unsigned) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 24) unsigned) ostream)
+    )
+  (cl:let* ((signed (cl:slot-value msg 'rotation_b_right)) (unsigned (cl:if (cl:< signed 0) (cl:+ signed 4294967296) signed)))
+    (cl:write-byte (cl:ldb (cl:byte 8 0) unsigned) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 8) unsigned) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 16) unsigned) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 24) unsigned) ostream)
+    )
+  (cl:let* ((signed (cl:slot-value msg 'rotation_b_left)) (unsigned (cl:if (cl:< signed 0) (cl:+ signed 4294967296) signed)))
     (cl:write-byte (cl:ldb (cl:byte 8 0) unsigned) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 8) unsigned) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 16) unsigned) ostream)
@@ -102,13 +134,25 @@
       (cl:setf (cl:ldb (cl:byte 8 8) unsigned) (cl:read-byte istream))
       (cl:setf (cl:ldb (cl:byte 8 16) unsigned) (cl:read-byte istream))
       (cl:setf (cl:ldb (cl:byte 8 24) unsigned) (cl:read-byte istream))
-      (cl:setf (cl:slot-value msg 'rotation_right) (cl:if (cl:< unsigned 2147483648) unsigned (cl:- unsigned 4294967296))))
+      (cl:setf (cl:slot-value msg 'rotation_a_right) (cl:if (cl:< unsigned 2147483648) unsigned (cl:- unsigned 4294967296))))
     (cl:let ((unsigned 0))
       (cl:setf (cl:ldb (cl:byte 8 0) unsigned) (cl:read-byte istream))
       (cl:setf (cl:ldb (cl:byte 8 8) unsigned) (cl:read-byte istream))
       (cl:setf (cl:ldb (cl:byte 8 16) unsigned) (cl:read-byte istream))
       (cl:setf (cl:ldb (cl:byte 8 24) unsigned) (cl:read-byte istream))
-      (cl:setf (cl:slot-value msg 'rotation_left) (cl:if (cl:< unsigned 2147483648) unsigned (cl:- unsigned 4294967296))))
+      (cl:setf (cl:slot-value msg 'rotation_a_left) (cl:if (cl:< unsigned 2147483648) unsigned (cl:- unsigned 4294967296))))
+    (cl:let ((unsigned 0))
+      (cl:setf (cl:ldb (cl:byte 8 0) unsigned) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 8) unsigned) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 16) unsigned) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 24) unsigned) (cl:read-byte istream))
+      (cl:setf (cl:slot-value msg 'rotation_b_right) (cl:if (cl:< unsigned 2147483648) unsigned (cl:- unsigned 4294967296))))
+    (cl:let ((unsigned 0))
+      (cl:setf (cl:ldb (cl:byte 8 0) unsigned) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 8) unsigned) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 16) unsigned) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 24) unsigned) (cl:read-byte istream))
+      (cl:setf (cl:slot-value msg 'rotation_b_left) (cl:if (cl:< unsigned 2147483648) unsigned (cl:- unsigned 4294967296))))
   msg
 )
 (cl:defmethod roslisp-msg-protocol:ros-datatype ((msg (cl:eql '<Main>)))
@@ -119,18 +163,20 @@
   "dozap_second/Main")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql '<Main>)))
   "Returns md5sum for a message object of type '<Main>"
-  "7a83861f39451721eaac1e365039256f")
+  "83aace50d71246340a8e7cc2d2789279")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql 'Main)))
   "Returns md5sum for a message object of type 'Main"
-  "7a83861f39451721eaac1e365039256f")
+  "83aace50d71246340a8e7cc2d2789279")
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql '<Main>)))
   "Returns full string definition for message of type '<Main>"
-  (cl:format cl:nil "int32 motor_right~%int32 motor_left~%int32 rotation_right~%int32 rotation_left~%~%~%"))
+  (cl:format cl:nil "int32 motor_right~%int32 motor_left~%int32 rotation_a_right~%int32 rotation_a_left~%int32 rotation_b_right~%int32 rotation_b_left~%~%~%"))
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql 'Main)))
   "Returns full string definition for message of type 'Main"
-  (cl:format cl:nil "int32 motor_right~%int32 motor_left~%int32 rotation_right~%int32 rotation_left~%~%~%"))
+  (cl:format cl:nil "int32 motor_right~%int32 motor_left~%int32 rotation_a_right~%int32 rotation_a_left~%int32 rotation_b_right~%int32 rotation_b_left~%~%~%"))
 (cl:defmethod roslisp-msg-protocol:serialization-length ((msg <Main>))
   (cl:+ 0
+     4
+     4
      4
      4
      4
@@ -141,6 +187,8 @@
   (cl:list 'Main
     (cl:cons ':motor_right (motor_right msg))
     (cl:cons ':motor_left (motor_left msg))
-    (cl:cons ':rotation_right (rotation_right msg))
-    (cl:cons ':rotation_left (rotation_left msg))
+    (cl:cons ':rotation_a_right (rotation_a_right msg))
+    (cl:cons ':rotation_a_left (rotation_a_left msg))
+    (cl:cons ':rotation_b_right (rotation_b_right msg))
+    (cl:cons ':rotation_b_left (rotation_b_left msg))
 ))

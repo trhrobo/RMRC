@@ -7,16 +7,18 @@ import struct
 
 
 class Main(genpy.Message):
-  _md5sum = "7a83861f39451721eaac1e365039256f"
+  _md5sum = "83aace50d71246340a8e7cc2d2789279"
   _type = "dozap_second/Main"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """int32 motor_right
 int32 motor_left
-int32 rotation_right
-int32 rotation_left
+int32 rotation_a_right
+int32 rotation_a_left
+int32 rotation_b_right
+int32 rotation_b_left
 """
-  __slots__ = ['motor_right','motor_left','rotation_right','rotation_left']
-  _slot_types = ['int32','int32','int32','int32']
+  __slots__ = ['motor_right','motor_left','rotation_a_right','rotation_a_left','rotation_b_right','rotation_b_left']
+  _slot_types = ['int32','int32','int32','int32','int32','int32']
 
   def __init__(self, *args, **kwds):
     """
@@ -26,7 +28,7 @@ int32 rotation_left
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       motor_right,motor_left,rotation_right,rotation_left
+       motor_right,motor_left,rotation_a_right,rotation_a_left,rotation_b_right,rotation_b_left
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -39,15 +41,21 @@ int32 rotation_left
         self.motor_right = 0
       if self.motor_left is None:
         self.motor_left = 0
-      if self.rotation_right is None:
-        self.rotation_right = 0
-      if self.rotation_left is None:
-        self.rotation_left = 0
+      if self.rotation_a_right is None:
+        self.rotation_a_right = 0
+      if self.rotation_a_left is None:
+        self.rotation_a_left = 0
+      if self.rotation_b_right is None:
+        self.rotation_b_right = 0
+      if self.rotation_b_left is None:
+        self.rotation_b_left = 0
     else:
       self.motor_right = 0
       self.motor_left = 0
-      self.rotation_right = 0
-      self.rotation_left = 0
+      self.rotation_a_right = 0
+      self.rotation_a_left = 0
+      self.rotation_b_right = 0
+      self.rotation_b_left = 0
 
   def _get_types(self):
     """
@@ -62,7 +70,7 @@ int32 rotation_left
     """
     try:
       _x = self
-      buff.write(_get_struct_4i().pack(_x.motor_right, _x.motor_left, _x.rotation_right, _x.rotation_left))
+      buff.write(_get_struct_6i().pack(_x.motor_right, _x.motor_left, _x.rotation_a_right, _x.rotation_a_left, _x.rotation_b_right, _x.rotation_b_left))
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
     except TypeError as te: self._check_types(ValueError("%s: '%s' when writing '%s'" % (type(te), str(te), str(locals().get('_x', self)))))
 
@@ -75,8 +83,8 @@ int32 rotation_left
       end = 0
       _x = self
       start = end
-      end += 16
-      (_x.motor_right, _x.motor_left, _x.rotation_right, _x.rotation_left,) = _get_struct_4i().unpack(str[start:end])
+      end += 24
+      (_x.motor_right, _x.motor_left, _x.rotation_a_right, _x.rotation_a_left, _x.rotation_b_right, _x.rotation_b_left,) = _get_struct_6i().unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -90,7 +98,7 @@ int32 rotation_left
     """
     try:
       _x = self
-      buff.write(_get_struct_4i().pack(_x.motor_right, _x.motor_left, _x.rotation_right, _x.rotation_left))
+      buff.write(_get_struct_6i().pack(_x.motor_right, _x.motor_left, _x.rotation_a_right, _x.rotation_a_left, _x.rotation_b_right, _x.rotation_b_left))
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
     except TypeError as te: self._check_types(ValueError("%s: '%s' when writing '%s'" % (type(te), str(te), str(locals().get('_x', self)))))
 
@@ -104,8 +112,8 @@ int32 rotation_left
       end = 0
       _x = self
       start = end
-      end += 16
-      (_x.motor_right, _x.motor_left, _x.rotation_right, _x.rotation_left,) = _get_struct_4i().unpack(str[start:end])
+      end += 24
+      (_x.motor_right, _x.motor_left, _x.rotation_a_right, _x.rotation_a_left, _x.rotation_b_right, _x.rotation_b_left,) = _get_struct_6i().unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -114,9 +122,9 @@ _struct_I = genpy.struct_I
 def _get_struct_I():
     global _struct_I
     return _struct_I
-_struct_4i = None
-def _get_struct_4i():
-    global _struct_4i
-    if _struct_4i is None:
-        _struct_4i = struct.Struct("<4i")
-    return _struct_4i
+_struct_6i = None
+def _get_struct_6i():
+    global _struct_6i
+    if _struct_6i is None:
+        _struct_6i = struct.Struct("<6i")
+    return _struct_6i

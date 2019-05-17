@@ -26,31 +26,31 @@ void controller_callback(const dozap_second::Button& button_msg){
 
     switch(button_msg.rotation_right){
         case 1:
-            data.rotation_right = Speed_min;
-            data.rotation_left = Speed_max;
+            data.rotation_a_right = Speed_zero;
+            data.rotation_a_left = Speed_zero;
             break;
         case -1:
-            data.rotation_right = Speed_zero;
-            data.rotation_left = Speed_zero;
+            data.rotation_a_right = Speed_min;
+            data.rotation_a_left = Speed_max;
             break;
         case 0:
-            data.rotation_right = Speed_zero;
-            data.rotation_left = Speed_zero;
+            data.rotation_a_right = Speed_zero;
+            data.rotation_a_left = Speed_zero;
             break;
     }
 
     switch(button_msg.rotation_left){
         case 1:
-            data.rotation_right = Speed_max;
-            data.rotation_left = Speed_min;
+            data.rotation_b_right = Speed_zero;
+            data.rotation_b_left = Speed_zero;
             break;
         case -1:
-            data.rotation_right = Speed_zero;
-            data.rotation_left = Speed_zero;
+            data.rotation_b_right = Speed_max;
+            data.rotation_b_left = Speed_min;
             break;
         case 0:
-            data.rotation_right = Speed_zero;
-            data.rotation_left = Speed_zero;
+            data.rotation_b_right = Speed_zero;
+            data.rotation_b_left = Speed_zero;
             break;
     }
 }
