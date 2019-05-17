@@ -25,11 +25,15 @@ struct Main_
 
   Main_()
     : motor_right(0)
-    , motor_left(0)  {
+    , motor_left(0)
+    , rotation_right(0)
+    , rotation_left(0)  {
     }
   Main_(const ContainerAllocator& _alloc)
     : motor_right(0)
-    , motor_left(0)  {
+    , motor_left(0)
+    , rotation_right(0)
+    , rotation_left(0)  {
   (void)_alloc;
     }
 
@@ -40,6 +44,12 @@ struct Main_
 
    typedef int32_t _motor_left_type;
   _motor_left_type motor_left;
+
+   typedef int32_t _rotation_right_type;
+  _rotation_right_type rotation_right;
+
+   typedef int32_t _rotation_left_type;
+  _rotation_left_type rotation_left;
 
 
 
@@ -119,12 +129,12 @@ struct MD5Sum< ::dozap_second::Main_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "799f128dce14b1811f847ac0f5950039";
+    return "7a83861f39451721eaac1e365039256f";
   }
 
   static const char* value(const ::dozap_second::Main_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0x799f128dce14b181ULL;
-  static const uint64_t static_value2 = 0x1f847ac0f5950039ULL;
+  static const uint64_t static_value1 = 0x7a83861f39451721ULL;
+  static const uint64_t static_value2 = 0xeaac1e365039256fULL;
 };
 
 template<class ContainerAllocator>
@@ -145,6 +155,8 @@ struct Definition< ::dozap_second::Main_<ContainerAllocator> >
   {
     return "int32 motor_right\n\
 int32 motor_left\n\
+int32 rotation_right\n\
+int32 rotation_left\n\
 ";
   }
 
@@ -165,6 +177,8 @@ namespace serialization
     {
       stream.next(m.motor_right);
       stream.next(m.motor_left);
+      stream.next(m.rotation_right);
+      stream.next(m.rotation_left);
     }
 
     ROS_DECLARE_ALLINONE_SERIALIZER
@@ -187,6 +201,10 @@ struct Printer< ::dozap_second::Main_<ContainerAllocator> >
     Printer<int32_t>::stream(s, indent + "  ", v.motor_right);
     s << indent << "motor_left: ";
     Printer<int32_t>::stream(s, indent + "  ", v.motor_left);
+    s << indent << "rotation_right: ";
+    Printer<int32_t>::stream(s, indent + "  ", v.rotation_right);
+    s << indent << "rotation_left: ";
+    Printer<int32_t>::stream(s, indent + "  ", v.rotation_left);
   }
 };
 

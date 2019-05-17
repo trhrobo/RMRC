@@ -3,4 +3,8 @@
           MOTOR_RIGHT
           MOTOR_LEFT-VAL
           MOTOR_LEFT
+          ROTATION_RIGHT-VAL
+          ROTATION_RIGHT
+          ROTATION_LEFT-VAL
+          ROTATION_LEFT
 ))

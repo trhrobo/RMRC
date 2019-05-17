@@ -20,6 +20,8 @@ class Main {
       // initObj === null is a special case for deserialization where we don't initialize fields
       this.motor_right = null;
       this.motor_left = null;
+      this.rotation_right = null;
+      this.rotation_left = null;
     }
     else {
       if (initObj.hasOwnProperty('motor_right')) {
@@ -34,6 +36,18 @@ class Main {
       else {
         this.motor_left = 0;
       }
+      if (initObj.hasOwnProperty('rotation_right')) {
+        this.rotation_right = initObj.rotation_right
+      }
+      else {
+        this.rotation_right = 0;
+      }
+      if (initObj.hasOwnProperty('rotation_left')) {
+        this.rotation_left = initObj.rotation_left
+      }
+      else {
+        this.rotation_left = 0;
+      }
     }
   }
 
@@ -43,6 +57,10 @@ class Main {
     bufferOffset = _serializer.int32(obj.motor_right, buffer, bufferOffset);
     // Serialize message field [motor_left]
     bufferOffset = _serializer.int32(obj.motor_left, buffer, bufferOffset);
+    // Serialize message field [rotation_right]
+    bufferOffset = _serializer.int32(obj.rotation_right, buffer, bufferOffset);
+    // Serialize message field [rotation_left]
+    bufferOffset = _serializer.int32(obj.rotation_left, buffer, bufferOffset);
     return bufferOffset;
   }
 
@@ -54,11 +72,15 @@ class Main {
     data.motor_right = _deserializer.int32(buffer, bufferOffset);
     // Deserialize message field [motor_left]
     data.motor_left = _deserializer.int32(buffer, bufferOffset);
+    // Deserialize message field [rotation_right]
+    data.rotation_right = _deserializer.int32(buffer, bufferOffset);
+    // Deserialize message field [rotation_left]
+    data.rotation_left = _deserializer.int32(buffer, bufferOffset);
     return data;
   }
 
   static getMessageSize(object) {
-    return 8;
+    return 16;
   }
 
   static datatype() {
@@ -68,7 +90,7 @@ class Main {
 
   static md5sum() {
     //Returns md5sum for a message object
-    return '799f128dce14b1811f847ac0f5950039';
+    return '7a83861f39451721eaac1e365039256f';
   }
 
   static messageDefinition() {
@@ -76,6 +98,8 @@ class Main {
     return `
     int32 motor_right
     int32 motor_left
+    int32 rotation_right
+    int32 rotation_left
     
     `;
   }
@@ -98,6 +122,20 @@ class Main {
     }
     else {
       resolved.motor_left = 0
+    }
+
+    if (msg.rotation_right !== undefined) {
+      resolved.rotation_right = msg.rotation_right;
+    }
+    else {
+      resolved.rotation_right = 0
+    }
+
+    if (msg.rotation_left !== undefined) {
+      resolved.rotation_left = msg.rotation_left;
+    }
+    else {
+      resolved.rotation_left = 0
     }
 
     return resolved;
