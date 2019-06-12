@@ -30,13 +30,13 @@ class Main {
         this.motor_right = initObj.motor_right
       }
       else {
-        this.motor_right = 0;
+        this.motor_right = 0.0;
       }
       if (initObj.hasOwnProperty('motor_left')) {
         this.motor_left = initObj.motor_left
       }
       else {
-        this.motor_left = 0;
+        this.motor_left = 0.0;
       }
       if (initObj.hasOwnProperty('rotation_a_right')) {
         this.rotation_a_right = initObj.rotation_a_right
@@ -68,9 +68,9 @@ class Main {
   static serialize(obj, buffer, bufferOffset) {
     // Serializes a message object of type Main
     // Serialize message field [motor_right]
-    bufferOffset = _serializer.int32(obj.motor_right, buffer, bufferOffset);
+    bufferOffset = _serializer.float64(obj.motor_right, buffer, bufferOffset);
     // Serialize message field [motor_left]
-    bufferOffset = _serializer.int32(obj.motor_left, buffer, bufferOffset);
+    bufferOffset = _serializer.float64(obj.motor_left, buffer, bufferOffset);
     // Serialize message field [rotation_a_right]
     bufferOffset = _serializer.int32(obj.rotation_a_right, buffer, bufferOffset);
     // Serialize message field [rotation_a_left]
@@ -87,9 +87,9 @@ class Main {
     let len;
     let data = new Main(null);
     // Deserialize message field [motor_right]
-    data.motor_right = _deserializer.int32(buffer, bufferOffset);
+    data.motor_right = _deserializer.float64(buffer, bufferOffset);
     // Deserialize message field [motor_left]
-    data.motor_left = _deserializer.int32(buffer, bufferOffset);
+    data.motor_left = _deserializer.float64(buffer, bufferOffset);
     // Deserialize message field [rotation_a_right]
     data.rotation_a_right = _deserializer.int32(buffer, bufferOffset);
     // Deserialize message field [rotation_a_left]
@@ -102,7 +102,7 @@ class Main {
   }
 
   static getMessageSize(object) {
-    return 24;
+    return 32;
   }
 
   static datatype() {
@@ -112,14 +112,14 @@ class Main {
 
   static md5sum() {
     //Returns md5sum for a message object
-    return '83aace50d71246340a8e7cc2d2789279';
+    return 'bf323843762cfb3e8a894aa82e16c9f6';
   }
 
   static messageDefinition() {
     // Returns full string definition for message
     return `
-    int32 motor_right
-    int32 motor_left
+    float64 motor_right
+    float64 motor_left
     int32 rotation_a_right
     int32 rotation_a_left
     int32 rotation_b_right
@@ -138,14 +138,14 @@ class Main {
       resolved.motor_right = msg.motor_right;
     }
     else {
-      resolved.motor_right = 0
+      resolved.motor_right = 0.0
     }
 
     if (msg.motor_left !== undefined) {
       resolved.motor_left = msg.motor_left;
     }
     else {
-      resolved.motor_left = 0
+      resolved.motor_left = 0.0
     }
 
     if (msg.rotation_a_right !== undefined) {

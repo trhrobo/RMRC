@@ -1,5 +1,5 @@
-int32 motor_right
-int32 motor_left
+float64 motor_right
+float64 motor_left
 int32 rotation_a_right
 int32 rotation_a_left
 int32 rotation_b_right

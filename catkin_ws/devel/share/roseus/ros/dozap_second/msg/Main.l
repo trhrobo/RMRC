@@ -19,16 +19,16 @@
 (defmethod dozap_second::Main
   (:init
    (&key
-    ((:motor_right __motor_right) 0)
-    ((:motor_left __motor_left) 0)
+    ((:motor_right __motor_right) 0.0)
+    ((:motor_left __motor_left) 0.0)
     ((:rotation_a_right __rotation_a_right) 0)
     ((:rotation_a_left __rotation_a_left) 0)
     ((:rotation_b_right __rotation_b_right) 0)
     ((:rotation_b_left __rotation_b_left) 0)
     )
    (send-super :init)
-   (setq _motor_right (round __motor_right))
-   (setq _motor_left (round __motor_left))
+   (setq _motor_right (float __motor_right))
+   (setq _motor_left (float __motor_left))
    (setq _rotation_a_right (round __rotation_a_right))
    (setq _rotation_a_left (round __rotation_a_left))
    (setq _rotation_b_right (round __rotation_b_right))
@@ -55,10 +55,10 @@
   (:serialization-length
    ()
    (+
-    ;; int32 _motor_right
-    4
-    ;; int32 _motor_left
-    4
+    ;; float64 _motor_right
+    8
+    ;; float64 _motor_left
+    8
     ;; int32 _rotation_a_right
     4
     ;; int32 _rotation_a_left
@@ -72,10 +72,10 @@
    (&optional strm)
    (let ((s (if strm strm
               (make-string-output-stream (send self :serialization-length)))))
-     ;; int32 _motor_right
-       (write-long _motor_right s)
-     ;; int32 _motor_left
-       (write-long _motor_left s)
+     ;; float64 _motor_right
+       (sys::poke _motor_right (send s :buffer) (send s :count) :double) (incf (stream-count s) 8)
+     ;; float64 _motor_left
+       (sys::poke _motor_left (send s :buffer) (send s :count) :double) (incf (stream-count s) 8)
      ;; int32 _rotation_a_right
        (write-long _rotation_a_right s)
      ;; int32 _rotation_a_left
@@ -88,10 +88,10 @@
      (if (null strm) (get-output-stream-string s))))
   (:deserialize
    (buf &optional (ptr- 0))
-   ;; int32 _motor_right
-     (setq _motor_right (sys::peek buf ptr- :integer)) (incf ptr- 4)
-   ;; int32 _motor_left
-     (setq _motor_left (sys::peek buf ptr- :integer)) (incf ptr- 4)
+   ;; float64 _motor_right
+     (setq _motor_right (sys::peek buf ptr- :double)) (incf ptr- 8)
+   ;; float64 _motor_left
+     (setq _motor_left (sys::peek buf ptr- :double)) (incf ptr- 8)
    ;; int32 _rotation_a_right
      (setq _rotation_a_right (sys::peek buf ptr- :integer)) (incf ptr- 4)
    ;; int32 _rotation_a_left
@@ -104,11 +104,11 @@
    self)
   )
 
-(setf (get dozap_second::Main :md5sum-) "83aace50d71246340a8e7cc2d2789279")
+(setf (get dozap_second::Main :md5sum-) "bf323843762cfb3e8a894aa82e16c9f6")
 (setf (get dozap_second::Main :datatype-) "dozap_second/Main")
 (setf (get dozap_second::Main :definition-)
-      "int32 motor_right
-int32 motor_left
+      "float64 motor_right
+float64 motor_left
 int32 rotation_a_right
 int32 rotation_a_left
 int32 rotation_b_right
@@ -118,6 +118,6 @@ int32 rotation_b_left
 
 
 
-(provide :dozap_second/Main "83aace50d71246340a8e7cc2d2789279")
+(provide :dozap_second/Main "bf323843762cfb3e8a894aa82e16c9f6")
 
 

@@ -18,31 +18,34 @@ constexpr int LEFT_ROTATION_2 = 80;
 constexpr int STOP = 0;
 int pi;
 
-void motor_right_cw(void);
-void motor_right_ccw(void);
-void motor_left_cw(void);
-void motor_left_ccw(void);
+void motor_right_cw(int);
+void motor_right_ccw(int);
+void motor_left_cw(int);
+void motor_left_ccw(int);
 void motor_rotation_foward_right(void);
 void motor_rotation_foward_left(void);
 void motor_rotation_back_right(void);
 void motor_rotation_back_left(void);
 void motor_stop(void);
-
+//自作のマップ関数
+int convert(float);
 void main_callback(const dozap_second::Main &main_msg){
+    int motor_right = convert(main_msg.motor_right);
+    int motor_left = convert(main_msg.motor_left);
 //いずれは旋回成分を並行成分と合成させる(まだGY521を実装していない)
-    if(main_msg.motor_right > 0){motor_right_cw();}
-    if(main_msg.motor_right < 0){motor_right_ccw();}
-    if(main_msg.motor_right > 0){motor_left_cw();}
-    if(main_msg.motor_right < 0){motor_left_ccw();}
-    if(main_msg.motor_right == 0 || main_msg.motor_left == 0){motor_stop();}
-    if(main_msg.rotation_a_right > 0){motor_right_cw();}
-    if(main_msg.rotation_b_right > 0){motor_right_cw();}
-    if(main_msg.rotation_a_right < 0){motor_right_ccw();}
-    if(main_msg.rotation_b_right < 0){motor_right_ccw();}
-    if(main_msg.rotation_a_left > 0){motor_left_cw();}
-    if(main_msg.rotation_b_left > 0){motor_left_cw();}
-    if(main_msg.rotation_a_left < 0){motor_left_ccw();}
-    if(main_msg.rotation_b_left < 0){motor_left_ccw();}
+    if(motor_right > 0){motor_right_cw(motor_right);}
+    if(motor_right < 0){motor_right_ccw(-motor_right);}
+    if(motor_left > 0){motor_left_cw(motor_left);}
+    if(motor_left < 0){motor_left_ccw(-motor_left);}
+    if(motor_right == 0 || motor_left == 0){motor_stop();}
+    if(main_msg.rotation_a_right > 0){motor_right_cw((float)RIGHT_DUTY);}
+    if(main_msg.rotation_b_right > 0){motor_right_cw((float)RIGHT_DUTY);}
+    if(main_msg.rotation_a_right < 0){motor_right_ccw((float)RIGHT_DUTY);}
+    if(main_msg.rotation_b_right < 0){motor_right_ccw((float)RIGHT_DUTY);}
+    if(main_msg.rotation_a_left > 0){motor_left_cw((float)LEFT_DUTY);}
+    if(main_msg.rotation_b_left > 0){motor_left_cw((float)LEFT_DUTY);}
+    if(main_msg.rotation_a_left < 0){motor_left_ccw((float)LEFT_DUTY);}
+    if(main_msg.rotation_b_left < 0){motor_left_ccw((float)LEFT_DUTY);}
 //rotation_fowardはGY521を実装してから
  /*   if(main_msg.rotation_a_right < 0 && main_msg.rotation_a_left > 0 && main_msg.motor_right > 0 && main_msg.motor_left > 0){motor_rotation_foward_right();}
     if(main_msg.rotation_b_right < 0 && main_msg.rotation_b_left > 0 && main_msg.motor_right > 0 && main_msg.motor_left > 0){motor_rotation_foward_right();}
@@ -81,30 +84,35 @@ int main(int argc, char **argv){
     return 0;
 }
 
-void motor_right_cw(void){
-     set_PWM_dutycycle(pi, RIGHT_MOTOR_PWM, RIGHT_DUTY);
-     gpio_write(pi, RIGHT_MOTOR_IN1, 1);
-     gpio_write(pi, RIGHT_MOTOR_IN2, 0);
-     ROS_INFO("cw");
-}
-void motor_right_ccw(void){
-     set_PWM_dutycycle(pi, RIGHT_MOTOR_PWM, RIGHT_DUTY);
-     gpio_write(pi, RIGHT_MOTOR_IN1, 0);
-     gpio_write(pi, RIGHT_MOTOR_IN2, 1);
-     ROS_INFO("ccw");
-}
-void motor_left_cw(void){
-     gpio_write(pi, LEFT_MOTOR_IN1, 1);
-     gpio_write(pi, LEFT_MOTOR_IN2, 0);
-     set_PWM_dutycycle(pi, LEFT_MOTOR_PWM, LEFT_DUTY);
-     ROS_INFO("cw");
+int convert(float x) {
+//線形補間
+     return (int)((x + 1.0) * 255 -255);
 }
 
-void motor_left_ccw(void){
+void motor_right_cw(int value){
+     gpio_write(pi, RIGHT_MOTOR_IN1, 1);
+     gpio_write(pi, RIGHT_MOTOR_IN2, 0);
+     set_PWM_dutycycle(pi, RIGHT_MOTOR_PWM, value);
+     ROS_INFO("cw:%d", value);
+}
+void motor_right_ccw(int value){
+     gpio_write(pi, RIGHT_MOTOR_IN1, 0);
+     gpio_write(pi, RIGHT_MOTOR_IN2, 1);
+     set_PWM_dutycycle(pi, RIGHT_MOTOR_PWM, value);
+     ROS_INFO("ccw:%d", value);
+}
+void motor_left_cw(int value){
+     gpio_write(pi, LEFT_MOTOR_IN1, 1);
+     gpio_write(pi, LEFT_MOTOR_IN2, 0);
+     set_PWM_dutycycle(pi, LEFT_MOTOR_PWM, value);
+     ROS_INFO("cw:%d", value);
+}
+
+void motor_left_ccw(int value){
      gpio_write(pi, LEFT_MOTOR_IN1, 0);
      gpio_write(pi, LEFT_MOTOR_IN2, 1);
-     set_PWM_dutycycle(pi, LEFT_MOTOR_PWM, LEFT_DUTY);
-     ROS_INFO("ccw");
+     set_PWM_dutycycle(pi, LEFT_MOTOR_PWM, value);
+     ROS_INFO("ccw:%d", value);
 }
 /*
 void motor_rotation_foward_right(void){

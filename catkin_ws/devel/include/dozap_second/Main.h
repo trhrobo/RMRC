@@ -24,16 +24,16 @@ struct Main_
   typedef Main_<ContainerAllocator> Type;
 
   Main_()
-    : motor_right(0)
-    , motor_left(0)
+    : motor_right(0.0)
+    , motor_left(0.0)
     , rotation_a_right(0)
     , rotation_a_left(0)
     , rotation_b_right(0)
     , rotation_b_left(0)  {
     }
   Main_(const ContainerAllocator& _alloc)
-    : motor_right(0)
-    , motor_left(0)
+    : motor_right(0.0)
+    , motor_left(0.0)
     , rotation_a_right(0)
     , rotation_a_left(0)
     , rotation_b_right(0)
@@ -43,10 +43,10 @@ struct Main_
 
 
 
-   typedef int32_t _motor_right_type;
+   typedef double _motor_right_type;
   _motor_right_type motor_right;
 
-   typedef int32_t _motor_left_type;
+   typedef double _motor_left_type;
   _motor_left_type motor_left;
 
    typedef int32_t _rotation_a_right_type;
@@ -139,12 +139,12 @@ struct MD5Sum< ::dozap_second::Main_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "83aace50d71246340a8e7cc2d2789279";
+    return "bf323843762cfb3e8a894aa82e16c9f6";
   }
 
   static const char* value(const ::dozap_second::Main_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0x83aace50d7124634ULL;
-  static const uint64_t static_value2 = 0x0a8e7cc2d2789279ULL;
+  static const uint64_t static_value1 = 0xbf323843762cfb3eULL;
+  static const uint64_t static_value2 = 0x8a894aa82e16c9f6ULL;
 };
 
 template<class ContainerAllocator>
@@ -163,8 +163,8 @@ struct Definition< ::dozap_second::Main_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "int32 motor_right\n\
-int32 motor_left\n\
+    return "float64 motor_right\n\
+float64 motor_left\n\
 int32 rotation_a_right\n\
 int32 rotation_a_left\n\
 int32 rotation_b_right\n\
@@ -212,9 +212,9 @@ struct Printer< ::dozap_second::Main_<ContainerAllocator> >
   template<typename Stream> static void stream(Stream& s, const std::string& indent, const ::dozap_second::Main_<ContainerAllocator>& v)
   {
     s << indent << "motor_right: ";
-    Printer<int32_t>::stream(s, indent + "  ", v.motor_right);
+    Printer<double>::stream(s, indent + "  ", v.motor_right);
     s << indent << "motor_left: ";
-    Printer<int32_t>::stream(s, indent + "  ", v.motor_left);
+    Printer<double>::stream(s, indent + "  ", v.motor_left);
     s << indent << "rotation_a_right: ";
     Printer<int32_t>::stream(s, indent + "  ", v.rotation_a_right);
     s << indent << "rotation_a_left: ";
