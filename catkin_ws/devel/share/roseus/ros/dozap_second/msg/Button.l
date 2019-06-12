@@ -19,12 +19,12 @@
 (defmethod dozap_second::Button
   (:init
    (&key
-    ((:move __move) 0)
+    ((:move __move) 0.0)
     ((:rotation_right __rotation_right) 0)
     ((:rotation_left __rotation_left) 0)
     )
    (send-super :init)
-   (setq _move (round __move))
+   (setq _move (float __move))
    (setq _rotation_right (round __rotation_right))
    (setq _rotation_left (round __rotation_left))
    self)
@@ -40,8 +40,8 @@
   (:serialization-length
    ()
    (+
-    ;; int32 _move
-    4
+    ;; float64 _move
+    8
     ;; int32 _rotation_right
     4
     ;; int32 _rotation_left
@@ -51,8 +51,8 @@
    (&optional strm)
    (let ((s (if strm strm
               (make-string-output-stream (send self :serialization-length)))))
-     ;; int32 _move
-       (write-long _move s)
+     ;; float64 _move
+       (sys::poke _move (send s :buffer) (send s :count) :double) (incf (stream-count s) 8)
      ;; int32 _rotation_right
        (write-long _rotation_right s)
      ;; int32 _rotation_left
@@ -61,8 +61,8 @@
      (if (null strm) (get-output-stream-string s))))
   (:deserialize
    (buf &optional (ptr- 0))
-   ;; int32 _move
-     (setq _move (sys::peek buf ptr- :integer)) (incf ptr- 4)
+   ;; float64 _move
+     (setq _move (sys::peek buf ptr- :double)) (incf ptr- 8)
    ;; int32 _rotation_right
      (setq _rotation_right (sys::peek buf ptr- :integer)) (incf ptr- 4)
    ;; int32 _rotation_left
@@ -71,10 +71,10 @@
    self)
   )
 
-(setf (get dozap_second::Button :md5sum-) "df37f56eb5634ffffccd37fb25f1f170")
+(setf (get dozap_second::Button :md5sum-) "c0a00557fffeb3031345a5d16981dc52")
 (setf (get dozap_second::Button :datatype-) "dozap_second/Button")
 (setf (get dozap_second::Button :definition-)
-      "int32 move
+      "float64 move
 int32 rotation_right
 int32 rotation_left
 
@@ -82,6 +82,6 @@ int32 rotation_left
 
 
 
-(provide :dozap_second/Button "df37f56eb5634ffffccd37fb25f1f170")
+(provide :dozap_second/Button "c0a00557fffeb3031345a5d16981dc52")
 
 

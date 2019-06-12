@@ -5,7 +5,7 @@
 dozap_second::Button data;
 
 void joy_callback(const sensor_msgs::Joy &joy_msg){
-    data.move = (int)joy_msg.axes[1];
+    data.move = joy_msg.axes[1];
     data.rotation_right = joy_msg.axes[5];
     data.rotation_left = joy_msg.axes[2];
      

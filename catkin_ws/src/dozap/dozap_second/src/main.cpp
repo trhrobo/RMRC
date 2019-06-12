@@ -9,7 +9,9 @@ constexpr int Speed_zero = 0;
 dozap_second::Main data;
 
 void controller_callback(const dozap_second::Button& button_msg){
-    switch(button_msg.move){
+      data.motor_right = button_msg.move;
+      data.motor_left = button_msg.move;
+/*    switch(button_msg.move){
         case 1:
             data.motor_right = Speed_max;
             data.motor_left = Speed_max;
@@ -23,7 +25,7 @@ void controller_callback(const dozap_second::Button& button_msg){
             data.motor_left = Speed_zero;
             break;
     }
-
+*/
     switch(button_msg.rotation_right){
         case 1:
             data.rotation_a_right = Speed_zero;

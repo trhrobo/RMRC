@@ -24,12 +24,12 @@ struct Button_
   typedef Button_<ContainerAllocator> Type;
 
   Button_()
-    : move(0)
+    : move(0.0)
     , rotation_right(0)
     , rotation_left(0)  {
     }
   Button_(const ContainerAllocator& _alloc)
-    : move(0)
+    : move(0.0)
     , rotation_right(0)
     , rotation_left(0)  {
   (void)_alloc;
@@ -37,7 +37,7 @@ struct Button_
 
 
 
-   typedef int32_t _move_type;
+   typedef double _move_type;
   _move_type move;
 
    typedef int32_t _rotation_right_type;
@@ -124,12 +124,12 @@ struct MD5Sum< ::dozap_second::Button_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "df37f56eb5634ffffccd37fb25f1f170";
+    return "c0a00557fffeb3031345a5d16981dc52";
   }
 
   static const char* value(const ::dozap_second::Button_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0xdf37f56eb5634fffULL;
-  static const uint64_t static_value2 = 0xfccd37fb25f1f170ULL;
+  static const uint64_t static_value1 = 0xc0a00557fffeb303ULL;
+  static const uint64_t static_value2 = 0x1345a5d16981dc52ULL;
 };
 
 template<class ContainerAllocator>
@@ -148,7 +148,7 @@ struct Definition< ::dozap_second::Button_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "int32 move\n\
+    return "float64 move\n\
 int32 rotation_right\n\
 int32 rotation_left\n\
 ";
@@ -191,7 +191,7 @@ struct Printer< ::dozap_second::Button_<ContainerAllocator> >
   template<typename Stream> static void stream(Stream& s, const std::string& indent, const ::dozap_second::Button_<ContainerAllocator>& v)
   {
     s << indent << "move: ";
-    Printer<int32_t>::stream(s, indent + "  ", v.move);
+    Printer<double>::stream(s, indent + "  ", v.move);
     s << indent << "rotation_right: ";
     Printer<int32_t>::stream(s, indent + "  ", v.rotation_right);
     s << indent << "rotation_left: ";

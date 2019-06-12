@@ -27,7 +27,7 @@ class Button {
         this.move = initObj.move
       }
       else {
-        this.move = 0;
+        this.move = 0.0;
       }
       if (initObj.hasOwnProperty('rotation_right')) {
         this.rotation_right = initObj.rotation_right
@@ -47,7 +47,7 @@ class Button {
   static serialize(obj, buffer, bufferOffset) {
     // Serializes a message object of type Button
     // Serialize message field [move]
-    bufferOffset = _serializer.int32(obj.move, buffer, bufferOffset);
+    bufferOffset = _serializer.float64(obj.move, buffer, bufferOffset);
     // Serialize message field [rotation_right]
     bufferOffset = _serializer.int32(obj.rotation_right, buffer, bufferOffset);
     // Serialize message field [rotation_left]
@@ -60,7 +60,7 @@ class Button {
     let len;
     let data = new Button(null);
     // Deserialize message field [move]
-    data.move = _deserializer.int32(buffer, bufferOffset);
+    data.move = _deserializer.float64(buffer, bufferOffset);
     // Deserialize message field [rotation_right]
     data.rotation_right = _deserializer.int32(buffer, bufferOffset);
     // Deserialize message field [rotation_left]
@@ -69,7 +69,7 @@ class Button {
   }
 
   static getMessageSize(object) {
-    return 12;
+    return 16;
   }
 
   static datatype() {
@@ -79,13 +79,13 @@ class Button {
 
   static md5sum() {
     //Returns md5sum for a message object
-    return 'df37f56eb5634ffffccd37fb25f1f170';
+    return 'c0a00557fffeb3031345a5d16981dc52';
   }
 
   static messageDefinition() {
     // Returns full string definition for message
     return `
-    int32 move
+    float64 move
     int32 rotation_right
     int32 rotation_left
     
@@ -102,7 +102,7 @@ class Button {
       resolved.move = msg.move;
     }
     else {
-      resolved.move = 0
+      resolved.move = 0.0
     }
 
     if (msg.rotation_right !== undefined) {

@@ -7,15 +7,15 @@ import struct
 
 
 class Button(genpy.Message):
-  _md5sum = "df37f56eb5634ffffccd37fb25f1f170"
+  _md5sum = "c0a00557fffeb3031345a5d16981dc52"
   _type = "dozap_second/Button"
   _has_header = False #flag to mark the presence of a Header object
-  _full_text = """int32 move
+  _full_text = """float64 move
 int32 rotation_right
 int32 rotation_left
 """
   __slots__ = ['move','rotation_right','rotation_left']
-  _slot_types = ['int32','int32','int32']
+  _slot_types = ['float64','int32','int32']
 
   def __init__(self, *args, **kwds):
     """
@@ -35,13 +35,13 @@ int32 rotation_left
       super(Button, self).__init__(*args, **kwds)
       #message fields cannot be None, assign default values for those that are
       if self.move is None:
-        self.move = 0
+        self.move = 0.
       if self.rotation_right is None:
         self.rotation_right = 0
       if self.rotation_left is None:
         self.rotation_left = 0
     else:
-      self.move = 0
+      self.move = 0.
       self.rotation_right = 0
       self.rotation_left = 0
 
@@ -58,7 +58,7 @@ int32 rotation_left
     """
     try:
       _x = self
-      buff.write(_get_struct_3i().pack(_x.move, _x.rotation_right, _x.rotation_left))
+      buff.write(_get_struct_d2i().pack(_x.move, _x.rotation_right, _x.rotation_left))
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
     except TypeError as te: self._check_types(ValueError("%s: '%s' when writing '%s'" % (type(te), str(te), str(locals().get('_x', self)))))
 
@@ -71,8 +71,8 @@ int32 rotation_left
       end = 0
       _x = self
       start = end
-      end += 12
-      (_x.move, _x.rotation_right, _x.rotation_left,) = _get_struct_3i().unpack(str[start:end])
+      end += 16
+      (_x.move, _x.rotation_right, _x.rotation_left,) = _get_struct_d2i().unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -86,7 +86,7 @@ int32 rotation_left
     """
     try:
       _x = self
-      buff.write(_get_struct_3i().pack(_x.move, _x.rotation_right, _x.rotation_left))
+      buff.write(_get_struct_d2i().pack(_x.move, _x.rotation_right, _x.rotation_left))
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
     except TypeError as te: self._check_types(ValueError("%s: '%s' when writing '%s'" % (type(te), str(te), str(locals().get('_x', self)))))
 
@@ -100,8 +100,8 @@ int32 rotation_left
       end = 0
       _x = self
       start = end
-      end += 12
-      (_x.move, _x.rotation_right, _x.rotation_left,) = _get_struct_3i().unpack(str[start:end])
+      end += 16
+      (_x.move, _x.rotation_right, _x.rotation_left,) = _get_struct_d2i().unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -110,9 +110,9 @@ _struct_I = genpy.struct_I
 def _get_struct_I():
     global _struct_I
     return _struct_I
-_struct_3i = None
-def _get_struct_3i():
-    global _struct_3i
-    if _struct_3i is None:
-        _struct_3i = struct.Struct("<3i")
-    return _struct_3i
+_struct_d2i = None
+def _get_struct_d2i():
+    global _struct_d2i
+    if _struct_d2i is None:
+        _struct_d2i = struct.Struct("<d2i")
+    return _struct_d2i
