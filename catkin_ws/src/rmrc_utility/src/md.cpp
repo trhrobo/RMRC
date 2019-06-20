@@ -8,17 +8,22 @@ MD::MD(int pin_A, int pin_B, int pwm_pin){
 	user_pwm = pwm_pin;
 }
 
-MD::OUTPUT(int check, int pwm){
+MD::OUTPUT(int check, float pwm){
+//check == -1 back
+//check == 0 stop
 //check == 1 front
-//check == 0 back
-	if(check){
+	if(check == 1){
 		gpio_write(pi, user_A, 1);
 		gpio_write(pi, user_B, 0);
-	}else{
-		
+	}else if(check == -1){
+
 		gpio_write(pi, user_A, 0);
 		gpio_write(pi, user_B, 1);
-	}
+	}else{
+		gpio_write(pi, user_A, 0);
+		gpio_write(pi, user_B, 0);
+    }
 	set_PWM_dutycycle(pi, pwm_pin, pwm);
-	
 }
+
+
