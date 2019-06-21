@@ -16,7 +16,6 @@ MD::OUTPUT(int check, float pwm){
 		gpio_write(pi, user_A, 1);
 		gpio_write(pi, user_B, 0);
 	}else if(check == -1){
-
 		gpio_write(pi, user_A, 0);
 		gpio_write(pi, user_B, 1);
 	}else{
