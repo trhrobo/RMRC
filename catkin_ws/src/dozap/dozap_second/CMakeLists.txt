@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   geometry_msgs
   message_generation
+  rmrc_utility
 )
 
 ## System dependencies are found with CMake's conventions
@@ -130,6 +131,7 @@ CATKIN_DEPENDS roscpp rospy std_msgs sensor_msgs message_runtime
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
+  /home/ubuntu/catkin_ws/src/rmrc_utility/include
 )
 
 ## Declare a C++ library
@@ -137,6 +139,7 @@ include_directories(
 #   src/${PROJECT_NAME}/dozap_second.cpp
 # )
 
+set (UTILITY ~/catkin_ws/src/rmrc_utility/src/)
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
@@ -147,7 +150,7 @@ include_directories(
 # add_executable(${PROJECT_NAME}_node src/dozap_second_node.cpp)
 add_executable(controller src/controller.cpp)
 add_executable(main src/main.cpp)
-add_executable(md src/md.cpp)
+add_executable(motor src/motor.cpp)
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -159,7 +162,7 @@ add_executable(md src/md.cpp)
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(controller ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(main ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-add_dependencies(md ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(motor ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
@@ -170,7 +173,7 @@ target_link_libraries(controller
 target_link_libraries(main
    ${catkin_LIBRARIES}
 )
-target_link_libraries(md
+target_link_libraries(motor
    ${catkin_LIBRARIES}
    pigpiod_if2
 )

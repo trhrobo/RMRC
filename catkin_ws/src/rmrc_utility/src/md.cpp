@@ -22,7 +22,7 @@ MD::OUTPUT(int check, float pwm){
 		gpio_write(pi, user_A, 0);
 		gpio_write(pi, user_B, 0);
     }
-	set_PWM_dutycycle(pi, pwm_pin, pwm);
+	set_PWM_dutycycle(pi, user_pin, pwm);
 }
 
 

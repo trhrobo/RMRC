@@ -389,6 +389,15 @@ move_demo_BINARY_DIR:STATIC=/home/ubuntu/catkin_ws/build/demos/move_demo
 //Value Computed by CMake
 move_demo_SOURCE_DIR:STATIC=/home/ubuntu/catkin_ws/src/demos/move_demo
 
+//Value Computed by CMake
+rmrc_utility_BINARY_DIR:STATIC=/home/ubuntu/catkin_ws/build/rmrc_utility
+
+//The directory containing a CMake configuration file for rmrc_utility.
+rmrc_utility_DIR:PATH=/home/ubuntu/catkin_ws/devel/share/rmrc_utility/cmake
+
+//Value Computed by CMake
+rmrc_utility_SOURCE_DIR:STATIC=/home/ubuntu/catkin_ws/src/rmrc_utility
+
 //The directory containing a CMake configuration file for rosconsole.
 rosconsole_DIR:PATH=/opt/ros/kinetic/share/rosconsole/cmake
 
@@ -521,7 +530,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=4
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=5
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP
