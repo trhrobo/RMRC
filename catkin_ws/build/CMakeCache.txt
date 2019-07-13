@@ -392,8 +392,7 @@ move_demo_SOURCE_DIR:STATIC=/home/ubuntu/catkin_ws/src/demos/move_demo
 //Value Computed by CMake
 rmrc_utility_BINARY_DIR:STATIC=/home/ubuntu/catkin_ws/build/rmrc_utility
 
-//The directory containing a CMake configuration file for rmrc_utility.
-rmrc_utility_DIR:PATH=/home/ubuntu/catkin_ws/devel/share/rmrc_utility/cmake
+rmrc_utility_DIR:PATH=
 
 //Value Computed by CMake
 rmrc_utility_SOURCE_DIR:STATIC=/home/ubuntu/catkin_ws/src/rmrc_utility

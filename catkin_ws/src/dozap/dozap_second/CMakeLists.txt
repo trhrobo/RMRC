@@ -14,7 +14,6 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   geometry_msgs
   message_generation
-  rmrc_utility
 )
 
 ## System dependencies are found with CMake's conventions
@@ -60,7 +59,7 @@ add_message_files(
   FILES
   Button.msg
   Main.msg
-) 
+)
 ## Generate services in the 'srv' folder
 # add_service_files(
 #   FILES
@@ -131,7 +130,6 @@ CATKIN_DEPENDS roscpp rospy std_msgs sensor_msgs message_runtime
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
-  /home/ubuntu/catkin_ws/src/rmrc_utility/include
 )
 
 ## Declare a C++ library
@@ -139,7 +137,7 @@ include_directories(
 #   src/${PROJECT_NAME}/dozap_second.cpp
 # )
 
-set (UTILITY ~/catkin_ws/src/rmrc_utility/src/)
+#set (UTILITY ~/catkin_ws/src/dozap/dozap_second/src/)
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure

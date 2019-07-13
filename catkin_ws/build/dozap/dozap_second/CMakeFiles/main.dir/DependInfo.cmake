@@ -21,7 +21,6 @@ set(CMAKE_CXX_TARGET_INCLUDE_PATH
   "/home/ubuntu/catkin_ws/src/dozap/dozap_second/include"
   "/opt/ros/kinetic/include"
   "/opt/ros/kinetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp"
-  "/home/ubuntu/catkin_ws/src/rmrc_utility/include"
   )
 
 # Targets to which this target links.

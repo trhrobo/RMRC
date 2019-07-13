@@ -29,12 +29,6 @@ pigpiod_if2.h
 -
 dozap_second/Main.h
 -
-md.hpp
-/home/ubuntu/catkin_ws/src/dozap/dozap_second/src/md.hpp
-
-/home/ubuntu/catkin_ws/src/rmrc_utility/include/md.hpp
-pigpiod_if2.h
--
 
 /opt/ros/kinetic/include/ros/advertise_options.h
 ros/forwards.h
