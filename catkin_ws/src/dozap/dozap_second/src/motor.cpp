@@ -89,6 +89,7 @@ int main(int argc, char **argv){
     MD right_motor = MD(RIGHT_MOTOR_IN1, RIGHT_MOTOR_IN2, RIGHT_MOTOR_PWM);
     MD left_motor = MD(LEFT_MOTOR_IN1, LEFT_MOTOR_IN2, LEFT_MOTOR_PWM);
     ros::Rate loop_rate(10);
+
     while(ros::ok()){
         motor_right = right_motor.convert(judge_right);
         motor_left = left_motor.convert(judge_left);
