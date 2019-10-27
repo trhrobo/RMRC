@@ -1,0 +1,3 @@
+<launch>
+<node name="gy521" pkg="sensor" type="gy521" output="screen" />
+</launch>
