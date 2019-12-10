@@ -35,7 +35,7 @@ void joyCallback(const sensor_msgs::Joy &controller) {
   ROS_INFO("pwm[0] = %d : pwm[1] = %d", pwm[0], pwm[1]);
 }
 int turn_right, turn_left;
-void controllerCallback(const comprehensive::Button msg) {
+void controllerCallback(const comprehensive::Button &msg) {
   turn_right = msg.rotation_right;
   turn_left = msg.rotation_left;
 }
