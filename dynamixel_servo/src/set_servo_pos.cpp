@@ -18,9 +18,13 @@ int prev_plus_flag = 2;
 double prev_value = 0;
 int call = 0;
 double check = 0;
+vector<double> goal_angle{0, 0, 0, 0};
+constexpr RANGE = 100;
 
 std_msgs::String joint1_name;
 std_msgs::Float64 joint1_pos;
+
+enum servoStatus { FORWARD; FORWARD_ONE; REVERSE; REVERSE_ONE; DESIGNATION; }
 
 void joyCallback(const sensor_msgs::Joy &controller) {
   if (controller.axes[5] < 0) {
@@ -41,10 +45,57 @@ void monitorJointState_callback(const sensor_msgs::JointState &jointstate) {
   cout << "joint1_pos.data = " << joint1_pos.data << endl;
 }
 
+void forward() {}
+
+void forwardOne() {}
+
+void reverse() {}
+
+void reverseOne() {}
+
+void designation() {}
+
+void angleCallback(const std_msgs::Float64MultiArray &msg) {}
+
+void flagCall(const std_msgs::Bool &msg) {}
+
+void angleCal() {
+  enum servoStatus now_status;
+
+  if (flag _designation) {
+    now_status = DESIGNATION;
+  } else if (flag_one) {
+    flag_rotate == 1 ? now_status = FORWARD_ONE : now_status = REVERSE_ONE;
+  } else {
+    flag_rotate == 1 ? now_status = FORWARD : now_status = REVERSE;
+  }
+
+  switch (status) {
+  case FORWARD:
+    forward();
+    break;
+  case FORWARD_ONE:
+    forwardOne();
+    break;
+  case REVERSE:
+    reverse();
+    break;
+  case REVERSE_ONE:
+    reverseOne();
+    break;
+  case DESIGNATION:
+    designetaion();
+    break;
+  }
+}
+
+void angleConvert() {}
+
 int main(int argc, char **argv) {
   ros::init(argc, argv, "dynamixel_writer");
   ros::NodeHandle nh;
   ros::Subscriber controller_sub = nh.subscribe("joy", 100, joyCallback);
+  ros::Subscriber angle_sub = nh.subscribe("servo_angle", 10, angleCallback);
   arm_pub = nh.advertise<trajectory_msgs::JointTrajectory>(
       "/dynamixel_workbench/joint_trajectory", 100);
   ros::Subscriber sub_joints; // サブスクライバの作成
