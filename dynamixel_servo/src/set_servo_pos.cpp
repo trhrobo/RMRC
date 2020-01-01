@@ -7,6 +7,7 @@
 #include <iostream>
 #include <ros/ros.h>
 #include <sensor_msgs/Joy.h>
+#include <vector>
 
 using std::abs;
 using std::cout;
@@ -20,11 +21,13 @@ int call = 0;
 double check = 0;
 vector<double> goal_angle{0, 0, 0, 0};
 constexpr RANGE = 100;
+vector<bool> flag_joint_check { false, false, false, false }
+bool flag_all = false;
 
 std_msgs::String joint1_name;
 std_msgs::Float64 joint1_pos;
 
-enum servoStatus { FORWARD; FORWARD_ONE; REVERSE; REVERSE_ONE; DESIGNATION; }
+enum servoStatus { FORWARD; FORWARD_ALL; REVERSE; REVERSE_ALL; DESIGNATION; }
 
 void joyCallback(const sensor_msgs::Joy &controller) {
   if (controller.axes[5] < 0) {
@@ -45,13 +48,68 @@ void monitorJointState_callback(const sensor_msgs::JointState &jointstate) {
   cout << "joint1_pos.data = " << joint1_pos.data << endl;
 }
 
-void forward() {}
+void checkJoint() {
+  for (int i < 0; i < flag_joint_check.size(); ++i) {
+    if (joint1_pos.data + 0.5 > prev_value &&
+        joint1_pos.data - 0.5 < prev_value) {
+      flag_joint_check[i] = true;
+    } else {
+      flag_joint_check[i] = false;
+    }
+  }
+}
 
-void forwardOne() {}
+void forward() {
+  for (int i < 0; i < flag_joint_check.size(); ++i) {
+    if (flag_joint_check[i]) {
+      if (plus_flag == 1) {
+        jtp0.points[0].positions[i] += 2;
+      }
+      if (check > 0 && call == 0) {
+        jtp0.points[0].positions[i] = prev_value;
+      }
+    }
+  }
+}
 
-void reverse() {}
+void forwardAll() {
+  for (int i < 0; i < flag_joint_check.size(); ++i) {
+    if (flag_joint_check[i]) {
+      if (plus_flag == 1) {
+        jtp0.points[0].positions[i] += 2;
+      }
+      if (check > 0 && call == 0) {
+        jtp0.points[0].positions[i] = prev_value;
+      }
+    }
+  }
+}
 
-void reverseOne() {}
+void reverse() {
+  for (int i < 0; i < flag_joint_check.size(); ++i) {
+    if (flag_joint_check[i]) {
+      if (plus_flag == 3) {
+        jtp0.points[0].positions[i] -= 2;
+      }
+      if (check > 0 && call == 0) {
+        jtp0.points[0].positions[i] = prev_value;
+      }
+    }
+  }
+}
+
+void reverseAll() {
+  for (int i < 0; i < flag_joint_check.size(); ++i) {
+    if (flag_joint_check[i]) {
+      if (plus_flag == 1) {
+        jtp0.points[0].positions[i] += 2;
+      }
+      if (check > 0 && call == 0) {
+        jtp0.points[0].positions[i] = prev_value;
+      }
+    }
+  }
+}
 
 void designation() {}
 
@@ -60,12 +118,12 @@ void angleCallback(const std_msgs::Float64MultiArray &msg) {}
 void flagCall(const std_msgs::Bool &msg) {}
 
 void angleCal() {
+  checkJoint();
   enum servoStatus now_status;
-
   if (flag _designation) {
     now_status = DESIGNATION;
-  } else if (flag_one) {
-    flag_rotate == 1 ? now_status = FORWARD_ONE : now_status = REVERSE_ONE;
+  } else if (flag_all) {
+    flag_rotate == 1 ? now_status = FORWARD_ALL : now_status = REVERSE_ALL;
   } else {
     flag_rotate == 1 ? now_status = FORWARD : now_status = REVERSE;
   }
@@ -74,14 +132,14 @@ void angleCal() {
   case FORWARD:
     forward();
     break;
-  case FORWARD_ONE:
-    forwardOne();
+  case FORWARD_ALL:
+    forwardAll();
     break;
   case REVERSE:
     reverse();
     break;
-  case REVERSE_ONE:
-    reverseOne();
+  case REVERSE_ALL:
+    reverseAll();
     break;
   case DESIGNATION:
     designetaion();
