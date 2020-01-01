@@ -59,9 +59,7 @@ void PID::Calcurate() {
 
 double PID::Get() { return answer_value; }
 
-void velocityCallback(const std_msgs::Float64 &msg) {
-  robot_velocity = msg.data;
-}
+void velocityCallback(const std_msgs::Float64 &msg) { robot_v = msg.data; }
 
 void gyroCallback(const std_msgs::Float64 &msg) { robot_theta = msg.data; }
 
@@ -86,7 +84,7 @@ int main(int argc, char **argv) {
   ros::init(argc, argv, "wheel_pid");
   ros::NodeHandle n;
   ros::Publisher pwm_pub = n.advertise<std_msgs::Int16>("wheel_pwm", 10);
-  ros::Subscriber velocity_sub = n.subscribe("real_vel", 10, velocityCallback);
+  ros::Subscriber velocity_sub = n.subscribe("wheel", 10, velocityCallback);
   ros::Subscriber gyro_sub = n.subscribe("gyro", 10, gyroCallback);
   ros::Subscriber theta_sub = n.subscribe("rotate_goal", 10, thetaCallback);
   vector<double> wheel_pwm{0, 0};
