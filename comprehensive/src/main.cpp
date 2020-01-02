@@ -10,15 +10,17 @@ using std::vector;
 using std::abs;
 
 std_msgs::Float64MultiArray msg;
+msg.data.resize(2);
 
-int speed = 0;
+double speed = 0;
+double angle = 0;
 constexpr speed_gain = 0.1;
 vector<double> wheel{0, 0};
 vector<double> pwm{0, 0};
 
 //適切な速度にする必要あり
 //現在はPWM値として255としているが[m/sec]にする必要あり
-void joyCallback(const sensor_msgs::Joy &controller) {
+/*void joyCallback(const sensor_msgs::Joy &controller) {
   speed = hypot(controller.axes[1], controller.axes[0]) * speed_gain;
   // wheel.push_back(abs(-1 - controller.axes[0]));
   // wheel.push_back(abs(1 - controller.axes[1]));
@@ -34,6 +36,13 @@ void joyCallback(const sensor_msgs::Joy &controller) {
   for (auto &t : pwm)
     controller.axes[1] >= 0 ? t = t : t = -t;
   ROS_INFO("pwm[0] = %d : pwm[1] = %d", pwm[0], pwm[1]);
+}*/
+
+void joyCallback(const sensor_msgs::Joy &controller) {
+  speed = hypot(controller.axes[1], controller.axes[0]) * speed_gain;
+  angle = atan2(controller.axes[0], controller.axes[1]) * speed_gain;
+  msg.data[0] = sin(angle + (M_PI / 4)) * speed;
+  msg.data[1] = sin(angle - (M_PI / 4)) * speed;
 }
 
 double turn_right, turn_left;
@@ -54,11 +63,18 @@ int main(int argc, char **argv) {
   msg.data.resize(2);
 
   while (ros::ok()) {
+    /*
     for (int i = 0; i < 2; ++i) {
       msg.data[i] = pwm[i];
+    }*/
+    if (turn_right != 0) {
+      msg.data[0] = -turn_right;
+      msg.data[1] = turn_right;
     }
-    turn_right != 0 ? msg.data[0] = -turn_right : msg.data[1] = turn_left;
-    turn_left != 0 ? msg.data[0] = turn_left : msg.data[1] = -turn_left;
+    if (turn_left != 0) {
+      msg.data[0] = turn_left;
+      msg.data[1] = -turn_left;
+    }
     wheel_pub.publish(msg);
     loop_rate.sleep();
     ros::spinOnce();
