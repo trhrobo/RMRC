@@ -1,11 +1,15 @@
+#include <Float64MultiArray.h>
+#include <Int64MultiArray.h>
 #include <cmath>
 #include <iostream>
 #include <ros.h>
+#include <vector>
 
 double robot_velocity;
 double robot_theta;
 double goal_theta;
-
+vector<double> goal_vel{0, 0};
+vector<int> encoder_now{0, 0};
 class PID {
 public:
   PID(const double *gain, const double freq);
@@ -59,18 +63,14 @@ void PID::Calcurate() {
 
 double PID::Get() { return answer_value; }
 
-void velocityCallback(const std_msgs::Float64 &msg) { robot_v = msg.data; }
+void velocityCallback(const std_msgs::Float64MultiArray &msg) {
+  goal_vel[0] = msg.data[0];
+  goal_vel[1] = msg.data[1];
+}
 
-void gyroCallback(const std_msgs::Float64 &msg) { robot_theta = msg.data; }
-
-void thetaCallback(const std_msgs::Float64 &msg) { goal_theta = msg.data; }
-
-// Vx, Vyを定義する必要あり
-void wheelCal(double &pwm) {
-  double Vx = robot_velocity * cos(robot_theta);
-  double Vy = robot_velocity * sin(robot_theta);
-  pwm[0] = 0.5 * R * Vy + (L / R) * goal_theta;
-  pwm[1] = -0.5 * R * Vx + (L / R) * goal_theta;
+void encoderCallback(const std_msgs::Int64MultiArray &msg) {
+  encoder_now[0] = msg.data[0];
+  encoder_now[1] = msg.data[1];
 }
 
 struct gain {
@@ -85,8 +85,7 @@ int main(int argc, char **argv) {
   ros::NodeHandle n;
   ros::Publisher pwm_pub = n.advertise<std_msgs::Int16>("wheel_pwm", 10);
   ros::Subscriber velocity_sub = n.subscribe("wheel", 10, velocityCallback);
-  ros::Subscriber gyro_sub = n.subscribe("gyro", 10, gyroCallback);
-  ros::Subscriber theta_sub = n.subscribe("rotate_goal", 10, thetaCallback);
+  ros::Subscriber encoder_sub = n.subscribe("encoder", 10, encoderCallback);
   vector<double> wheel_pwm{0, 0};
   vector<gain> wheel_gain {
     {1, 1, 1}, { 1, 1, 1 }
@@ -105,8 +104,7 @@ int main(int argc, char **argv) {
     for (int i = 0; i < wheel_pwm.size(); ++i) {
       //速さを求める式[m/s]
       wheel_now[i] =
-          ((((double)rotary[i].get() / (RANGE * MULTIPLICATION)) * 101.6) /
-           1000);
+          ((encoder_now[i] / (RANGE * MULTIPLICATION)) * 101.6) / 1000;
       wheel_speed[i] = (wheel_now[i] - wheel_prev[i]) / (1 / FREQ);
       speed_pid[i].PidUpdate(wheel_pwm[i], wheel_speed[i], prev_speed[i]);
       //			speed_pid[i].PidUpdate((double)pid_goal,
