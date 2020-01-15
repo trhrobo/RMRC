@@ -1,7 +1,7 @@
 #include <pigpiod_if2.h>
 #include <ros/ros.h>
-#include <std_msgs/Int64MultiArray.h>
 #include <std_msgs/Int64.h>
+#include <std_msgs/Int64MultiArray.h>
 
 constexpr int right_A = 17;
 constexpr int right_B = 27;
@@ -17,9 +17,12 @@ private:
   bool now_A, now_B;
   int pulse_sum;
   int gpio_handle;
-  static void oneMultiplication(int pi, unsigned int gpio, unsigned int edge, uint32_t tick, void *userdata);
-  static void twoMultiplication(int pi, unsigned int gpio, unsigned int edge, uint32_t tick, void *userdata);
-  static void fourMultiplication(int pi, unsigned int gpio, unsigned int edge, uint32_t tick, void *userdata);
+  static void oneMultiplication(int pi, unsigned int gpio, unsigned int edge,
+                                uint32_t tick, void *userdata);
+  static void twoMultiplication(int pi, unsigned int gpio, unsigned int edge,
+                                uint32_t tick, void *userdata);
+  static void fourMultiplication(int pi, unsigned int gpio, unsigned int edge,
+                                 uint32_t tick, void *userdata);
 
 public:
   AMT(int user_A, int user_B, int user_multiplication);
@@ -30,7 +33,8 @@ public:
 AMT::AMT(int user_A, int user_B, int user_multiplication) {
   pin_A = user_A;
   pin_B = user_B;
-  gpio_handle = pigpio_start(const_cast<char *>(PIGPIOD_HOST), const_cast<char *>(PIGPIOD_PORT));
+  gpio_handle = pigpio_start(const_cast<char *>(PIGPIOD_HOST),
+                             const_cast<char *>(PIGPIOD_PORT));
   set_mode(gpio_handle, pin_A, PI_INPUT);
   set_mode(gpio_handle, pin_B, PI_INPUT);
   set_pull_up_down(gpio_handle, pin_A, PI_PUD_UP);
@@ -87,9 +91,7 @@ void AMT::twoMultiplication(int pi, unsigned int gpio, unsigned int edge,
   }
 }
 
-int AMT::get(){
-  return pulse_sum;
-}
+int AMT::get() { return pulse_sum; }
 
 int main(int argc, char **argv) {
   ros::init(argc, argv, "encoder");
@@ -98,8 +100,8 @@ int main(int argc, char **argv) {
       n.advertise<std_msgs::Int64MultiArray>("encoder", 10);
   std_msgs::Int64MultiArray msg;
   msg.data.resize(2);
-  //ros::Publisher encoder_pub = n.advertise<std_msgs::Int64>("encoder", 10);
-  //std_msgs::Int64 msg;
+  // ros::Publisher encoder_pub = n.advertise<std_msgs::Int64>("encoder", 10);
+  // std_msgs::Int64 msg;
   AMT encoder_right(right_A, right_B, 1);
   AMT encoder_left(left_A, left_B, 1);
   ros::Rate loop_rate(1000);
@@ -107,7 +109,7 @@ int main(int argc, char **argv) {
   while (ros::ok()) {
     msg.data[0] = encoder_right.get();
     msg.data[1] = encoder_left.get();
-    //msg.data = encoder_right.get();
+    // msg.data = encoder_right.get();
     encoder_pub.publish(msg);
     ros::spinOnce();
     loop_rate.sleep();
