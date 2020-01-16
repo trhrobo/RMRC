@@ -4,6 +4,7 @@
 #include <ros/ros.h>
 #include <sensor_msgs/Joy.h>
 #include <std_msgs/Float64MultiArray.h>
+#include <geometry_msgs/Twist.h>
 #include <vector>
 
 using std::vector;
@@ -14,7 +15,6 @@ msg.data.resize(2);
 
 double speed = 0;
 double angle = 0;
-constexpr speed_gain = 0.1;
 vector<double> wheel{0, 0};
 vector<double> pwm{0, 0};
 
@@ -38,43 +38,29 @@ vector<double> pwm{0, 0};
   ROS_INFO("pwm[0] = %d : pwm[1] = %d", pwm[0], pwm[1]);
 }*/
 
-void joyCallback(const sensor_msgs::Joy &controller) {
-  speed = hypot(controller.axes[1], controller.axes[0]) * speed_gain;
-  angle = atan2(controller.axes[0], controller.axes[1]) * speed_gain;
+void velCallback(const geometry_msgs::Twist &vel) {
+  speed = hypot(vel.linear.y, vel.linear.x);
+  angle = atan2(vel.linear.x, vel.linear.y);
   msg.data[0] = sin(angle + (M_PI / 4)) * speed;
   msg.data[1] = sin(angle - (M_PI / 4)) * speed;
+  if(vel.angular.z > 0){
+    msg.data[0] = vel.angular.z;
+    msg.data[1] = -vel.angular.z;
+  }
 }
 
 double turn_right, turn_left;
-
-void controllerCallback(const comprehensive::Button &msg) {
-  turn_right = msg.rotation_right;
-  turn_left = msg.rotation_left;
-}
 
 int main(int argc, char **argv) {
   ros::init(argc, argv, "wheel_control");
   ros::NodeHandle n;
   ros::Publisher wheel_pub =
       n.advertise<std_msgs::Float64MultiArray>("wheel", 10);
-  ros::Subscriber controller_sub = n.subscribe("joy", 10, joyCallback);
-  ros::Subscriber xbox_sub = n.subscribe("xbox", 10, controllerCallback);
+  ros::Subscriber controller_sub = n.subscribe("cmd_vel", 10, velCallback);
   ros::Rate loop_rate(1000);
   msg.data.resize(2);
 
   while (ros::ok()) {
-    /*
-    for (int i = 0; i < 2; ++i) {
-      msg.data[i] = pwm[i];
-    }*/
-    if (turn_right != 0) {
-      msg.data[0] = -turn_right;
-      msg.data[1] = turn_right;
-    }
-    if (turn_left != 0) {
-      msg.data[0] = turn_left;
-      msg.data[1] = -turn_left;
-    }
     wheel_pub.publish(msg);
     loop_rate.sleep();
     ros::spinOnce();
