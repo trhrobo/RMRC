@@ -1,36 +1,35 @@
 #include <ros/ros.h>
-#include <trajectory_msgs/JointTrajectory.h>
 #include <std_msgs/Int16MultiArray.h>
+#include <trajectory_msgs/JointTrajectory.h>
 #include <vector>
+
+using std::vector;
 
 vector<double> angle_goal{0, 0, 0, 0};
 
-enum dynamixel_name {front_right, front_left, back_right, back_left};
+enum dynamixel_name { front_right, front_left, back_right, back_left };
 
-dynamixelCallback(const std_msgs::Int16MultiArray &msg){
-  for(int i = 0; i < msg.data.size(); ++i){
+void dynamixelCallback(const std_msgs::Int16MultiArray &msg) {
+  for (int i = 0; i < msg.data.size(); ++i) {
     angle_goal[i] = msg.data[i];
   }
 }
 
 class dynamixel {
-  private:
-    int id;
-  public:
-    explicit dynamixel(int user_id);
-    ~dynamixel();
-    int angleCal(int goal_value);
-}
+private:
+  int id;
 
-dynamixel::dynamixel(int user_id){
-  id = user_id;
-}
+public:
+  dynamixel(int user_id);
+  ~dynamixel();
+  int angleCal(int goal_value);
+};
+
+dynamixel::dynamixel(int user_id) { id = user_id; }
 
 dynamixel::~dynamixel() {}
 
-int dynamixel::angleCal(int value) {
-  return value;
-}
+int dynamixel::angleCal(int value) { return value; }
 
 int main(int argc, char **argv) {
   ros::init(argc, argv, "dynamixel_pos");
@@ -53,20 +52,23 @@ int main(int argc, char **argv) {
   jtp0.joint_names[2] = "left_front";
   jtp0.joint_names[3] = "left_back";
 
+  /*
   dynamixel servo[4] = {
-    {front_right},
-    {front_left},
-    {back_right},
-    {back_left}
-  };
+      {front_right},
+      {front_left},
+      {back_right},
+      {back_left}
+  };*/
+
+  dynamixel servo[4] = {0, 1, 2, 3};
 
   ros::Rate loop_rate(45);
 
   while (ros::ok()) {
-    for(int i = 0; i < 4; ++i){
+    for (int i = 0; i < 4; ++i) {
       jtp0.points[0].positions[i] = servo[i].angleCal(angle_goal[i]);
     }
-    servo_pos.publish(jtp0);
+    servo_pub.publish(jtp0);
     ros::spinOnce();
     loop_rate.sleep();
   }

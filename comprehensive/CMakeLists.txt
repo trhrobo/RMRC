@@ -10,6 +10,8 @@ add_compile_options(-std=c++11)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
+  sensor_msgs
+  geometry_msgs
   message_generation
 )
 

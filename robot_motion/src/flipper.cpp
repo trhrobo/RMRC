@@ -17,7 +17,7 @@ bool flag_prev_status = false;
 // judgement of rotate the rear flipper in the negative direction
 bool flag_lower = false;
 
-enum class Status { MANUAL; UP_BOTH; UP_EITHER; };
+enum Status { MANUAL, UP_BOTH, UP_EITHER };
 
 void angleCallback(const std_msgs::Float64MultiArray &msg) {
   for (auto &num : dynamixel_current_angle) {
@@ -30,9 +30,7 @@ void distanceCallback(const std_msgs::Float64MultiArray &msg) {
   distance_back = msg.data[1];
 }
 
-void gyroCallback(const std_msgs::Float64MultiArray &msg) {
-  gyro_robot = msg.data;
-}
+void gyroCallback(const std_msgs::Float64 &msg) { gyro_robot = msg.data; }
 
 void controlleCallback(const comprehensive::Button &msg) {
   msg.dynamixel_right_front

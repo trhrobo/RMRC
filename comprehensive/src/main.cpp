@@ -1,23 +1,18 @@
 #include <cmath>
 #include <comprehensive/Button.h>
+#include <geometry_msgs/Twist.h>
 #include <iostream>
 #include <ros/ros.h>
 #include <sensor_msgs/Joy.h>
 #include <std_msgs/Float64MultiArray.h>
-#include <geometry_msgs/Twist.h>
 #include <vector>
 
 using std::vector;
 using std::abs;
 
-std_msgs::Float64MultiArray msg;
-msg.data.resize(2);
-
 double speed = 0;
 double angle = 0;
-vector<double> wheel{0, 0};
-vector<double> pwm{0, 0};
-
+vector<double> wheel_speed{0, 0};
 //適切な速度にする必要あり
 //現在はPWM値として255としているが[m/sec]にする必要あり
 /*void joyCallback(const sensor_msgs::Joy &controller) {
@@ -41,11 +36,11 @@ vector<double> pwm{0, 0};
 void velCallback(const geometry_msgs::Twist &vel) {
   speed = hypot(vel.linear.y, vel.linear.x);
   angle = atan2(vel.linear.x, vel.linear.y);
-  msg.data[0] = sin(angle + (M_PI / 4)) * speed;
-  msg.data[1] = sin(angle - (M_PI / 4)) * speed;
-  if(vel.angular.z > 0){
-    msg.data[0] = vel.angular.z;
-    msg.data[1] = -vel.angular.z;
+  wheel_speed[0] = sin(angle + (M_PI / 4)) * speed;
+  wheel_speed[1] = sin(angle - (M_PI / 4)) * speed;
+  if (vel.angular.z > 0) {
+    wheel_speed[0] = vel.angular.z;
+    wheel_speed[1] = -vel.angular.z;
   }
 }
 
@@ -58,9 +53,14 @@ int main(int argc, char **argv) {
       n.advertise<std_msgs::Float64MultiArray>("wheel", 10);
   ros::Subscriber controller_sub = n.subscribe("cmd_vel", 10, velCallback);
   ros::Rate loop_rate(1000);
+
+  std_msgs::Float64MultiArray msg;
   msg.data.resize(2);
 
   while (ros::ok()) {
+    for (int i = 0; i < 2; ++i) {
+      msg.data[i] = wheel_speed[i];
+    }
     wheel_pub.publish(msg);
     loop_rate.sleep();
     ros::spinOnce();

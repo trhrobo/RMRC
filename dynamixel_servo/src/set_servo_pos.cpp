@@ -9,6 +9,7 @@
 #include <sensor_msgs/Joy.h>
 #include <vector>
 
+using std::vector;
 using std::abs;
 using std::cout;
 using std::endl;
@@ -20,20 +21,25 @@ ros::Publisher arm_pub;
 // 初期値が2であるのははじめは回転しないようにするため
 // 現在の角度を読み取ってその角度を加減すると初期値で回転しなくても良くなる
 vector<int> flag_plus{2, 2, 2, 2};
-vector<int> prev_flag_plus { 2, 2, 2, 2 }
+vector<int> prev_flag_plus{2, 2, 2, 2};
 int call = 0;
 double check = 0;
 vector<double> goal_angle{0, 0, 0, 0};
-constexpr RANGE = 100;
-vector<bool> flag_joint_check { false, false, false, false }
+constexpr int RANGE = 100;
+vector<bool> flag_joint_check{false, false, false, false};
 bool flag_all = false;
 
 std_msgs::String joint1_name;
 std_msgs::Float64 joint1_pos;
 
 enum servoStatus {
-  FORWARD; FORWARD_ALL; REVERSE; REVERSE_ALL; DESIGNATION; BRAKE;
-}
+  FORWARD,
+  FORWARD_ALL,
+  REVERSE,
+  REVERSE_ALL,
+  DESIGNATION,
+  BRAKE
+};
 
 // flag_plus == 1だと正転
 // flag_plus == 3だと逆転

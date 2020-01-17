@@ -1,15 +1,18 @@
-#include <Float64MultiArray.h>
-#include <Int64MultiArray.h>
 #include <cmath>
 #include <iostream>
-#include <ros.h>
+#include <ros/ros.h>
+#include <std_msgs/Float64MultiArray.h>
+#include <std_msgs/Int64MultiArray.h>
 #include <vector>
+
+using std::vector;
 
 double robot_velocity;
 double robot_theta;
 double goal_theta;
 vector<double> goal_vel{0, 0};
 vector<int> encoder_now{0, 0};
+
 class PID {
 public:
   PID(const double *gain, const double freq);
@@ -77,43 +80,50 @@ struct gain {
   double Kp;
   double Ki;
   double Kd;
-  gain(double _Kp, _Ki, _Kd) : Kp(_Kp), Ki(_Ki), Kd(_Kd);
+  gain(double _Kp, double _Ki, double _Kd) : Kp(_Kp), Ki(_Ki), Kd(_Kd){};
 }
 
 int main(int argc, char **argv) {
   ros::init(argc, argv, "wheel_pid");
   ros::NodeHandle n;
-  ros::Publisher pwm_pub = n.advertise<std_msgs::Int16>("wheel_pwm", 10);
+  ros::Publisher pwm_pub =
+      n.advertise<std_msgs::Int64MultiArray>("wheel_pwm", 10);
   ros::Subscriber velocity_sub = n.subscribe("wheel", 10, velocityCallback);
   ros::Subscriber encoder_sub = n.subscribe("encoder", 10, encoderCallback);
   vector<double> wheel_pwm{0, 0};
-  vector<gain> wheel_gain {
-    {1, 1, 1}, { 1, 1, 1 }
-  }
-  const FREQ = 100;
-  const RANGE = 100;
-  const MULTIPLICATION = 1;
+  vector<gain> wheel_gain{{1, 1, 1}, {1, 1, 1}};
+  constexpr int FREQ = 100;
+  constexpr int RANGE = 100;
+  constexpr int MULTIPLICATION = 1;
   PID speed_pid[3] = {PID(wheel_gain[0], FREQ), PID(wheel_gain[1], FREQ),
                       PID(wheel_gain[2], FREQ), PID(wheel_gain[3], FREQ)};
   ros::Rate loop_rate(FREQ);
 
+  vector<double> speed_now{0, 0, 0, 0};
+  vector<double> speed_prev{0, 0, 0, 0};
+  vector<double> wheel_now{0, 0, 0, 0};
+  vector<double> wheel_prev{0, 0, 0, 0};
+  vector<double> pid_result{0, 0, 0, 0};
+
+  std_msgs::Int64MultiArray info;
+  pid_result.data.resize(4);
+
   while (ros::ok()) {
     //各タイヤへの速度の分解
-    wheelCal(wheel_pwm);
-
     for (int i = 0; i < wheel_pwm.size(); ++i) {
       //速さを求める式[m/s]
       wheel_now[i] =
           ((encoder_now[i] / (RANGE * MULTIPLICATION)) * 101.6) / 1000;
       wheel_speed[i] = (wheel_now[i] - wheel_prev[i]) / (1 / FREQ);
-      speed_pid[i].PidUpdate(wheel_pwm[i], wheel_speed[i], prev_speed[i]);
+      speed_pid[i].PidUpdate(goal_vel[i], speed_now[i], speed_prev[i]);
       //			speed_pid[i].PidUpdate((double)pid_goal,
       // wheel_speed[i], prev_speed[i]);
       pid_result[i] = speed_pid[i].Get();
       wheel_prev[i] = wheel_now[i];
-      prev_speed[i] = wheel_speed[i];
+      speed_prev[i] = speed_now[i];
       info.data = pid_result[i];
     }
+    pwm_pub.publish(info);
     ros::spinOnce();
     loop_rate.sleep();
   }
