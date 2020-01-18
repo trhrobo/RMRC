@@ -5,7 +5,7 @@
 
 using std::vector;
 
-vector<double> angle_goal{0, 0, 0, 0};
+vector<int> angle_goal{0, 0, 0, 0};
 
 enum dynamixel_name { front_right, front_left, back_right, back_left };
 
