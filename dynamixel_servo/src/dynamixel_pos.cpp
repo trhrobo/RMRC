@@ -39,6 +39,7 @@ int main(int argc, char **argv) {
       "/dynamixel_workbench/joint_trajectory", 10);
 
   ros::Subscriber servo_sub = n.subscribe("flipper", 45, dynamixelCallback);
+
   trajectory_msgs::JointTrajectory jtp0;
 
   jtp0.header.frame_id = "flipper";
@@ -68,7 +69,10 @@ int main(int argc, char **argv) {
     for (int i = 0; i < 4; ++i) {
       jtp0.points[0].positions[i] = servo[i].angleCal(angle_goal[i]);
     }
+    jtp0.points[0].time_from_start = ros::Duration(0.02);
     servo_pub.publish(jtp0);
+    ROS_INFO("Joint1= %d | Joint2= %d | Joint3 = %d |Joint4 = %d",
+             angle_goal[0], angle_goal[1], angle_goal[2], angle_goal[3]);
     ros::spinOnce();
     loop_rate.sleep();
   }
