@@ -1,4 +1,5 @@
 #include <ros/ros.h>
+#include <ros/time.h>
 #include <std_msgs/Float64MultiArray.h>
 #include <trajectory_msgs/JointTrajectory.h>
 #include <vector>
@@ -42,16 +43,19 @@ int main(int argc, char **argv) {
 
   trajectory_msgs::JointTrajectory jtp0;
 
-  jtp0.header.frame_id = "flipper";
+  jtp0.header.frame_id = "base_link";
+
   jtp0.joint_names.resize(4);
+
   jtp0.points.resize(1);
 
+  //  jtp0.points[0].positions.resize(4);
   jtp0.points[0].positions.resize(4);
 
-  jtp0.joint_names[0] = "right_front";
-  jtp0.joint_names[1] = "right_back";
-  jtp0.joint_names[2] = "left_front";
-  jtp0.joint_names[3] = "left_back";
+  jtp0.joint_names[0] = "front_right";
+  jtp0.joint_names[1] = "front_left";
+  jtp0.joint_names[2] = "back_right";
+  jtp0.joint_names[3] = "back_left";
 
   /*
   dynamixel servo[4] = {
@@ -66,9 +70,11 @@ int main(int argc, char **argv) {
   ros::Rate loop_rate(45);
 
   while (ros::ok()) {
+
     for (int i = 0; i < 4; ++i) {
       jtp0.points[0].positions[i] = servo[i].angleCal(angle_goal[i]);
     }
+
     jtp0.points[0].time_from_start = ros::Duration(0.02);
     servo_pub.publish(jtp0);
     ROS_INFO("Joint1= %lf | Joint2= %lf | Joint3 = %lf |Joint4 = %lf",

@@ -26,10 +26,10 @@ void jointStateCallback(const sensor_msgs::JointState &jointstate) {
   /*for (int i = 0; i < 4; ++i) {
     current_dynamixel_pose[i] = jointstate.position[i];
   }*/
-  current_dynamixel_pose[0] = jointstate.position[3];
-  current_dynamixel_pose[1] = jointstate.position[2];
-  current_dynamixel_pose[2] = jointstate.position[1];
-  current_dynamixel_pose[3] = jointstate.position[0];
+  current_dynamixel_pose[0] = jointstate.position[0];
+  current_dynamixel_pose[1] = jointstate.position[1];
+  current_dynamixel_pose[2] = jointstate.position[2];
+  current_dynamixel_pose[3] = jointstate.position[3];
 
   ROS_INFO("now[0] = %lf | now[1] = %lf | now[2] = %lf | now[3] = %lf",
            current_dynamixel_pose[0], current_dynamixel_pose[1],
@@ -85,9 +85,7 @@ int main(int argc, char **argv) {
 
   double angle_goal[4]{};
   dynamixel_goal.data.resize(4);
-  // flipper position[4]{{front_right}, {front_left}, {back_right},
-  // {back_left}};
-  flipper position[4] = {0, 1, 2, 3};
+  flipper position[4]{{front_right}, {front_left}, {back_right}, {back_left}};
 
   while (ros::ok()) {
     if (buttons_reverse) {

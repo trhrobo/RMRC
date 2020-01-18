@@ -144,7 +144,7 @@ add_executable(dynamixel_pos src/dynamixel_pos.cpp)
 ## target back to the shorter version for ease of user use
 ## e.g. "rosrun someones_pkg node" instead of "rosrun someones_pkg someones_pkg_node"
 # set_target_properties(${PROJECT_NAME}_node PROPERTIES OUTPUT_NAME node PREFIX "")
-set_target_properties(dynamixel_pos PROPERTIES OUTPUT_NAME set_servo_pos PREFIX "")
+set_target_properties(dynamixel_pos PROPERTIES OUTPUT_NAME dynamixel_pos PREFIX "")
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
