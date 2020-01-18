@@ -1,15 +1,15 @@
 #include <ros/ros.h>
-#include <std_msgs/Int16MultiArray.h>
+#include <std_msgs/Float64MultiArray.h>
 #include <trajectory_msgs/JointTrajectory.h>
 #include <vector>
 
 using std::vector;
 
-vector<int> angle_goal{0, 0, 0, 0};
+vector<double> angle_goal{0, 0, 0, 0};
 
 enum dynamixel_name { front_right, front_left, back_right, back_left };
 
-void dynamixelCallback(const std_msgs::Int16MultiArray &msg) {
+void dynamixelCallback(const std_msgs::Float64MultiArray &msg) {
   for (int i = 0; i < msg.data.size(); ++i) {
     angle_goal[i] = msg.data[i];
   }
@@ -22,14 +22,14 @@ private:
 public:
   dynamixel(int user_id);
   ~dynamixel();
-  int angleCal(int goal_value);
+  double angleCal(double goal_value);
 };
 
 dynamixel::dynamixel(int user_id) { id = user_id; }
 
 dynamixel::~dynamixel() {}
 
-int dynamixel::angleCal(int value) { return value; }
+double dynamixel::angleCal(double value) { return value; }
 
 int main(int argc, char **argv) {
   ros::init(argc, argv, "dynamixel_pos");
@@ -71,7 +71,7 @@ int main(int argc, char **argv) {
     }
     jtp0.points[0].time_from_start = ros::Duration(0.02);
     servo_pub.publish(jtp0);
-    ROS_INFO("Joint1= %d | Joint2= %d | Joint3 = %d |Joint4 = %d",
+    ROS_INFO("Joint1= %lf | Joint2= %lf | Joint3 = %lf |Joint4 = %lf",
              angle_goal[0], angle_goal[1], angle_goal[2], angle_goal[3]);
     ros::spinOnce();
     loop_rate.sleep();

@@ -2,7 +2,7 @@
 #include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
 #include <sensor_msgs/Joy.h>
-#include <std_msgs/Int16MultiArray.h>
+#include <std_msgs/Float64MultiArray.h>
 #include <vector>
 
 bool buttons_reverse = false;
@@ -42,7 +42,11 @@ flipper::flipper(int user_id) { id = user_id; }
 
 int flipper::forward(int value) { return value += 2; }
 
-int flipper::reverse(int value) { return value -= 2; }
+int flipper::reverse(int value) {
+  value -= 2;
+  value < 0 ? value = 0 : value = value;
+  return value;
+}
 
 void forwardALL(int standard_value, int goal[4]) {
   goal[0] += 2;
@@ -63,13 +67,13 @@ int main(int argc, char **argv) {
   ros::NodeHandle n;
 
   ros::Publisher flipper_pub =
-      n.advertise<std_msgs::Int16MultiArray>("flipper", 30);
+      n.advertise<std_msgs::Float64MultiArray>("flipper", 30);
   ros::Subscriber flipper_sub = n.subscribe("joy", 10, joyCallback);
   ros::Rate loop_rate(45);
 
-  std_msgs::Int16MultiArray dynamixel_goal;
+  std_msgs::Float64MultiArray dynamixel_goal;
 
-  int angle_goal[4]{};
+  double angle_goal[4]{};
   dynamixel_goal.data.resize(4);
   flipper position[4]{{front_right}, {front_left}, {back_right}, {back_left}};
 
@@ -78,48 +82,60 @@ int main(int argc, char **argv) {
       if (axes_front_right < 0) {
         if (current_dynamixel_pose[0] + 0.5 > angle_goal[0] &&
             current_dynamixel_pose[0] - 0.5 < angle_goal[0]) {
+          ROS_INFO("OK_REVERSE 1");
+          angle_goal[0] = position[0].reverse(angle_goal[0]);
+        }
+      }
+      if (axes_front_left < 0) {
+        if (current_dynamixel_pose[1] + 0.5 > angle_goal[1] &&
+            current_dynamixel_pose[1] - 0.5 < angle_goal[1]) {
+          ROS_INFO("OK_REVERSE 2");
+          angle_goal[1] = position[1].reverse(angle_goal[1]);
+        }
+      }
+      if (buttons_back_right) {
+        if (current_dynamixel_pose[2] + 0.5 > angle_goal[2] &&
+            current_dynamixel_pose[2] - 0.5 < angle_goal[2]) {
+          ROS_INFO("OK_REVERSE 3");
+          angle_goal[2] = position[2].reverse(angle_goal[2]);
+        }
+      }
+      if (buttons_back_left) {
+        if (current_dynamixel_pose[3] + 0.5 > angle_goal[3] &&
+            current_dynamixel_pose[3] - 0.5 < angle_goal[3]) {
+          ROS_INFO("OK_REVERSE 4");
+          angle_goal[3] = position[3].reverse(angle_goal[3]);
+        }
+      }
+    } else {
+      if (axes_front_right < 0) {
+        if (current_dynamixel_pose[0] + 0.5 > angle_goal[0] &&
+            current_dynamixel_pose[0] - 0.5 < angle_goal[0]) {
+          ROS_INFO("OK_REVERSE 1");
           angle_goal[0] = position[0].forward(angle_goal[0]);
         }
       }
       if (axes_front_left < 0) {
         if (current_dynamixel_pose[1] + 0.5 > angle_goal[1] &&
             current_dynamixel_pose[1] - 0.5 < angle_goal[1]) {
+          ROS_INFO("OK_REVERSE 2");
           angle_goal[1] = position[1].forward(angle_goal[1]);
         }
       }
       if (buttons_back_right) {
         if (current_dynamixel_pose[2] + 0.5 > angle_goal[2] &&
             current_dynamixel_pose[2] - 0.5 < angle_goal[2]) {
+          ROS_INFO("OK_REVERSE 3");
           angle_goal[2] = position[2].forward(angle_goal[2]);
         }
       }
       if (buttons_back_left) {
         if (current_dynamixel_pose[3] + 0.5 > angle_goal[3] &&
             current_dynamixel_pose[3] - 0.5 < angle_goal[3]) {
+          ROS_INFO("OK_REVERSE 4");
           angle_goal[3] = position[3].forward(angle_goal[3]);
         }
       }
-    } else {
-      if (axes_front_right < 0)
-        if (current_dynamixel_pose[0] + 0.5 > angle_goal[0] &&
-            current_dynamixel_pose[0] - 0.5 < angle_goal[0]) {
-          angle_goal[0] = position[0].reverse(angle_goal[0]);
-        }
-      if (axes_front_left < 0)
-        if (current_dynamixel_pose[1] + 0.5 > angle_goal[1] &&
-            current_dynamixel_pose[1] - 0.5 < angle_goal[1]) {
-          angle_goal[1] = position[1].reverse(angle_goal[1]);
-        }
-      if (buttons_back_right)
-        if (current_dynamixel_pose[2] + 0.5 > angle_goal[2] &&
-            current_dynamixel_pose[2] - 0.5 < angle_goal[2]) {
-          angle_goal[2] = position[2].reverse(angle_goal[2]);
-        }
-      if (buttons_back_left)
-        if (current_dynamixel_pose[3] + 0.5 > angle_goal[3] &&
-            current_dynamixel_pose[3] - 0.5 < angle_goal[3]) {
-          angle_goal[3] = position[3].reverse(angle_goal[3]);
-        }
     }
     for (int i = 0; i < 4; ++i) {
       dynamixel_goal.data[i] = angle_goal[i];
