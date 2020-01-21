@@ -74,18 +74,18 @@ for (int i = 1; i < 4; ++i) {
 class flipper {
 private:
   int id;
-  void forward();
-  void reverse();
 
 public:
   flipper(int user_id);
+  void forward();
+  void reverse();
 };
 
 flipper::flipper(int user_id) { id = user_id; }
 
-void flipper::forward() { theta_ref[id] += 5; }
+double flipper::forward() { theta_ref[id] += 5; }
 
-void flipper::reverse() { theta_ref[id] -= 5; }
+double flipper::reverse() { theta_ref[id] -= 5; }
 
 //現在角度とトルクを取得
 void jointStateCallback(const sensor_msgs::JointState &jointstate) {
@@ -133,9 +133,6 @@ void joyCallback(const std_msgs::Joy &controller) {
   prev_semi_autonomous = controller.buttons[6];
 }
 
-//半自動モードかどうかキーを確認する
-void judge_semi_autonomous() {}
-
 //角度PID
 void pidCal() {
   for (int i = 0; i < 4; ++i) {
@@ -157,23 +154,45 @@ int main(int argc, char **argv) {
   flipper position[4] = {0, 1, 2, 3};
   while (ros::ok()) {
     //半自動モードかどうか
-    if (judge_semi_autonomous()) {
-      if (semi_autonomous_judge()) {
-        semi_autonomous_front::set();
-      } else {
-        semi_autonomous_rear::set();
-      }
+    if (flag_semi_autonomous) {
+      semi_autonomous_front::set();
+      semi_autonomous_rear::set();
       //全てのフリッパーを同じように動かすか
     } else if (flag_all) {
-      if (judge_all) {
+      if ((axes_front_right < 0) or (axes_front_left < 0)) {
         all::setForward();
-      } else {
+      }
+      if ((buttons_rear_right == true) or (buttons_rear_left == true)) {
         all::setReverse();
       }
       //個別でフリッパーを動かすか
     } else {
-      if (judge_manual()) {
+      if (buttons_reverse) {
+        if (axes_front_right < 0) {
+          position[0].reverse(theta_ref[0]);
+        }
+        if (axes_front_left < 0) {
+          position[1].reverse(theta_ref[1]);
+        }
+        if (buttons_rear_right) {
+          position[2].reverse(theta_ref[2]);
+        }
+        if (buttons_rear_left) {
+          position[3].reverse(theta_ref[3]);
+        }
       } else {
+        if (axes_front_right < 0) {
+          position[0].forward(theta_ref[0]);
+        }
+        if (axes_front_left < 0) {
+          position[1].forward(theta_ref[1]);
+        }
+        if (buttons_rear_right) {
+          position[2].forward(theta_ref[2]);
+        }
+        if (buttons_rear_left) {
+          position[3].forward(theta_ref[3]);
+        }
       }
     }
     pidCal();
