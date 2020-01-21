@@ -1,13 +1,14 @@
 #include <cmath>
 #include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
+#include <sensor_msgs/Joy.h>
 #include <std_msgs/Float64.h>
 #include <vector>
-
 using std::vector;
 
-constexpr double original_pose = 90.0;
-vector<double> current_dynamixel_pose{0, 0, 0, 0};
+constexpr double original_theta = 90.0;
+constexpr double autonomous_max_theta = 75.0;
+vector<double> current_dynamixel_theta{0, 0, 0, 0};
 vector<double> current_dynamixel_torque{0, 0, 0, 0};
 vector<double> theta_ref{0, 0, 0, 0};
 double gyro_robot{};
@@ -24,8 +25,8 @@ double set() {
   } else {
     theta_ref[0] += 5;
   }
-  theta_ref[0] >= original_pose
-      ? theta_ref[0] = original_pose
+  theta_ref[0] >= original_theta
+      ? theta_ref[0] = original_theta
       : theta_ref[0] < 0 ? theta_ref[0] = 0 : theta_ref[0] = theta_ref[0];
   theta_ref[1] = theta_ref[0];
 }
@@ -42,8 +43,8 @@ double set() {
   } else {
     theta_ref[2] += 5;
   }
-  theta_ref[2] >= original_pose
-      ? theta_ref[2] = original_pose
+  theta_ref[2] >= original_theta
+      ? theta_ref[2] = original_theta
       : theta_ref[2] < 0 ? theta_ref[2] = 0 : theta_ref[2] = theta_ref[2];
   theta_ref[3] = theta_ref[2];
 }
@@ -52,6 +53,11 @@ bool judgeGrounding() { return (theta_ref > theta_rear) && (torque_rear < 0); }
 }
 //--------------------------------------------------------------------
 namespace all {
+double reset() {
+  for (int i = 0; i < 4; ++i) {
+    theta_ref[i] = original_theta;
+  }
+}
 double setForward() {
   theta_ref[0] += 5;
   for (int i = 1; i < 4; ++i) {
@@ -81,25 +87,56 @@ void flipper::forward() { theta_ref[id] += 5; }
 
 void flipper::reverse() { theta_ref[id] -= 5; }
 
+//現在角度とトルクを取得
 void jointStateCallback(const sensor_msgs::JointState &jointstate) {
-  current_dynamixel_pose[0] = jointstate.position[3];
+  current_dynamixel_theta[0] = jointstate.position[3];
   current_dynamixel_torque[0] = jointstate.effort[3];
 
-  current_dynamixel_pose[1] = jointstate.position[2];
+  current_dynamixel_theta[1] = jointstate.position[2];
   current_dynamixel_torque[1] = jointstate.effort[2];
 
-  current_dynamixel_pose[2] = jointstate.position[1];
+  current_dynamixel_theta[2] = jointstate.position[1];
   current_dynamixel_torque[2] = jointstate.effort[1];
 
-  current_dynamixel_pose[3] = jointstate.position[0];
+  current_dynamixel_theta[3] = jointstate.position[0];
   current_dynamixel_torque[3] = jointstate.effort[0];
 }
 
+//ロボットの現在角度を取得
 void gyroCallback(const std_msgs::Float64 &msg) { gyro_robot = msg.data; }
+
+bool buttons_reverse = false;
+bool flag_semi_autonomous = false;
+bool prev_semi_autonomous = false;
+bool flag_all = false;
+bool prev_all = false;
+double axes_front_right = 0;
+double axes_front_left = 0;
+double buttons_rear_right = 0;
+double buttons_rear_left = 0;
+
+//コントローラ値を入力
+void joyCallback(const std_msgs::Joy &controller) {
+  buttons_reverse = controller.buttons[2];
+  axes_front_right = controller.axes[5];
+  axes_front_left = controller.axes[2];
+  buttons_rear_right = controller.buttons[5];
+  buttons_rear_left = controller.buttons[4];
+  if ((prev_all == false) and controllet.buttons[6] == true) {
+    flag_all != flag_all;
+  }
+  prev_all = controller.buttons[6];
+  // Xboxキーが押されたらflag_semi_autonomousを切り替える
+  if ((prev_semi_autonomous == false) and controllet.buttons[6] == true) {
+    flag_semi_autonomous != flag_semi_autonomous;
+  }
+  prev_semi_autonomous = controller.buttons[6];
+}
 
 //半自動モードかどうかキーを確認する
 void judge_semi_autonomous() {}
 
+//角度PID
 void pidCal() {
   for (int i = 0; i < 4; ++i) {
     theta_ref[i] = Kp * (theta_ref[i] - theta_rear) +
@@ -115,8 +152,9 @@ int main(int argc, char **argv) {
   ros::Subscriber feedback_sub =
       n.subscribe("/dynamixel_workbench/joint_states", 10, jointStateCallback);
   ros::Subscriber gyro_sub = n.subscribe("gyro", 10, gyroCallback);
-
+  ros::Subscriber controller_sub = n.subscribe("joy", 10, joyCallback);
   ros::Rate loop_rate(100);
+  flipper position[4] = {0, 1, 2, 3};
   while (ros::ok()) {
     //半自動モードかどうか
     if (judge_semi_autonomous()) {
