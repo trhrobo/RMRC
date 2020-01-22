@@ -3,6 +3,7 @@
 #include <sensor_msgs/JointState.h>
 #include <sensor_msgs/Joy.h>
 #include <std_msgs/Float64.h>
+#include <std_msgs/Float64MultiArray.h>
 #include <vector>
 using std::vector;
 
@@ -11,6 +12,7 @@ constexpr double autonomous_max_theta = 75.0;
 constexpr double autonomous_min_theta = -90.0;
 constexpr double Kp = 1.0;
 constexpr double Kd = 1.0;
+constexpr double frequency = 45;
 vector<double> current_dynamixel_theta{0, 0, 0, 0};
 vector<double> current_dynamixel_torque{0, 0, 0, 0};
 vector<double> theta_ref{0, 0, 0, 0};
@@ -73,6 +75,7 @@ double setReverse() {
   for (int i = 1; i < 4; ++i) {
     theta_ref[i] = theta_ref[0];
   }
+}
 }
 //--------------------------------------------------------------------
 class flipper {
