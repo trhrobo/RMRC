@@ -8,6 +8,9 @@ using std::vector;
 
 constexpr double original_theta = 90.0;
 constexpr double autonomous_max_theta = 75.0;
+constexpr double autonomous_min_theta = -90.0;
+constexpr double Kp = 1.0;
+constexpr double Kd = 1.0;
 vector<double> current_dynamixel_theta{0, 0, 0, 0};
 vector<double> current_dynamixel_torque{0, 0, 0, 0};
 vector<double> theta_ref{0, 0, 0, 0};
@@ -19,37 +22,38 @@ double torque_rear{};
 
 //------------------------------------------------------------------
 namespace semi_autonomous_front {
+bool judgeGrounding() {
+  return (theta_ref[0] > theta_front) && (torque_front < 0);
+}
 double set() {
   if (judgeGrounding()) {
     theta_ref[0] -= 5;
   } else {
     theta_ref[0] += 5;
   }
-  theta_ref[0] >= original_theta
-      ? theta_ref[0] = original_theta
+  theta_ref[0] >= autonomous_max_theta
+      ? theta_ref[0] = autonomous_max_theta
       : theta_ref[0] < 0 ? theta_ref[0] = 0 : theta_ref[0] = theta_ref[0];
   theta_ref[1] = theta_ref[0];
-}
-
-bool judgeGrounding() {
-  return (theta_ref > theta_front) && (torque_front < 0);
 }
 }
 //-------------------------------------------------------------------
 namespace semi_autonomous_rear {
+bool judgeGrounding() {
+  return (theta_ref[0] > theta_rear) && (torque_rear < 0) && (gyro_robot);
+}
 double set() {
   if (judgeGrounding()) {
     theta_ref[2] -= 5;
   } else {
     theta_ref[2] += 5;
   }
-  theta_ref[2] >= original_theta
-      ? theta_ref[2] = original_theta
-      : theta_ref[2] < 0 ? theta_ref[2] = 0 : theta_ref[2] = theta_ref[2];
+  theta_ref[2] >= original_theta ? theta_ref[2] = original_theta
+                                 : theta_ref[2] < autonomous_min_theta
+                                       ? theta_ref[2] = autonomous_min_theta
+                                       : theta_ref[2] = theta_ref[2];
   theta_ref[3] = theta_ref[2];
 }
-
-bool judgeGrounding() { return (theta_ref > theta_rear) && (torque_rear < 0); }
 }
 //--------------------------------------------------------------------
 namespace all {
@@ -64,11 +68,11 @@ double setForward() {
     theta_ref[i] = theta_ref[0];
   }
 }
-double setReverse() {}
-theta_ref[0] -= 5;
-for (int i = 1; i < 4; ++i) {
-  theta_ref[i] = theta_ref[0];
-}
+double setReverse() {
+  theta_ref[0] -= 5;
+  for (int i = 1; i < 4; ++i) {
+    theta_ref[i] = theta_ref[0];
+  }
 }
 //--------------------------------------------------------------------
 class flipper {
@@ -83,9 +87,9 @@ public:
 
 flipper::flipper(int user_id) { id = user_id; }
 
-double flipper::forward() { theta_ref[id] += 5; }
+void flipper::forward() { theta_ref[id] += 5; }
 
-double flipper::reverse() { theta_ref[id] -= 5; }
+void flipper::reverse() { theta_ref[id] -= 5; }
 
 //現在角度とトルクを取得
 void jointStateCallback(const sensor_msgs::JointState &jointstate) {
@@ -116,18 +120,18 @@ double buttons_rear_right = 0;
 double buttons_rear_left = 0;
 
 //コントローラ値を入力
-void joyCallback(const std_msgs::Joy &controller) {
+void joyCallback(const sensor_msgs::Joy &controller) {
   buttons_reverse = controller.buttons[2];
   axes_front_right = controller.axes[5];
   axes_front_left = controller.axes[2];
   buttons_rear_right = controller.buttons[5];
   buttons_rear_left = controller.buttons[4];
-  if ((prev_all == false) and controllet.buttons[6] == true) {
+  if ((prev_all == false) and controller.buttons[6] == true) {
     flag_all != flag_all;
   }
   prev_all = controller.buttons[6];
   // Xboxキーが押されたらflag_semi_autonomousを切り替える
-  if ((prev_semi_autonomous == false) and controllet.buttons[6] == true) {
+  if ((prev_semi_autonomous == false) and controller.buttons[6] == true) {
     flag_semi_autonomous != flag_semi_autonomous;
   }
   prev_semi_autonomous = controller.buttons[6];
@@ -144,14 +148,16 @@ int main(int argc, char **argv) {
   ros::init(argc, argv, "semi_autonomous");
   ros::NodeHandle n;
 
-  ros::Publisher semi_autonoumous_pub =
+  ros::Publisher semi_autonomous_pub =
       n.advertise<std_msgs::Float64MultiArray>("flipper_semi_autonomous", 30);
   ros::Subscriber feedback_sub =
       n.subscribe("/dynamixel_workbench/joint_states", 10, jointStateCallback);
   ros::Subscriber gyro_sub = n.subscribe("gyro", 10, gyroCallback);
   ros::Subscriber controller_sub = n.subscribe("joy", 10, joyCallback);
-  ros::Rate loop_rate(100);
+  ros::Rate loop_rate(45);
   flipper position[4] = {0, 1, 2, 3};
+  std_msgs::Float64MultiArray send;
+  send.data.resize(4);
   while (ros::ok()) {
     //半自動モードかどうか
     if (flag_semi_autonomous) {
@@ -169,33 +175,39 @@ int main(int argc, char **argv) {
     } else {
       if (buttons_reverse) {
         if (axes_front_right < 0) {
-          position[0].reverse(theta_ref[0]);
+          position[0].reverse();
         }
         if (axes_front_left < 0) {
-          position[1].reverse(theta_ref[1]);
+          position[1].reverse();
         }
         if (buttons_rear_right) {
-          position[2].reverse(theta_ref[2]);
+          position[2].reverse();
         }
         if (buttons_rear_left) {
-          position[3].reverse(theta_ref[3]);
+          position[3].reverse();
         }
       } else {
         if (axes_front_right < 0) {
-          position[0].forward(theta_ref[0]);
+          position[0].forward();
         }
         if (axes_front_left < 0) {
-          position[1].forward(theta_ref[1]);
+          position[1].forward();
         }
         if (buttons_rear_right) {
-          position[2].forward(theta_ref[2]);
+          position[2].forward();
         }
         if (buttons_rear_left) {
-          position[3].forward(theta_ref[3]);
+          position[3].forward();
         }
       }
     }
     pidCal();
+    for (int i = 0; i < 4; ++i) {
+      send.data[i] = theta_ref[i];
+    }
+    theta_front = theta_ref[0];
+    theta_rear = theta_ref[2];
+    semi_autonomous_pub.publish(send);
     ros::spinOnce();
     loop_rate.sleep();
   }
