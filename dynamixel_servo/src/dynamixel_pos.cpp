@@ -39,7 +39,9 @@ int main(int argc, char **argv) {
   ros::Publisher servo_pub = n.advertise<trajectory_msgs::JointTrajectory>(
       "/dynamixel_workbench/joint_trajectory", 10);
 
-  ros::Subscriber servo_sub = n.subscribe("flipper", 45, dynamixelCallback);
+  // ros::Subscriber servo_sub = n.subscribe("flipper", 45, dynamixelCallback);
+  ros::Subscriber servo_sub =
+      n.subscribe("flipper_semi_autonomous", 45, dynamixelCallback);
 
   trajectory_msgs::JointTrajectory jtp0;
 

@@ -22,56 +22,101 @@ double theta_rear{};
 double torque_front{};
 double torque_rear{};
 
+//#define DEBUG
+
 //------------------------------------------------------------------
 namespace semi_autonomous_front {
+bool check() {
+  for (int i = 0; i < 4; ++i) {
+    if ((current_dynamixel_theta[i] + 0.5 > theta_ref[i]) and
+        (current_dynamixel_theta[i] - 0.5 < theta_ref[i])) {
+    } else {
+      return false;
+    }
+  }
+  return true;
+}
+
 bool judgeGrounding() {
   return (theta_ref[0] > theta_front) && (torque_front < 0);
 }
+
 double set() {
-  if (judgeGrounding()) {
-    theta_ref[0] -= 5;
-  } else {
-    theta_ref[0] += 5;
+  if (semi_autonomous_front::check()) {
+    if (judgeGrounding()) {
+      theta_ref[0] -= 1.0;
+    } else {
+      theta_ref[0] += 1.0;
+    }
+    theta_ref[0] >= autonomous_max_theta
+        ? theta_ref[0] = autonomous_max_theta
+        : theta_ref[0] < 0 ? theta_ref[0] = 0 : theta_ref[0] = theta_ref[0];
+    theta_ref[1] = theta_ref[0];
   }
-  theta_ref[0] >= autonomous_max_theta
-      ? theta_ref[0] = autonomous_max_theta
-      : theta_ref[0] < 0 ? theta_ref[0] = 0 : theta_ref[0] = theta_ref[0];
-  theta_ref[1] = theta_ref[0];
 }
 }
 //-------------------------------------------------------------------
 namespace semi_autonomous_rear {
+bool check() {
+  for (int i = 0; i < 4; ++i) {
+    if ((current_dynamixel_theta[i] + 0.5 > theta_ref[i]) and
+        (current_dynamixel_theta[i] - 0.5 < theta_ref[i])) {
+    } else {
+      return false;
+    }
+  }
+  return true;
+}
+
 bool judgeGrounding() {
   return (theta_ref[0] > theta_rear) && (torque_rear < 0) && (gyro_robot);
 }
+
 double set() {
-  if (judgeGrounding()) {
-    theta_ref[2] -= 5;
-  } else {
-    theta_ref[2] += 5;
+  if (semi_autonomous_rear::check()) {
+    if (judgeGrounding()) {
+      theta_ref[2] -= 1.0;
+    } else {
+      theta_ref[2] += 1.0;
+    }
+    theta_ref[2] >= original_theta ? theta_ref[2] = original_theta
+                                   : theta_ref[2] < autonomous_min_theta
+                                         ? theta_ref[2] = autonomous_min_theta
+                                         : theta_ref[2] = theta_ref[2];
+    theta_ref[3] = theta_ref[2];
   }
-  theta_ref[2] >= original_theta ? theta_ref[2] = original_theta
-                                 : theta_ref[2] < autonomous_min_theta
-                                       ? theta_ref[2] = autonomous_min_theta
-                                       : theta_ref[2] = theta_ref[2];
-  theta_ref[3] = theta_ref[2];
 }
 }
 //--------------------------------------------------------------------
 namespace all {
+bool check() {
+  for (int i = 0; i < 4; ++i) {
+    if ((current_dynamixel_theta[i] + 0.5 > theta_ref[i]) and
+        (current_dynamixel_theta[i] - 0.5 < theta_ref[i])) {
+    } else {
+      return false;
+    }
+  }
+  return true;
+}
+
 double reset() {
   for (int i = 0; i < 4; ++i) {
     theta_ref[i] = original_theta;
   }
 }
 double setForward() {
-  theta_ref[0] += 5;
+  if (all::check()) {
+    theta_ref[0] += 1.3;
+  }
   for (int i = 1; i < 4; ++i) {
     theta_ref[i] = theta_ref[0];
   }
 }
 double setReverse() {
-  theta_ref[0] -= 5;
+  if (all::check()) {
+    theta_ref[0] -= 1.3;
+  }
   for (int i = 1; i < 4; ++i) {
     theta_ref[i] = theta_ref[0];
   }
@@ -90,9 +135,32 @@ public:
 
 flipper::flipper(int user_id) { id = user_id; }
 
-void flipper::forward() { theta_ref[id] += 5; }
+void flipper::forward() {
+  if ((current_dynamixel_theta[id] + 0.5 > theta_ref[id]) and
+      (current_dynamixel_theta[id] - 0.5 < theta_ref[id])) {
+#ifdef DEBUG
+    ROS_INFO("OK_FORWARD %d", id);
+    ROS_INFO("theta_ref[%d] %lf current_dynamixel_theta[%d] %lf", id,
+             theta_ref[id], id, current_dynamixel_theta[id]);
+#endif
+    theta_ref[id] += 1.3;
+#ifdef DEBUG
+    ROS_INFO("theta_ref_result[%d] %lf", id, theta_ref[id]);
+#endif
+  }
+}
 
-void flipper::reverse() { theta_ref[id] -= 5; }
+void flipper::reverse() {
+  if ((current_dynamixel_theta[id] + 0.5 > theta_ref[id]) and
+      (current_dynamixel_theta[id] - 0.5 < theta_ref[id])) {
+#ifdef DEBUG
+    ROS_INFO("OK_REVERSE %d", id);
+    ROS_INFO("theta_ref[%d] %lf current_dynamixel_theta[%d] %lf", id,
+             theta_ref[id], id, current_dynamixel_theta[id]);
+#endif
+    theta_ref[id] -= 1.3;
+  }
+}
 
 //現在角度とトルクを取得
 void jointStateCallback(const sensor_msgs::JointState &jointstate) {
@@ -117,6 +185,8 @@ bool flag_semi_autonomous = false;
 bool prev_semi_autonomous = false;
 bool flag_all = false;
 bool prev_all = false;
+bool flag_reset = false;
+bool prev_reset = false;
 double axes_front_right = 0;
 double axes_front_left = 0;
 double buttons_rear_right = 0;
@@ -129,15 +199,24 @@ void joyCallback(const sensor_msgs::Joy &controller) {
   axes_front_left = controller.axes[2];
   buttons_rear_right = controller.buttons[5];
   buttons_rear_left = controller.buttons[4];
-  if ((prev_all == false) and controller.buttons[6] == true) {
-    flag_all != flag_all;
+  if ((prev_all == false) and controller.buttons[3] == true) {
+    flag_all = !flag_all;
   }
-  prev_all = controller.buttons[6];
+  prev_all = controller.buttons[3];
   // Xboxキーが押されたらflag_semi_autonomousを切り替える
-  if ((prev_semi_autonomous == false) and controller.buttons[6] == true) {
-    flag_semi_autonomous != flag_semi_autonomous;
+  if ((prev_semi_autonomous == false) and controller.buttons[8] == true) {
+    flag_semi_autonomous = !flag_semi_autonomous;
   }
-  prev_semi_autonomous = controller.buttons[6];
+  prev_semi_autonomous = controller.buttons[8];
+  // Bキーで全てのフリッパーの角度を90°
+  if ((prev_reset == false) and controller.buttons[1] == true) {
+    flag_reset = !flag_reset;
+  }
+  prev_reset = controller.buttons[1];
+#ifdef DEBUG
+  ROS_INFO("flag_all %d flag_semi_autonomous %d", flag_all,
+           flag_semi_autonomous);
+#endif
 }
 
 //角度PID
@@ -174,6 +253,9 @@ int main(int argc, char **argv) {
       if ((buttons_rear_right == true) or (buttons_rear_left == true)) {
         all::setReverse();
       }
+      if (flag_reset) {
+        all::reset();
+      }
       //個別でフリッパーを動かすか
     } else {
       if (buttons_reverse) {
@@ -204,7 +286,7 @@ int main(int argc, char **argv) {
         }
       }
     }
-    pidCal();
+    // pidCal();
     for (int i = 0; i < 4; ++i) {
       send.data[i] = theta_ref[i];
     }

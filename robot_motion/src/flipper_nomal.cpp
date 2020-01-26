@@ -42,16 +42,16 @@ private:
 
 public:
   flipper(int user_id);
-  int forward(int value);
-  int reverse(int value);
+  double forward(double value);
+  double reverse(double value);
 };
 
 flipper::flipper(int user_id) { id = user_id; }
 
-int flipper::forward(int value) { return value += 2; }
+double flipper::forward(double value) { return value += 1.3; }
 
-int flipper::reverse(int value) {
-  value -= 2;
+double flipper::reverse(double value) {
+  value -= 1.3;
   current_dynamixel_pose[id] == 0 ? value = 0 : value = value;
   return value;
 }
