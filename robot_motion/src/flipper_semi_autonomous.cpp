@@ -37,7 +37,7 @@ bool check() {
   return true;
 }
 
-bool judgeGrounding() {
+inline bool judgeGrounding() {
   return (theta_ref[0] > theta_front) && (torque_front < 0);
 }
 
@@ -68,7 +68,7 @@ bool check() {
   return true;
 }
 
-bool judgeGrounding() {
+inline bool judgeGrounding() {
   return (theta_ref[0] > theta_rear) && (torque_rear < 0) && (gyro_robot);
 }
 
@@ -100,12 +100,12 @@ bool check() {
   return true;
 }
 
-double reset() {
+inline double reset() {
   for (int i = 0; i < 4; ++i) {
     theta_ref[i] = original_theta;
   }
 }
-double setForward() {
+inline double setForward() {
   if (all::check()) {
     theta_ref[0] += 1.3;
   }
@@ -113,7 +113,7 @@ double setForward() {
     theta_ref[i] = theta_ref[0];
   }
 }
-double setReverse() {
+inline double setReverse() {
   if (all::check()) {
     theta_ref[0] -= 1.3;
   }
@@ -220,7 +220,7 @@ void joyCallback(const sensor_msgs::Joy &controller) {
 }
 
 //角度PID
-void pidCal() {
+inline void pidCal() {
   for (int i = 0; i < 4; ++i) {
     theta_ref[i] = Kp * (theta_ref[i] - theta_rear) +
                    Kd * ((theta_ref[i] - theta_rear) / frequency);

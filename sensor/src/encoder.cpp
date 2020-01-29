@@ -7,6 +7,13 @@ constexpr int right_A = 17;
 constexpr int right_B = 27;
 constexpr int left_A = 22;
 constexpr int left_B = 23;
+constexpr int RANGE_RIGHT = 500;
+constexpr int RANGE_LEFT = 500;
+constexpr int MULTIPLICATION_RIGHT = 1;
+constexpr int MULTIPLICATION_LEFT = 1;
+constexpr double DIAMETER_RIGHT = 100.0;
+constexpr double DIAMETER_LEFT = 100.0;
+constexpr int LOOP_RATE = 500;
 const char *PIGPIOD_HOST = "localhost";
 const char *PIGPIOD_PORT = "8888";
 
@@ -104,13 +111,26 @@ int main(int argc, char **argv) {
   // std_msgs::Int64 msg;
   AMT encoder_right(right_A, right_B, 1);
   AMT encoder_left(left_A, left_B, 1);
-  ros::Rate loop_rate(1000);
-
+  ros::Rate loop_rate(500);
+  int now_pulse_right = 0;
+  int prev_pulse_right = 0;
+  int now_pulse_left = 0;
+  int prev_pulse_left = 0;
   while (ros::ok()) {
-    msg.data[0] = encoder_right.get();
-    msg.data[1] = encoder_left.get();
+    now_pulse_right = encoder_right.get();
+    now_pulse_left = encoder_left.get();
+    msg.data[0] = ((((now_pulse_right - prev_pulse_right) /
+                     (RANGE_RIGHT * MULTIPLICATION_RIGHT))) *
+                   DIAMETER_RIGHT) /
+                  LOOP_RATE;
+    msg.data[1] = ((((now_pulse_left - prev_pulse_left) /
+                     (RANGE_LEFT * MULTIPLICATION_LEFT))) *
+                   DIAMETER_LEFT) /
+                  LOOP_RATE;
     // msg.data = encoder_right.get();
     encoder_pub.publish(msg);
+    prev_pulse_right = now_pulse_right;
+    prev_pulse_left = now_pulse_left;
     ros::spinOnce();
     loop_rate.sleep();
   }

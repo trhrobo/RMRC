@@ -15,13 +15,22 @@ int main(int argc, char **argv) {
   ros::Rate loop_rate(100);
 
   int pi = pigpio_start(0, 0);
+  int serial_handle{};
   unsigned char dummy_flag{};
-  int serial_handle =
-      serial_open(pi, const_cast<char *>(port), baudrate, dummy_flag);
-  if (serial_handle < 0) {
+
+  try {
+    serial_handle =
+        serial_open(pi, const_cast<char *>(port), baudrate, dummy_flag);
+    if (serial_handle < 0) {
+      throw serial_handle;
+    } else {
+      cout << "Serial Initialize complete" << endl;
+    }
+  }
+
+  catch (int _serial_handle) {
     cout << "Serial Initialize Failed" << endl;
-  } else {
-    cout << "Serial Initialize complete" << endl;
+    return 1;
   }
 
   uint8_t got_data{};
