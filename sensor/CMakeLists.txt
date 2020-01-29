@@ -141,6 +141,7 @@ add_executable(gy521 src/gy521.cpp)
 add_executable(gy521_pose src/gy521_pose.cpp)
 add_executable(gy521_yaw src/gy521_yaw.cpp)
 add_executable(gy521_pitch src/gy521_pitch.cpp)
+add_executable(vnh5019 src/vnh5019.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -172,6 +173,10 @@ target_link_libraries(gy521_yaw
   ${catkin_LIBRARIES}
 )
 target_link_libraries(gy521_pitch
+  pigpiod_if2
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(vnh5019
   pigpiod_if2
   ${catkin_LIBRARIES}
 )
