@@ -23,14 +23,12 @@ private:
 public:
   dynamixel(int user_id);
   ~dynamixel();
-  double angleCal(double goal_value);
+  double angleCal(double goal_value) { return goal_value; }
 };
 
 dynamixel::dynamixel(int user_id) { id = user_id; }
 
 dynamixel::~dynamixel() {}
-
-double dynamixel::angleCal(double value) { return value; }
 
 int main(int argc, char **argv) {
   ros::init(argc, argv, "dynamixel_pos");

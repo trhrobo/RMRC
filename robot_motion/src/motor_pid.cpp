@@ -61,7 +61,7 @@ void PID::Integral() { integral_value += now_value * (1 / FREQ); }
 void PID::Calcurate() {
   //	cout << goal_value << ":" << now_value << endl;
   answer_value = Kp * (goal_value - now_value);
-  -Kd *defferential_value;
+  //-Kd *defferential_value;
 }
 
 double PID::Get() {
@@ -113,9 +113,7 @@ int main(int argc, char **argv) {
   info.data.resize(4);
 
   while (ros::ok()) {
-    //各タイヤへの速度の分解
     for (int i = 0; i < wheel_pwm.size(); ++i) {
-      //速さを求める式[m/s]
       speed_pid[i].PidUpdate(goal_vel[i], speed_now[i], speed_prev[i]);
       pid_result[i] = speed_pid[i].Get();
       speed_prev[i] = speed_now[i];

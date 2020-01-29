@@ -3,16 +3,22 @@
 #include <std_msgs/Int64.h>
 #include <std_msgs/Int64MultiArray.h>
 
-constexpr int right_A = 17;
-constexpr int right_B = 27;
-constexpr int left_A = 22;
-constexpr int left_B = 23;
-constexpr int RANGE_RIGHT = 500;
-constexpr int RANGE_LEFT = 500;
-constexpr int MULTIPLICATION_RIGHT = 1;
-constexpr int MULTIPLICATION_LEFT = 1;
-constexpr double DIAMETER_RIGHT = 100.0;
-constexpr double DIAMETER_LEFT = 100.0;
+namespace right {
+constexpr int pin_A = 17;
+constexpr int pin_B = 27;
+constexpr int RANGE = 500;
+constexpr int MULTIPLICATION = 1;
+constexpr double DIAMETER = 100.0;
+}
+
+namespace left {
+constexpr int pin_A = 22;
+constexpr int pin_B = 23;
+constexpr int RANGE = 500;
+constexpr int MULTIPLICATION = 1;
+constexpr double DIAMETER = 100.0;
+}
+
 constexpr int LOOP_RATE = 500;
 const char *PIGPIOD_HOST = "localhost";
 const char *PIGPIOD_PORT = "8888";
@@ -109,8 +115,8 @@ int main(int argc, char **argv) {
   msg.data.resize(2);
   // ros::Publisher encoder_pub = n.advertise<std_msgs::Int64>("encoder", 10);
   // std_msgs::Int64 msg;
-  AMT encoder_right(right_A, right_B, 1);
-  AMT encoder_left(left_A, left_B, 1);
+  AMT encoder_right(right::pin_A, right::pin_B, 1);
+  AMT encoder_left(left::pin_A, left::pin_B, 1);
   ros::Rate loop_rate(500);
   int now_pulse_right = 0;
   int prev_pulse_right = 0;
@@ -120,12 +126,12 @@ int main(int argc, char **argv) {
     now_pulse_right = encoder_right.get();
     now_pulse_left = encoder_left.get();
     msg.data[0] = ((((now_pulse_right - prev_pulse_right) /
-                     (RANGE_RIGHT * MULTIPLICATION_RIGHT))) *
-                   DIAMETER_RIGHT) /
+                     (right::RANGE * right::MULTIPLICATION))) *
+                   right::DIAMETER) /
                   LOOP_RATE;
     msg.data[1] = ((((now_pulse_left - prev_pulse_left) /
-                     (RANGE_LEFT * MULTIPLICATION_LEFT))) *
-                   DIAMETER_LEFT) /
+                     (left::RANGE * left::MULTIPLICATION))) *
+                   left::DIAMETER) /
                   LOOP_RATE;
     // msg.data = encoder_right.get();
     encoder_pub.publish(msg);

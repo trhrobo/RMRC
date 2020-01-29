@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
   ros::NodeHandle n;
   ros::Publisher wheel_pub =
       n.advertise<std_msgs::Float64MultiArray>("wheel", 10);
-  ros::Subscriber controller_sub = n.subscribe("cmd_vel", 10, velCallback);
+  ros::Subscriber controller_sub = n.subscribe("/cmd_vel", 10, velCallback);
   ros::Rate loop_rate(1000);
 
   std_msgs::Float64MultiArray msg;

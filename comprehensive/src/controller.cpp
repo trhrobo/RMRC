@@ -26,7 +26,7 @@ void joyCallback(const sensor_msgs::Joy &msg) {
 int main(int argc, char **argv) {
   ros::init(argc, argv, "xbox");
   ros::NodeHandle n;
-  ros::Publisher vel_pub = n.advertise<geometry_msgs::Twist>("cmd_vel", 10);
+  ros::Publisher vel_pub = n.advertise<geometry_msgs::Twist>("/cmd_vel", 10);
   ros::Publisher controller_pub =
       n.advertise<comprehensive::Button>("xbox", 10);
   ros::Subscriber controller_sub = n.subscribe("joy", 10, joyCallback);
