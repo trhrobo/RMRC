@@ -118,8 +118,8 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
-  ${catkin_INCLUDE_DIRS}
+ include
+ ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -136,12 +136,13 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/sensor_node.cpp)
-add_executable(encoder src/encoder.cpp)
+#add_executable(encoder src/encoder.cpp)
+add_executable(encoder_speed src/encoder_speed.cpp src/encoder.cpp)
 add_executable(gy521 src/gy521.cpp)
 add_executable(gy521_pose src/gy521_pose.cpp)
 add_executable(gy521_yaw src/gy521_yaw.cpp)
 add_executable(gy521_pitch src/gy521_pitch.cpp)
-add_executable(vnh5019 src/vnh5019.cpp)
+add_executable(md src/md.cpp src/vnh5019.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -157,7 +158,11 @@ add_executable(vnh5019 src/vnh5019.cpp)
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
-target_link_libraries(encoder
+#target_link_libraries(encoder
+#  pigpiod_if2
+#  ${catkin_LIBRARIES}
+#)
+target_link_libraries(encoder_speed
   ${catkin_LIBRARIES}
   pigpiod_if2
 )
@@ -176,7 +181,11 @@ target_link_libraries(gy521_pitch
   pigpiod_if2
   ${catkin_LIBRARIES}
 )
-target_link_libraries(vnh5019
+#target_link_libraries(vnh5019
+#  pigpiod_if2
+#  ${catkin_LIBRARIES}
+#)
+target_link_libraries(md
   pigpiod_if2
   ${catkin_LIBRARIES}
 )
