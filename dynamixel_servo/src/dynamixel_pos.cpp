@@ -1,3 +1,4 @@
+#include "dynamixel/dynamixel.h"
 #include <ros/ros.h>
 #include <ros/time.h>
 #include <std_msgs/Float64MultiArray.h>
@@ -15,20 +16,6 @@ void dynamixelCallback(const std_msgs::Float64MultiArray &msg) {
     angle_goal[i] = msg.data[i];
   }
 }
-
-class dynamixel {
-private:
-  int id;
-
-public:
-  dynamixel(int user_id);
-  ~dynamixel();
-  double angleCal(double goal_value) { return goal_value; }
-};
-
-dynamixel::dynamixel(int user_id) { id = user_id; }
-
-dynamixel::~dynamixel() {}
 
 int main(int argc, char **argv) {
   ros::init(argc, argv, "dynamixel_pos");
