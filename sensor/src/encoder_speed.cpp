@@ -12,9 +12,9 @@ constexpr double DIAMETER = 100.0;
 }
 
 namespace left {
-constexpr int pin_A = 22;
-constexpr int pin_B = 23;
-constexpr int RANGE = 500;
+constexpr int pin_A = 23;
+constexpr int pin_B = 24;
+constexpr int RANGE = 512;
 constexpr int MULTIPLICATION = 1;
 constexpr double DIAMETER = 100.0;
 }
@@ -38,6 +38,7 @@ int main(int argc, char **argv) {
   while (ros::ok()) {
     now_pulse_right = encoder_right.get();
     now_pulse_left = encoder_left.get();
+    ROS_INFO("right = %lf, left = %lf", now_pulse_right, now_pulse_left);
     msg.data[0] = ((((now_pulse_right - prev_pulse_right) /
                      (right::RANGE * right::MULTIPLICATION))) *
                    right::DIAMETER) /
