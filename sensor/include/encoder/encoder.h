@@ -1,3 +1,6 @@
+#ifndef ENCODER_H
+#define ENCODER_H
+
 #include<cstdint>
 class AMT {
 private:
@@ -19,3 +22,4 @@ public:
   int get();
 };
 
+#endif
