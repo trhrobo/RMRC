@@ -162,6 +162,27 @@ void flipper::reverse() {
   }
 }
 
+class flipperSemiAutonomous {
+private:
+  int id[4];
+  double posCal();
+
+public:
+  flipperSemiAutonomous(int *user_id, flipper front_right, flipper front_left,
+                        flipper back_right, flipper back_left);
+  double dynamixelSet();
+};
+
+flipperSemiAutonomous(int *user_id, flipper user_front_right,
+                      flipper user_front_left, flipper user_back_right,
+                      flipper user_back_left);
+for (int i = 0; i < 4; ++i) {
+  id[i] = user_id[i];
+}
+}
+
+flipperSemiAutonomous::dynamixelSet() {}
+
 //現在角度とトルクを取得
 void jointStateCallback(const sensor_msgs::JointState &jointstate) {
   current_dynamixel_theta[0] = jointstate.position[3];
@@ -226,6 +247,7 @@ inline void pidCal() {
                    Kd * ((theta_ref[i] - theta_rear) / frequency);
   }
 }
+
 int main(int argc, char **argv) {
   ros::init(argc, argv, "semi_autonomous");
   ros::NodeHandle n;
@@ -240,6 +262,7 @@ int main(int argc, char **argv) {
   flipper position[4] = {0, 1, 2, 3};
   std_msgs::Float64MultiArray send;
   send.data.resize(4);
+
   while (ros::ok()) {
     //半自動モードかどうか
     if (flag_semi_autonomous) {
