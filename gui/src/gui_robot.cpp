@@ -13,6 +13,7 @@ void dynamixelCallback(const sensor_msgs::JointState &msg) {
 int main(int argc, char **argv) {
   ros::init(argc, argv, "gui_robot");
   ros::NodeHandle n;
+  ros::Publisher joint_pub<std_msgs::JointState>("/gui_info", 10);
   ros::Subscriber dynamixel_sub =
       n.subscribe("/dynamixel_workbench/joint_states", 10, dynamixelCallback);
   ros::Rate loop_rate(10);
