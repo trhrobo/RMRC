@@ -70,12 +70,9 @@ int main(int argc, char **argv) {
   ros::init(argc, argv, "flipper");
   ros::NodeHandle n;
 
-  ros::Publisher flipper_pub =
-      n.advertise<std_msgs::Int16MultiArray>("flipper");
-  ros::Subscriber flipper_sub =
-      n.subscribe("joy", 10, joyCallback);
-  ros::Subscriber change_sub =
-      n.subscribe("xbox", 10, changeCallback);
+  ros::Publisher flipper_pub = n.advertise<std_msgs::Int16MultiArray>("flipper");
+  ros::Subscriber flipper_sub = n.subscribe("joy", 10, joyCallback);
+  ros::Subscriber change_sub = n.subscribe("xbox", 10, changeCallback);
   ros::Rate loop_rate(45);
 
   std_msgs::Int16MultiArray dynamixel_goal;
@@ -96,48 +93,40 @@ int main(int argc, char **argv) {
   while (ros::ok()) {
     if (buttons_reverse) {
       if (axes_front_right) {
-        if (current_dynamixel_pose[0] + 0.5 > angle_goal[0] &&
-            current_dynamixel_pose[0] - 0.5 < angle_goal[0]) {
+        if (current_dynamixel_pose[0] + 0.5 > angle_goal[0] && current_dynamixel_pose[0] - 0.5 < angle_goal[0]) {
           angle_goal[0] = position[0].forward(angle_goal[0]);
         }
       }
       if (axes_front_left) {
-        if (current_dynamixel_pose[1] + 0.5 > angle_goal[1] &&
-            current_dynamixel_pose[1] - 0.5 < angle_goal[1]) {
+        if (current_dynamixel_pose[1] + 0.5 > angle_goal[1] && current_dynamixel_pose[1] - 0.5 < angle_goal[1]) {
           angle_goal[1] = position[1].forward(angle_goal[1]);
         }
       }
       if (axes_back_right) {
-        if (current_dynamixel_pose[2] + 0.5 > angle_goal[2] &&
-            current_dynamixel_pose[2] - 0.5 < angle_goal[2]) {
+        if (current_dynamixel_pose[2] + 0.5 > angle_goal[2] && current_dynamixel_pose[2] - 0.5 < angle_goal[2]) {
           angle_goal[2] = position[2].forward(angle_goal[2]);
         }
       }
       if (axes_back_left) {
-        if (current_dynamixel_pose[3] + 0.5 > angle_goal[3] &&
-            current_dynamixel_pose[3] - 0.5 < angle_goal[3]) {
+        if (current_dynamixel_pose[3] + 0.5 > angle_goal[3] && current_dynamixel_pose[3] - 0.5 < angle_goal[3]) {
           angle_goal[3] = position[3].forward(angle_goal[3]);
         }
       }
     } else {
       if (axes_front_right)
-        if (current_dynamixel_pose[0] + 0.5 > angle_goal[0] &&
-            current_dynamixel_pose[0] - 0.5 < angle_goal[0]) {
+        if (current_dynamixel_pose[0] + 0.5 > angle_goal[0] && current_dynamixel_pose[0] - 0.5 < angle_goal[0]) {
           angle_goal[0] = position[0].reverse(angle_goal[0]);
         }
       if (axes_front_left)
-        if (current_dynamixel_pose[1] + 0.5 > angle_goal[1] &&
-            current_dynamixel_pose[1] - 0.5 < angle_goal[1]) {
+        if (current_dynamixel_pose[1] + 0.5 > angle_goal[1] && current_dynamixel_pose[1] - 0.5 < angle_goal[1]) {
           angle_goal[1] = position[1].reverse(angle_goal[1]);
         }
       if (axes_back_right)
-        if (current_dynamixel_pose[2] + 0.5 > angle_goal[2] &&
-            current_dynamixel_pose[2] - 0.5 < angle_goal[2]) {
+        if (current_dynamixel_pose[2] + 0.5 > angle_goal[2] && current_dynamixel_pose[2] - 0.5 < angle_goal[2]) {
           angle_goal[2] = position[2].reverse(angle_goal[2]);
         }
       if (axes_back_left)
-        if (current_dynamixel_pose[3] + 0.5 > angle_goal[3] &&
-            current_dynamixel_pose[3] - 0.5 < angle_goal[3]) {
+        if (current_dynamixel_pose[3] + 0.5 > angle_goal[3] && current_dynamixel_pose[3] - 0.5 < angle_goal[3]) {
           angle_goal[3] = position[3].reverse(angle_goal[3]);
         }
     }
