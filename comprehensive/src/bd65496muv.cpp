@@ -11,15 +11,15 @@ constexpr int left_change_pin = 1;
 int pwm_right = 0, pwm_left = 0;
 
 class bd65496 {
-private:
-  int gpio_handle;
-  int pwm_pin, change_pin;
-  void front(int pwm);
-  void back(int pwm);
+  private:
+    int gpio_handle;
+    int pwm_pin, change_pin;
+    void front(int pwm);
+    void back(int pwm);
 
-public:
-  bd65496(int user_pwm_pin, int user_change_pin);
-  void set(int pwm);
+  public:
+    bd65496(int user_pwm_pin, int user_change_pin);
+    void set(int pwm);
 };
 
 bd65496::bd65496(int user_pwm_pin, int user_change_pin) {

@@ -35,13 +35,13 @@ void jointStateCallback(const sensor_msgs::JointState &jointstate) {
 }
 
 class flipper {
-private:
-  int id;
+  private:
+    int id;
 
-public:
-  flipper(int user_id);
-  int forward(int value);
-  int reverse(int value);
+  public:
+    flipper(int user_id);
+    int forward(int value);
+    int reverse(int value);
 }
 
 flipper::flipper(int user_id) {

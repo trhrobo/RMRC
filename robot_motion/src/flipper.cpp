@@ -34,13 +34,13 @@ void gyroCallback(const std_msgs::Float64 &msg) { gyro_robot = msg.data; }
 
 void controlleCallback(const comprehensive::Button &msg) {
   msg.dynamixel_right_front
-      ? flag_manual = true
-      : msg.dynamixel_right_back
-            ? flag_manual = true
-            : msg.dynamixel_left_front
-                  ? flag_manual = true
-                  : msg.dynamixel_left_back ? flag_manual = true : flag_manual =
-                                                                       false;
+    ? flag_manual = true
+    : msg.dynamixel_right_back
+    ? flag_manual = true
+    : msg.dynamixel_left_front
+    ? flag_manual = true
+    : msg.dynamixel_left_back ? flag_manual = true : flag_manual =
+    false;
   dynamixel_goal_angle[0] = msg.dynamixel_right_front;
   dynamixel_goal_angle[1] = msg.dynamixel_left_front;
   dynamixel_goal_angle[2] = msg.dynamixel_right_back;
@@ -51,14 +51,14 @@ bool judge_angle_back(double robot, double back, double distance_back);
 bool flag_down_back(double robot, bool contacts_front);
 
 Status judge_angle(double &front, double &back, double &distance_front,
-                   double &distance_back, double &robot_angle);
+    double &distance_back, double &robot_angle);
 
 int main(int argc, char **argv) {
   ros::init(argc, argv, "flipper_angle");
   ros::NodeHandle n;
   // send message type is radian
   ros::Publisher angle_pub =
-      n.advertise<std_msgs::Float64MultiArray>("flipper_angle", 10);
+    n.advertise<std_msgs::Float64MultiArray>("flipper_angle", 10);
   ros::Subscriber servo_angle_sub = n.subscribe<"angle_now", 10, angleCallback>;
   ros::Subscriber distance_sub = n.subscribe<"distance", 10, distanceCallback>;
   ros::Subscriber gyro_sub = n.subscribe<"gyro_pitch", 10, gyroCallback>;
@@ -84,18 +84,18 @@ int main(int argc, char **argv) {
       servoStatus = MANUAL;
     else {
       servoStatus = judge_angle(double &angle_front, double &angle_back,
-                                double &distance_front, double &distance_back,
-                                double &robot_angle);
+          double &distance_front, double &distance_back,
+          double &robot_angle);
       //----------calcuration of angle_front----------
       if (dynamixel_current_angle[0] > 0 && dynamixel_current_angle[1] < 90) {
         if (dynamixel_current_angle[1] > 0 && dynamixel_current_angle[2] < 90) {
           angle_front =
-              (dynamixel_current_angle[0] + dynamixel_current_angle[1]) / 2;
+            (dynamixel_current_angle[0] + dynamixel_current_angle[1]) / 2;
         } else {
           angle_front = dynamixel_current_angle[0];
         }
       } else if (dynamixel_current_angle[1] > 0 &&
-                 dynamixel_current_angle[2] < 90) {
+          dynamixel_current_angle[2] < 90) {
         angle_front = dynamixel_current_angle[1];
       } else {
         angle_front = nomal_angle_front;
@@ -104,12 +104,12 @@ int main(int argc, char **argv) {
       if (dynamixel_current_angle[2] > 0 && dynamixel_current_angle[2] < 90) {
         if (dynamixel_current_angle[3] > 0 && dynamixel_current_angle[3] < 90) {
           angle_back =
-              (dynamixel_current_angle[2] + dynamixel_current_angle[3]) / 2;
+            (dynamixel_current_angle[2] + dynamixel_current_angle[3]) / 2;
         } else {
           angle_back = dynamixel_current_angle[2];
         }
       } else if (dynamixel_current_angle[3] > 0 &&
-                 dynamixel_current_angle[3] < 90) {
+          dynamixel_current_angle[3] < 90) {
         angle_back = dynamixel_current_angle[3];
       } else {
         angle_back = nomal_angle_back;
@@ -117,25 +117,25 @@ int main(int argc, char **argv) {
     }
     //----------calcuration of dynamixel_goal_angle----------
     switch (servoStatus) {
-    case MANUAL:
-      flag_prev_status = false;
-      break;
-    case UP_BOTH:
-      dynamixel_goal_angle[0] = 15;
-      dynamixel_goal_angle[1] = 15;
-      dynamixel_goal_angle[2] = 0;
-      dynamixel_goal_angle[3] = 0;
-      flag_prev_status = false;
-      break;
-    case UP_EITHER:
-      dynamixel_goal_angle[0] = 25;
-      dynamixel_goal_angle[1] = 25;
-      if (flag_lower == false) {
-        dynamixel_goal_angle[2] -= 2;
-        dynamixel_goal_angle[3] -= 2;
-      }
-      flag_prev_status = true;
-      break;
+      case MANUAL:
+        flag_prev_status = false;
+        break;
+      case UP_BOTH:
+        dynamixel_goal_angle[0] = 15;
+        dynamixel_goal_angle[1] = 15;
+        dynamixel_goal_angle[2] = 0;
+        dynamixel_goal_angle[3] = 0;
+        flag_prev_status = false;
+        break;
+      case UP_EITHER:
+        dynamixel_goal_angle[0] = 25;
+        dynamixel_goal_angle[1] = 25;
+        if (flag_lower == false) {
+          dynamixel_goal_angle[2] -= 2;
+          dynamixel_goal_angle[3] -= 2;
+        }
+        flag_prev_status = true;
+        break;
     }
     //----------set dynamixel_parameters----------
     for (auto &num : dynamixel_goal_angle) {
@@ -150,7 +150,7 @@ int main(int argc, char **argv) {
 }
 
 Status judge_angle(double &front, double &back, double &distance_front,
-                   double &distance_back, double &robot_angle) {
+    double &distance_back, double &robot_angle) {
   bool front_contacts = false, back_contacts = false;
   if (distance_angle < flipper_length) {
     if ()
@@ -171,7 +171,7 @@ Status judge_angle(double &front, double &back, double &distance_front,
     flag_lower = false;
   }
   (front_contacts == true && back_contacts == true)
-      ? return UP_BOTH
-      : (front_contacts == false && back_contacts true) ? return UP_EITHER
-                                                        : return MANUAL;
+    ? return UP_BOTH
+    : (front_contacts == false && back_contacts true) ? return UP_EITHER
+    : return MANUAL;
 }

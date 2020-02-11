@@ -13,18 +13,18 @@ AMT::AMT(int user_A, int user_B, int user_multiplication) {
   set_watchdog(gpio_handle, pin_B, 0);
   pulse_sum = 0;
   switch (user_multiplication) {
-  case 2:
-    callback_A =
+    case 2:
+      callback_A =
         callback_ex(gpio_handle, pin_A, EITHER_EDGE, twoMultiplication, this);
-    callback_B =
+      callback_B =
         callback_ex(gpio_handle, pin_B, EITHER_EDGE, twoMultiplication, this);
-    break;
-  default:
-    callback_A =
+      break;
+    default:
+      callback_A =
         callback_ex(gpio_handle, pin_A, EITHER_EDGE, oneMultiplication, this);
-    callback_B =
+      callback_B =
         callback_ex(gpio_handle, pin_B, EITHER_EDGE, oneMultiplication, this);
-    break;
+      break;
   }
 }
 
@@ -34,7 +34,7 @@ AMT::~AMT() {
 }
 
 void AMT::oneMultiplication(int pi, unsigned int gpio, unsigned int edge,
-                            uint32_t tick, void *userdata) {
+    uint32_t tick, void *userdata) {
   AMT *regist = (AMT *)userdata;
   if (gpio == regist->pin_A) {
     regist->now_A = edge;
@@ -47,7 +47,7 @@ void AMT::oneMultiplication(int pi, unsigned int gpio, unsigned int edge,
 }
 
 void AMT::twoMultiplication(int pi, unsigned int gpio, unsigned int edge,
-                            uint32_t tick, void *userdata) {
+    uint32_t tick, void *userdata) {
   AMT *regist = (AMT *)userdata;
   if (gpio == regist->pin_A) {
     regist->now_A = edge;

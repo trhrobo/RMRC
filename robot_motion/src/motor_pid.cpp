@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
   ros::init(argc, argv, "wheel_pid");
   ros::NodeHandle n;
   ros::Publisher pwm_pub =
-      n.advertise<std_msgs::Int64MultiArray>("wheel_pwm", 10);
+    n.advertise<std_msgs::Int64MultiArray>("wheel_pwm", 10);
   ros::Subscriber velocity_sub = n.subscribe("wheel", 10, velocityCallback);
   ros::Subscriber encoder_sub = n.subscribe("encoder", 10, encoderCallback);
   vector<double> wheel_pwm{0, 0};

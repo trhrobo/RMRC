@@ -15,7 +15,7 @@ int main(int argc, char **argv) {
   ros::NodeHandle n;
   ros::Publisher joint_pub<std_msgs::JointState>("/gui_info", 10);
   ros::Subscriber dynamixel_sub =
-      n.subscribe("/dynamixel_workbench/joint_states", 10, dynamixelCallback);
+    n.subscribe("/dynamixel_workbench/joint_states", 10, dynamixelCallback);
   ros::Rate loop_rate(10);
   while (ros::ok()) {
     sensor_msgs::JointState js0;

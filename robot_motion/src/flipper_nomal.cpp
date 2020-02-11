@@ -25,7 +25,7 @@ void joyCallback(const sensor_msgs::Joy &controller) {
 void jointStateCallback(const sensor_msgs::JointState &jointstate) {
   /*for (int i = 0; i < 4; ++i) {
     current_dynamixel_pose[i] = jointstate.position[i];
-  }*/
+    }*/
   current_dynamixel_pose[0] = jointstate.position[3];
   current_dynamixel_pose[1] = jointstate.position[2];
   current_dynamixel_pose[2] = jointstate.position[1];
@@ -35,13 +35,13 @@ void jointStateCallback(const sensor_msgs::JointState &jointstate) {
 }
 
 class flipper {
-private:
-  int id;
+  private:
+    int id;
 
-public:
-  flipper(int user_id);
-  double forward(double value);
-  double reverse(double value);
+  public:
+    flipper(int user_id);
+    double forward(double value);
+    double reverse(double value);
 };
 
 flipper::flipper(int user_id) { id = user_id; }
