@@ -1,6 +1,6 @@
 <launch>
 
-  <arg name="model" default="$(find gui)/urdf/body.xacro"/>
+  <arg name="model" default="$(find gui)/urdf/body_stl.xacro"/>
   <arg name="gui" default="true" />
   <arg name="rvizconfig" default="$(find gui)/rviz/cam_rviz.rviz" />
 
