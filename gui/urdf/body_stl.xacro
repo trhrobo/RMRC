@@ -22,7 +22,7 @@
                 <geometry>
                   <mesh filename="package://gui/stl/flipper.stl"/>
                 </geometry>
-                <origin xyz="0 0 0.041" rpy="0 0 0"/>
+                <origin xyz="0.02 0 0.038" rpy="0 0 0"/>
                 <material name="red"/>
             </visual>
         </link>
@@ -46,8 +46,8 @@
         </visual>
     </link>
 
-    <xacro:flipper_macro suffix="front_right_flipper"  parent="base_link" xyz="0.0975 0.10 0.026"/>
-    <xacro:flipper_macro suffix="front_left_flipper" parent="base_link" xyz="0.0975 -0.10 0.026"/>
-    <xacro:flipper_macro suffix="rear_right_flipper" parent="base_link" xyz="-0.0975 0.10 0.026"/>
-    <xacro:flipper_macro suffix="rear_left_flipper" parent="base_link" xyz="-0.0975 -0.10 0.026"/>
+    <xacro:flipper_macro suffix="front_right_flipper"  parent="base_link" xyz="0.0975 0.084 0.026"/>
+    <xacro:flipper_macro suffix="front_left_flipper" parent="base_link" xyz="0.0975 -0.084 0.026"/>
+    <xacro:flipper_macro suffix="rear_right_flipper" parent="base_link" xyz="-0.0975 0.084 0.026"/>
+    <xacro:flipper_macro suffix="rear_left_flipper" parent="base_link" xyz="-0.0970 -0.084 0.027"/>
 </robot>
