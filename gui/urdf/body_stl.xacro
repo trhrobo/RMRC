@@ -10,7 +10,7 @@
         <color rgba="0.5 0.0 2.5 2.0"/>
     </material>
 
-    <xacro:macro name="flipper_macro" params="parent suffix xyz">
+    <xacro:macro name="flipper_left_macro" params="parent suffix xyz">
         <joint name="${suffix}_joint" type="revolute">
             <parent link="${parent}"/>
             <child  link="${suffix}_link"/>
@@ -21,6 +21,24 @@
             <visual>
                 <geometry>
                   <mesh filename="package://gui/stl/flipper.stl"/>
+                </geometry>
+                <origin xyz="0.02 0 0.038" rpy="0 0 0"/>
+                <material name="red"/>
+            </visual>
+        </link>
+    </xacro:macro>
+
+    <xacro:macro name="flipper_right_macro" params="parent suffix xyz">
+        <joint name="${suffix}_joint" type="revolute">
+            <parent link="${parent}"/>
+            <child  link="${suffix}_link"/>
+            <origin xyz="${xyz}" rpy="0 0 ${radians(-90)}"/>
+            <limit lower="-1.5" upper="1.5" effort="0" velocity="0"/>
+        </joint>
+        <link name="${suffix}_link">
+            <visual>
+                <geometry>
+                  <mesh filename="package://gui/stl/flipper_another.stl"/>
                 </geometry>
                 <origin xyz="0.02 0 0.038" rpy="0 0 0"/>
                 <material name="red"/>
@@ -46,8 +64,8 @@
         </visual>
     </link>
 
-    <xacro:flipper_macro suffix="front_right_flipper"  parent="base_link" xyz="0.0975 0.084 0.026"/>
-    <xacro:flipper_macro suffix="front_left_flipper" parent="base_link" xyz="0.0975 -0.084 0.026"/>
-    <xacro:flipper_macro suffix="rear_right_flipper" parent="base_link" xyz="-0.0975 0.084 0.026"/>
-    <xacro:flipper_macro suffix="rear_left_flipper" parent="base_link" xyz="-0.0970 -0.084 0.027"/>
+    <xacro:flipper_right_macro suffix="front_right_flipper"  parent="base_link" xyz="0.0975 0.125 0.026"/>
+    <xacro:flipper_left_macro suffix="front_left_flipper" parent="base_link" xyz="0.0975 -0.084 0.026"/>
+    <xacro:flipper_right_macro suffix="rear_right_flipper" parent="base_link" xyz="-0.0975 0.125 0.026"/>
+    <xacro:flipper_left_macro suffix="rear_left_flipper" parent="base_link" xyz="-0.0970 -0.084 0.027"/>
 </robot>
