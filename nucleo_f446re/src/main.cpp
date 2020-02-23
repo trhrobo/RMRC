@@ -1,93 +1,36 @@
-//#include <BufferedSerial.h>
-#include <mbed.h>
+#include"mbed.h"
+//#include"VNH5019.h"
+#include"AMT102.h"
+#include"x_nucleo_53l0a1.h"
+#include"VNH5019.h"
+#include<stdio.h>
+#include"rtos.h"
+#define DEBUG 0
+#define VL53L0_I2C_SDA   D14
+#define VL53L0_I2C_SCL   D15
+//BufferedSerial raspi(PB_6, PB_7, 115200);
 
-constexpr double threshold = 1.0;
-DigitalIn mgnet(D13);
-
-struct pin {
-  int pin_A;
-  int pin_B;
-  int pin_PWM;
-  int pin_CS;
-  int pin_EN;
-  // pin(int user_A, int user_B, int user_PWM, int user_US, int
-  // user_EN):pin_A(user_A), pin_B(user_B), pin_PWM(user_PWM), pin_CS(user_US),
-  // pin_EN(user_EN){}
-};
-
-class VNH5019 {
-private:
-  pin object;
-
-public:
-  VNH5019(const pin user);
-  void set(int pwm);
-  void current_limit();
-};
-
-VNH5019::VNH5019(const pin user) { object = user; }
-
-void VNH5019::set(int pwm) {
-  if (pwm > 0) {
-    this->object.pin_A = 1;
-    this->object.pin_B = 0;
-    this->object.pin_PWM = (float)pwm / 255;
-  } else {
-    this->object.pin_A = 0;
-    this->object.pin_B = 1;
-    this->object.pin_PWM = (float)pwm / -255;
-  }
-}
-
-void VNH5019::current_limit() {
-  if (this->object.pin_CS > threshold) {
-    this->object.pin_EN = 0;
-  } else {
-    this->object.pin_EN = 1;
-  }
-}
-
-DigitalOut VNHpin_A(D1);
-DigitalOut VNHpin_B(D2);
-DigitalIn VNHpin_enable(D3);
-AnalogOut VNHpin_PWM(D4);
-AnalogIn VNHpin_CS(D5);
-
-// BufferedSerial raspi(PB_6, PB_7, 115200);
+#if DEBUG
+Serial pc(USBTX, USBRX, 115200);
+#else
 Serial raspi(PB_6, PB_7, 115200);
-int main() {
-  uint8_t dataByte[2];
-  uint8_t receiveByte[4];
-  uint8_t checksum_send{};
-  uint8_t checksum_receive{};
-  uint16_t mg = 0;
-  uint8_t pwm_right{};
-  uint8_t pwm_left{};
-  uint16_t speed_right{};
-  uint16_t speed_left{};
+#endif
+static X_NUCLEO_53L0A1 *board=NULL;
+Thread sendThread;
+Thread receiveThread;
 
-  pin pin_right;
-  pin_right.pin_A = 1;
-  pin_right.pin_B = 2;
-  pin_right.pin_CS = 3;
-  pin_right.pin_EN = 4;
-  pin_right.pin_PWM = 5;
+uint16_t mg = 0;
+uint16_t speed_right{};
+uint16_t speed_left{};
+uint8_t dataByte[2];
+uint8_t receiveByte[4];
+uint8_t checksum_send{};
+uint8_t checksum_receive{};
+uint8_t pwm_right{};
+uint8_t pwm_left{};
 
-  pin pin_left;
-  pin_left.pin_A = 6;
-  pin_left.pin_B = 7;
-  pin_left.pin_CS = 8;
-  pin_left.pin_EN = 9;
-  pin_left.pin_PWM = 10;
-  VNH5019 motor_right(pin_right);
-  VNH5019 motor_left(pin_left);
-
-  while (1) {
-    if (mgnet.read()) {
-      mg = 1;
-    } else {
-      mg = 0;
-    }
+void serialSend(){
+    //serial send magnet data;
     dataByte[0] = (mg >> 8) & 0xFF;
     dataByte[1] = (mg >> 0) & 0xFF;
     // send.putc(HEAD_BYTE);
@@ -105,6 +48,9 @@ int main() {
       }
     }
     raspi.putc(checksum_send);
+}
+
+void serialReceive(){
 
     if (static_cast<uint8_t>(raspi.getc()) == 0x02) {
       for (int i = 0; i < 4; ++i) {
@@ -127,9 +73,67 @@ int main() {
                                            ((receiveByte[3] << 0) && 0x00FF));
       }
     }
-    motor_right.set(pwm_right);
-    motor_right.current_limit();
-    motor_left.set(pwm_left);
-    motor_left.current_limit();
-  }
 }
+
+int main() {
+  sendThread.start(serialSend);
+  receiveThread.start(serialReceive);
+  int status;
+  uint32_t distance;
+  DevI2C *device_i2c = new DevI2C(VL53L0_I2C_SDA, VL53L0_I2C_SCL);
+
+  /* creates the 53L0A1 expansion board singleton obj */
+  // board = X_NUCLEO_53L0A1::instance(device_i2c, A2, D8, D2);
+  board = X_NUCLEO_53L0A1::instance(device_i2c);
+  /* init the 53L0A1 expansion board with default values */
+  status = board->init_board();
+  if(status){
+    return 1;
+  }
+  #if DEBUG
+  RotaryInc rotary(D15,D14,2 * 50.8 * M_PI,200);
+  #else
+/*
+  MotorDriverPin pin_right;
+  pin_right.pin_A = 1;
+  pin_right.pin_B = 2;
+  pin_right.pin_CS = 3;
+  pin_right.pin_EN = 4;
+  pin_right.pin_PWM = 5;
+
+  MotorDriverPin pin_left;
+  pin_left.pin_A = 6;
+  pin_left.pin_B = 7;
+  pin_left.pin_CS = 8;
+  pin_left.pin_EN = 9;
+  pin_left.pin_PWM = 10;
+*/
+  MotorDriver motor_right(D15, D14, D13, D12, A1);
+  MotorDriver motor_left(D11, D10, D9, D8, A0);
+  RotaryInc rotary(D15,D14,2 * 50.8 * M_PI,200);
+  #endif
+
+  while (1) {
+    //get distance data
+    status = board->sensor_centre->get_distance(&distance);
+    #if DEBUG
+    long long  speed = rotary.getSpeed();
+    pc.printf("speed = %lld\n", speed);
+    //get magnet data
+    if (magnet.read()) {
+      mg = 1;
+    } else {
+      mg = 0;
+    }
+    #else
+    //output motor
+    motor_right.setPwm(pwm_right);
+    motor_right.currentLimit();
+    motor_left.setPwm(pwm_left);
+    motor_left.currentLimit();
+    #endif
+  }
+  sendThread.join();
+  receiveThread.join();
+}
+
