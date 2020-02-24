@@ -12,7 +12,7 @@ typedef struct{
   vector<double> POSE_2{0, 0};
 }dynamixelPose;
 
-class SemiAutonomous{
+class SemiAutonomousBase{
   protected:
     ros::Publisher dynamixel_pub;
     ros::Subscriber dynamixel_sub;
@@ -25,7 +25,7 @@ class SemiAutonomous{
     double gyro_pose;
     double goal_pose;
   public:
-    SemiAutonomous(){
+    SemiAutonomousBase(){
       ros::NodeHandle n;
       dynamixel_pub = n.advertise<std_msgs::>;
       dynamixel_sub = n.subscribe("dynamixel_sub", 10, &SemiAutonomous::dynamixelCallback, this);
@@ -54,18 +54,10 @@ class SemiAutonomous{
     bool dynamixelLoad(){
     }
 
-    void mainSemiAutonomous(){
-      if(tof_distance < DISTANCE_THRESHOLD && dynamixelLoad == 1){
-        if(gyro_pose > UP){
-          goal_pose = POSE_1;
-        }else{
-          goal_pose = POSE_2;
-        }
-      }
-    }
+    virtual void mainSemiAutonomous() = 0;
 };
 
-class SemiAutonomousFront : public SemiAutonomous{
+class SemiAutonomousFront : public SemiAutonomousBase{
   private:
     dynamixelPose poseParamFront;
   public:
@@ -73,7 +65,7 @@ class SemiAutonomousFront : public SemiAutonomous{
       poseParamFront.POSE_1{1, 1};
       poseParamFront.POSE_2(2, 2);
     }
-    void mainSemiAutonomousFront(){
+    void mainSemiAutonomous() override{
       bool flag_dynamixel_load = this -> dynamixelLoad();
       if(tof_distance < DISTANCE_THRESHOLD && dynamixelLoad == true){
         if(gyro_pose > POSE_UP){
@@ -85,7 +77,7 @@ class SemiAutonomousFront : public SemiAutonomous{
     }
 };
 
-class SemiAutonomousRear : public SemiAutonomous{
+class SemiAutonomousRear : public SemiAutonomousBase{
   private:
     dynamixelPose poseParamRear;
   public:
@@ -93,8 +85,26 @@ class SemiAutonomousRear : public SemiAutonomous{
       poseParamRear.POSE_1(3, 3);
       poseParamRear.POSE_2(4, 4);
     }
-    void mainSemiAutonomousRear(){
+    void mainSemiAutonomous() override{
     }
 };
 
+class semiAutonomous{
+  private:
+    SemiAutonomousFront *front;
+    SemiAutonomousRear *rear;
+  public:
+    semiAutonomous(){
+      front = new SemiAutonomousFront;
+      rear = new SemiAutonomousRear;
+    }
+    ~semiAutonomous(){
+      delete front;
+      delete rear;
+    }
+    void main(){
+      front -> mainSemiAutonomous;
+      rear -> mainSemiAutonomous;
+    }
+};
 #endif semi_autonomous
