@@ -3,17 +3,29 @@
 #include <ros/time.h>
 #include <std_msgs/Float64MultiArray.h>
 #include <trajectory_msgs/JointTrajectory.h>
+#include <sensor_msgs::JointState.h>
 #include <vector>
 
 using std::vector;
 
-vector<double> angle_goal{0, 0, 0, 0};
+#define front_right 0
+#define front_left 1
+#define rear_right 2
+#define rear_left 3
 
-enum dynamixel_name { front_right, front_left, back_right, back_left };
+vector<double> angle_goal{0, 0, 0, 0};
+vector<double> angle_now{0, 0, 0, 0};
+enum dynamixel_name { front_right, front_left, rear_right, rear_left };
 
 void dynamixelCallback(const std_msgs::Float64MultiArray &msg) {
   for (int i = 0; i < msg.data.size(); ++i) {
     angle_goal[i] = msg.data[i];
+  }
+}
+
+void jointCallback(const sensor_msgs::jointCallback &msg){
+  for(int i = 0; i < 4; ++i){
+    angle_now[i] = msg.position[i];
   }
 }
 
@@ -25,8 +37,8 @@ int main(int argc, char **argv) {
       "/dynamixel_workbench/joint_trajectory", 10);
 
   // ros::Subscriber servo_sub = n.subscribe("flipper", 45, dynamixelCallback);
-  ros::Subscriber servo_sub =
-    n.subscribe("flipper_semi_autonomous", 45, dynamixelCallback);
+  ros::Subscriber servo_sub = n.subscribe("flipper_semi_autonomous", 45, dynamixelCallback);
+  ros::Subscriber joint_sub = n.subscribe("/dynamixel_workbench/joint_states", 10, jointCallback);
 
   trajectory_msgs::JointTrajectory jtp0;
 
@@ -41,8 +53,8 @@ int main(int argc, char **argv) {
 
   jtp0.joint_names[0] = "front_right";
   jtp0.joint_names[1] = "front_left";
-  jtp0.joint_names[2] = "back_right";
-  jtp0.joint_names[3] = "back_left";
+  jtp0.joint_names[2] = "rear_right";
+  jtp0.joint_names[3] = "rear_left";
 
   /*
      dynamixel servo[4] = {
@@ -52,14 +64,14 @@ int main(int argc, char **argv) {
      {back_left}
      };*/
 
-  dynamixel servo[4] = {0, 1, 2, 3};
+  dynamixel servo[4] = {front_right, front_left, rear_right, rear_left};
 
   ros::Rate loop_rate(45);
 
   while (ros::ok()) {
 
     for (int i = 0; i < 4; ++i) {
-      jtp0.points[0].positions[i] = servo[i].angleCal(angle_goal[i]);
+      jtp0.points[0].positions[i] = servo[i].dynamixelSet(angle_goal[i], angle_now[i]);
     }
 
     jtp0.points[0].time_from_start = ros::Duration(0.02);

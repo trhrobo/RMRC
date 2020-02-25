@@ -10,7 +10,7 @@ typedef struct{
   std::array<int, 3> param;
 }dynamixelParam;
 
-class dynamixel {
+class dynamixel{
 private:
   int _id;
 public:
