@@ -28,13 +28,13 @@ class SemiAutonomousBase{
     ros::Subscriber tof_sub;
     vector<double> current_dynamixel_pose{0, 0, 0, 0};
     vector<double> current_dynamixel_load{0, 0, 0, 0};
-    vector<double> tof_distance{0, 0};
+    vector<double> tof_distance{0, 0, 0, 0};
     vector<double> goal_dynamixel_pose{0, 0, 0, 0};
     double gyro_pose;
     double goal_pose_right;
     double goal_pose_left;
   public:
-    SemiAutonomousBase();
+    SemiAutonomousBase(ros::NodeHandle *n);
     void init();
     void dynamixelCallback(const sensor_msgs::JointState &jointstate);
     void gyroCallback(const std_msgs::Float64 &msg);
@@ -48,11 +48,8 @@ class SemiAutonomousFront : public SemiAutonomousBase{
   private:
     ros::Subscriber psd_front_sub;
     dynamixelPose poseParamFront;
-    double psd_distance_forward = 0;
-    double psd_distance_down = 0;
   public:
-    SemiAutonomousFront();
-    void psdFrontCallback(const std_msgs::Float64MultiArray &msg);
+    SemiAutonomousFront(ros::NodeHandle *n);
     double psdCurve() override;
     void mainSemiAutonomous() override;
 };
@@ -61,13 +58,8 @@ class SemiAutonomousRear : public SemiAutonomousBase{
   private:
     ros::Subscriber psd_rear_sub;
     dynamixelPose poseParamRear;
-    double psd_distance_forward_front = 0;
-    double psd_distance_down_front = 0;
-    double psd_distance_forward_rear = 0;
-    double psd_distance_down_rear = 0;
   public:
-    SemiAutonomousRear();
-    void psdRearCallback(const std_msgs::Float64MultiArray &msg);
+    SemiAutonomousRear(ros::NodeHandle *n);
     double psdCurve() override;
     void mainSemiAutonomous() override;
 };
@@ -77,7 +69,7 @@ class semiAutonomous{
     SemiAutonomousFront *front;
     SemiAutonomousRear *rear;
   public:
-    semiAutonomous();
+    semiAutonomous(ros::NodeHandle *n);
     ~semiAutonomous();
     void main();
 };
