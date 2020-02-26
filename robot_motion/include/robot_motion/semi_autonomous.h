@@ -25,8 +25,6 @@ class SemiAutonomousBase{
     vector<double> goal_dynamixel_pose{0, 0, 0, 0};
     double gyro_pose;
     double goal_pose;
-    double psd_distance_forward = 0;
-    double psd_distance_down = 0;
   public:
     SemiAutonomousBase(){
       ros::NodeHandle n;
@@ -36,34 +34,32 @@ class SemiAutonomousBase{
       tof_sub = n.subscribe("tof_sub", 10, &SemiAutonomous::tofCallback, this);
     }
     void init();
-
     void dynamixelCallback(const sensor_msgs::JointState &jointstate){
       for(int i = 0; i < 4; ++i){
         current_dynamixel_pose[i] = jointstate[3 - i];
         current_dynamixel_load[i] = jointstate[3 - i];
       }
     }
-
     void gyroCallback(const std_msgs::Float64 &msg){
       gyro_pose = msg.data;
     }
-
     void tofCallback(const std_msgs::Float64MultiArray &msg){
       for(int i = 0; i < 2; ++i){
         tof_distance[i] = msg.data[i];
       }
     }
-
     bool dynamixelLoad(){
     }
-
     virtual void mainSemiAutonomous() = 0;
+    virtual double psdCurve() = 0;
 };
 
 class SemiAutonomousFront : public SemiAutonomousBase{
   private:
     ros::Subscriber psd_front_sub;
     dynamixelPose poseParamFront;
+    double psd_distance_forward = 0;
+    double psd_distance_down = 0;
   public:
     SemiAutonomousFront{
       psd_front_sub = n.subscribe("psd_info", 10, psdFrontCallback);
@@ -74,16 +70,16 @@ class SemiAutonomousFront : public SemiAutonomousBase{
       psd_distance_forward = msg.data[0];
       psd_distance_down = msg.data[1];
     }
-    double psdCurve{
+    double psdCurve() override{
       return -(psd_distance_forward * psd_distance_forward / 250) + 40;
     }
     void mainSemiAutonomous() override{
       bool flag_dynamixel_load = this -> dynamixelLoad();
-      //接地判定
-      if(psd_down < DISTANCE_THRESHOLD_DOWN){
-        goal_pose = this -> poseFront.POSE_1 - psdCurve();
+      //接地判定 && 閾値以内に障害物があるかどうかの判定
+      if(psd_distance_down < DISTANCE_THRESHOLD_DOWN && psd_distance_forward < DISTANCE_THRESHOLD_FORWARD){
+        goal_pose = this -> poseParamFront.POSE_1 - psdCurve();
       }else{
-        goal_pose = this -> poseFront.POSE_2;
+        goal_pose = this -> poseParamFront.POSE_2;
       }
     }
 };
@@ -92,6 +88,10 @@ class SemiAutonomousRear : public SemiAutonomousBase{
   private:
     ros::Subscriber psd_rear_sub;
     dynamixelPose poseParamRear;
+    double psd_distance_forward_front = 0;
+    double psd_distance_down_front = 0;
+    double psd_distance_forward_rear = 0;
+    double psd_distance_down_rear = 0;
   public:
     SemiAutonomousRear(){
       psd_rear_sub = n.subscribe("psd_info", 10, psdRearCallback);
@@ -99,10 +99,21 @@ class SemiAutonomousRear : public SemiAutonomousBase{
       poseParamRear.POSE_2(20, 20);
     }
     void psdRearCallback(const std_msgs::Float64MultiArray &msg){
-      psd_distance_forward = msg.data[2];
-      psd_distance_down = msg.data[3];
+      psd_distance_forward_front = msg.data[0];
+      psd_distance_down_front = msg.data[1];
+      psd_distance_forward_rear = msg.data[2];
+      psd_distance_down_rear = msg.data[3];
+    }
+    double psdCurve() override{
     }
     void mainSemiAutonomous() override{
+      if(psd_distance_down_front > DISTANCE_THRESHOLD_DOWN && psd_distance_down_rear > DISTANCE_THRESHOLD_DOWN && psd_distance_forward_front > DISTANCE_THRESHOLD_FORWARD){
+        goal_pose = psdCurve();
+      }else if(psd_distance_down_front > DISTANCE_THRESHOLD_DOWN|| psd_distance_forward_front < DISTANCE_FORWARD){
+      //変化しない
+      }else{
+        goal_pose = this -> poseParamFront.POSE_1;
+      }
     }
 };
 
