@@ -25,7 +25,7 @@ void SemiAutonomousBase::tofCallback(const std_msgs::Float64MultiArray &msg){
 bool SemiAutonomousBase::dynamixelLoad(){
 }
 
-SemiAutonomousFront::SemiAutonomousFront(ros::NodeHandle *n){
+SemiAutonomousFront::SemiAutonomousFront(ros::NodeHandle *n) : SemiAutonomousBase(n){
   poseParamFront.POSE_1 = {60, 60};
   poseParamFront.POSE_2 = {20, 20};
 }
@@ -44,7 +44,7 @@ void SemiAutonomousFront::mainSemiAutonomous(){
   }
 }
 
-SemiAutonomousRear::SemiAutonomousRear(ros::NodeHandle *n){
+SemiAutonomousRear::SemiAutonomousRear(ros::NodeHandle *n) : SemiAutonomousBase(n){
   poseParamRear.POSE_1 = {60, 60};
   poseParamRear.POSE_2 = {20, 20};
 }
