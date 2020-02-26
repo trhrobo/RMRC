@@ -162,13 +162,13 @@ class flipperSemiAutonomous {
     double dynamixelSet();
 };
 
-flipperSemiAutonomous(int *user_id, flipper user_front_right, flipper user_front_left, flipper user_back_right, flipper user_back_left);
-for (int i = 0; i < 4; ++i) {
-  id[i] = user_id[i];
-}
+flipperSemiAutonomous::flipperSemiAutonomous(int *user_id, flipper user_front_right, flipper user_front_left, flipper user_back_right, flipper user_back_left){
+  for (int i = 0; i < 4; ++i) {
+    id[i] = user_id[i];
+  }
 }
 
-flipperSemiAutonomous::dynamixelSet() {}
+double flipperSemiAutonomous::dynamixelSet() {}
 
 //現在角度とトルクを取得
 void jointStateCallback(const sensor_msgs::JointState &jointstate) {

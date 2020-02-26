@@ -137,7 +137,7 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 #add_executable(flipper src/flipper.cpp)
 add_executable(flipper_nomal src/flipper_nomal.cpp)
-#add_executable(flipper_semi_autonomous src/flipper_semi_autonomous.cpp)
+add_executable(flipper_semi_autonomous src/flipper_semi_autonomous.cpp)
 add_executable(motor_pid src/motor_pid.cpp src/pid.cpp)
 #add_executable(motor_pid src/motor_pid.cpp)
 
@@ -151,7 +151,7 @@ add_executable(motor_pid src/motor_pid.cpp src/pid.cpp)
 ## same as for the library above
 #add_dependencies(flipper ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(flipper_nomal ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-#add_dependencies(flipper_semi_autonomous ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(flipper_semi_autonomous ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(motor_pid ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 #add_dependencies(motor_pid ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
@@ -162,9 +162,9 @@ add_dependencies(motor_pid ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED
 target_link_libraries(flipper_nomal
   ${catkin_LIBRARIES}
 )
-#target_link_libraries(flipper_semi_autonomous
-#  ${catkin_LIBRARIES}
-#)
+target_link_libraries(flipper_semi_autonomous
+  ${catkin_LIBRARIES}
+)
 target_link_libraries(motor_pid
   ${catkin_LIBRARIES}
 )

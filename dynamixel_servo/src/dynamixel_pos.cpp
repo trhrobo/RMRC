@@ -3,7 +3,7 @@
 #include <ros/time.h>
 #include <std_msgs/Float64MultiArray.h>
 #include <trajectory_msgs/JointTrajectory.h>
-#include <sensor_msgs::JointState.h>
+#include <sensor_msgs/JointState.h>
 #include <vector>
 
 using std::vector;
@@ -15,7 +15,7 @@ using std::vector;
 
 vector<double> angle_goal{0, 0, 0, 0};
 vector<double> angle_now{0, 0, 0, 0};
-enum dynamixel_name { front_right, front_left, rear_right, rear_left };
+//enum dynamixel_name { front_right, front_left, rear_right, rear_left };
 
 void dynamixelCallback(const std_msgs::Float64MultiArray &msg) {
   for (int i = 0; i < msg.data.size(); ++i) {
@@ -23,7 +23,7 @@ void dynamixelCallback(const std_msgs::Float64MultiArray &msg) {
   }
 }
 
-void jointCallback(const sensor_msgs::jointCallback &msg){
+void jointCallback(const sensor_msgs::JointState &msg){
   for(int i = 0; i < 4; ++i){
     angle_now[i] = msg.position[i];
   }
