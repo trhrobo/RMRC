@@ -15,14 +15,12 @@ namespace dozap {
       out_min;
   }
 }
-
 void joyCallback(const sensor_msgs::Joy &msg) {
   robot_vel.linear.x = dozap::map(msg.axes[0], -1, 1, -1.5, 1.5);
   robot_vel.linear.y = dozap::map(msg.axes[1], -1, 1, -1.5, 1.5);
   //コントローラの右側のX軸のみを利用する
   robot_vel.angular.z = dozap::map(msg.axes[4], -1, 1, -1.5, 1.5);
 }
-
 int main(int argc, char **argv) {
   ros::init(argc, argv, "xbox");
   ros::NodeHandle n;
