@@ -5,6 +5,7 @@
 #include <std_msgs/Float64.h>
 #include <std_msgs/Float64MultiArray.h>
 #include <vector>
+#include "robot_motion/semi_autonomous.h"
 using std::vector;
 
 constexpr double original_theta = 90.0;
