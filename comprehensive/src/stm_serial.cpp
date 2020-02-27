@@ -1,11 +1,43 @@
-#include <iostream>
-#include <pigpiod_if2.h>
-#include <ros/ros.h>
-#include <std_msgs/Float64MultiArray.h>
+#include<iostream>
+#include<pigpiod_if2.h>
+#include<ros/ros.h>
+#include<std_msgs/Float64MultiArray.h>
+#include<thread>
 
-using namespace std;
+using std::thread;
+using std::cout;
+using std::endl;
+
 const char *port = "/dev/ttyAMA0";
 int baudrate = 115200;
+int pi = pigpio_start(0, 0);
+int serial_handle{};
+//send
+uint8_t dataByte[2];
+uint8_t checksum_send;
+uint16_t send_data = 0;
+
+void sendSerial(){
+  //send
+  checksum_send = 0;
+  if(send_data > 1000)send_data = 0;
+  send_data++;
+  dataByte[0] = (send_data >> 8) & 0xFF;
+  dataByte[1] = (send_data >> 0) & 0xFF;
+  serial_write_byte(pi, serial_handle, 0x02);
+  for (int i = 0; i < 2; ++i) {
+    if ((dataByte[i] == 0x7D) || (dataByte[i] == 0x02)) {
+      serial_write_byte(pi, serial_handle, 0x7D);
+      checksum_send += 0x7D;
+      serial_write_byte(pi, serial_handle, dataByte[i] ^ 0x20);
+      checksum_send += dataByte[i] ^ 0x20;
+    } else {
+      serial_write_byte(pi, serial_handle, dataByte[i]);
+      checksum_send += dataByte[i];
+    }
+  }
+  serial_write_byte(pi, serial_handle, checksum_send);
+}
 
 int main(int argc, char **argv) {
   ros::init(argc, argv, "stm_serial");
@@ -39,7 +71,11 @@ int main(int argc, char **argv) {
   uint16_t result{};
   std_msgs::Float64MultiArray msg_receive;
   msg_receive.data.resize(1);
+
+  thread send(sendSerial);
+
   while (ros::ok()) {
+    //receive
     uint8_t checksum{};
     got_data = static_cast<uint8_t>(serial_read_byte(pi, serial_handle));
     if (got_data == 0x02) {
@@ -69,5 +105,6 @@ int main(int argc, char **argv) {
     ros::spinOnce();
     loop_rate.sleep();
   }
+  send.join();
   serial_close(pi, serial_handle);
 }
