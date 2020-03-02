@@ -10,18 +10,19 @@ using std::endl;
 
 #define HEAD_BYTE 0xFF
 #define STX 0x02
+#define float32_t float
 
 const char *port = "/dev/ttyAMA0";
 int baudrate = 115200;
 int pi = pigpio_start(0, 0);
 int serial_handle{};
 //send
-uint16_t send_data[2]{};
+float32_t send_data[2]{};
 //receive
 uint8_t got_data{};
 uint8_t byte_now{};
 uint8_t byte[2]{};
-uint32_t receive_result[5]{};
+float32_t receive_result[5]{};
 
 typedef struct{
   uint16_t gyro_data;
@@ -30,25 +31,26 @@ typedef struct{
 
 void sendSerial(){
   uint8_t checksum_send = 0;
+  unsigned char data_h_h[2], data_h_l[2], data_l_h[2], data_l_l[2];
   for(int i = 0; i < 2; ++i){
-    unsigned char data_h_h[i] = (send_data[i] >> 32) & 0xFF;
-    unsigned char data_h_l[i]= (send_data[i] >> 24) & 0xFF;
-    unsigned char data_l_l[i] = (send_data[i] >> 16) & 0xFF;
-    unsigned char data_l_l[i] = (send_data[i] >> 8) & 0xFF;
-  }
+    data_h_h[i] = (send_data[i] >> 24) & 0xFF;
+    data_h_l[i] = (send_data[i] >> 16) & 0xFF;
+    data_l_h[i] = (send_data[i] >> 8) & 0xFF;
+    data_l_l[i] = (send_data[i] >> 0) & 0xFF;
+  };
   unsigned char sendFormat[2][5] = {
     {0, data_h_h[0], data_h_l[0], data_l_h[0], data_l_l[0]},
     {1, data_h_h[1], data_h_l[1], data_l_h[1], data_l_l[1]},
-  }
+  };
   //send head byte
   serial_write_byte(pi, serial_handle, HEAD_BYTE);
-  check_sum_send += HEAD_BYTE;
+  checksum_send += HEAD_BYTE;
   serial_write_byte(pi, serial_handle, STX);
-  check_sum_send += STX;
+  checksum_send += STX;
   for(int i = 0; i < 2; ++i){
     for(int k = 0; k < 5; ++k){
       serial_write_byte(pi, serial_handle, sendFormat[i][k]);
-      check_sum_send += sendFormat[i][k];
+      checksum_send += sendFormat[i][k];
     }
   }
   //send checksum
@@ -57,13 +59,14 @@ void sendSerial(){
 void receiveSerial(){
   uint8_t checksum_receive{};
   uint8_t receive_data[5];
+  unsigned char data_h_h[5], data_h_l[5], data_l_h[5], data_l_l[5];
   unsigned char receiveFormat[5][5] = {
-    {0, data_h_h[i], data_h_l[i], data_l_h[i], data_l_l[i]},
-    {1, data_h_h[i], data_h_l[i], data_l_h[i], data_l_l[i]},
-    {2, data_h_h[i], data_h_l[i], data_l_h[i], data_l_l[i]},
-    {3, data_h_h[i], data_h_l[i], data_l_h[i], data_l_l[i]},
-    {4, data_h_h[i], data_h_l[i], data_l_h[i], data_l_l[i]},
-  }
+    {0, data_h_h[0], data_h_l[0], data_l_h[0], data_l_l[0]},
+    {1, data_h_h[1], data_h_l[1], data_l_h[1], data_l_l[1]},
+    {2, data_h_h[2], data_h_l[2], data_l_h[2], data_l_l[2]},
+    {3, data_h_h[3], data_h_l[3], data_l_h[3], data_l_l[3]},
+    {4, data_h_h[4], data_h_l[4], data_l_h[4], data_l_l[4]},
+  };
   got_data = static_cast<uint8_t>(serial_read_byte(pi, serial_handle));
   if(got_data = HEAD_BYTE){
     got_data = static_cast<uint8_t>(serial_read_byte(pi, serial_handle));
@@ -91,7 +94,7 @@ void receiveSerial(){
     }
   }
 }
-void sendCallback(const std_mgs::Float32MultiArray &msg){
+void sendCallback(const std_msgs::Float32MultiArray &msg){
   send_data[0] = msg.data[0];
   send_data[1] = msg.data[1];
 }
@@ -128,7 +131,9 @@ int main(int argc, char **argv) {
   thread receive(receiveSerial);
 
   while (ros::ok()) {
-    msg_receive.data[0] = receive_result;
+    for(int i = 0; i < 5; ++i){
+      msg_receive.data[i] = receive_result[i];
+    }
     sensor_pub.publish(msg_receive);
     ros::spinOnce();
     loop_rate.sleep();
