@@ -1,0 +1,33 @@
+.pio/build/nucleo_f446re/FrameworkMbed/features/nfc/source/nfc/NFCRemoteInitiator.o: \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nfc/source/nfc/NFCRemoteInitiator.cpp \
+ .pio/build/nucleo_f446re/mbed_config.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nfc/nfc/NFCRemoteInitiator.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nfc/nfc/NFCDefinitions.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nfc/stack/nfc_errors.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nfc/acore/acore/ac_buffer.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nfc/nfc/NFCRemoteEndpoint.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nfc/nfc/NFCNDEFCapable.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/platform/Span.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/platform/mbed_assert.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/platform/mbed_toolchain.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/platform/mbed_preprocessor.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nfc/stack/ndef/ndef.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nfc/stack/nfc_common.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nfc/stack/nfc_errors.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nfc/stack/platform/nfc_debug.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nfc/acore/acore/ac_macros.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nfc/acore/acore/ac_buffer_reader.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nfc/acore/acore/ac_buffer_builder.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nfc/acore/acore/ac_stream.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nfc/acore/acore/ac_buffer.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nfc/acore/acore/ac_buffer_reader.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nfc/acore/acore/ac_buffer_builder.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nfc/stack/tech/iso7816/iso7816_app.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nfc/stack/tech/iso7816/iso7816.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nfc/stack/transceiver/protocols.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nfc/stack/tech/isodep/isodep_target.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nfc/stack/transceiver/transceiver.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nfc/stack/transceiver/protocols.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nfc/stack/platform/nfc_transport.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nfc/stack/platform/nfc_scheduler.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nfc/stack/tech/isodep/isodep.h
