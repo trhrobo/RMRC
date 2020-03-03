@@ -140,6 +140,10 @@ int main(int argc, char **argv) {
   thread receive(receiveSerial);
 
   while (ros::ok()) {
+    thread send(sendSerial);
+    thread receive(receiveSerial);
+    send.join();
+    receive.join();
     for(int i = 0; i < 5; ++i){
       msg_receive.data[i] = receive_result[i];
     }
@@ -147,7 +151,5 @@ int main(int argc, char **argv) {
     ros::spinOnce();
     loop_rate.sleep();
   }
-  send.join();
-  receive.join();
   serial_close(pi, serial_handle);
 }
