@@ -75,7 +75,7 @@ void receiveSerial(){
     {4, data_h_h[4], data_h_l[4], data_l_h[4], data_l_l[4]},
   };
   got_data = static_cast<uint8_t>(serial_read_byte(pi, serial_handle));
-  if(got_data = HEAD_BYTE){
+  if(got_data == HEAD_BYTE){
     got_data = static_cast<uint8_t>(serial_read_byte(pi, serial_handle));
     if(got_data == STX){
       checksum_receive += HEAD_BYTE;
