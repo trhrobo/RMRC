@@ -1,0 +1,31 @@
+.pio/build/nucleo_f446re/FrameworkMbed/features/nanostack/coap-service/source/coap_service_api.o: \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nanostack/coap-service/source/coap_service_api.c \
+ .pio/build/nucleo_f446re/mbed_config.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/frameworks/nanostack-libservice/mbed-client-libservice/ns_types.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/frameworks/nanostack-libservice/mbed-client-libservice/ns_list.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/frameworks/nanostack-libservice/mbed-client-libservice/ns_types.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/frameworks/nanostack-libservice/mbed-client-libservice/ns_trace.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/frameworks/mbed-trace/mbed-trace/mbed_trace.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/frameworks/nanostack-libservice/mbed-client-libservice/nsdynmemLIB.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/frameworks/mbed-coap/mbed-coap/sn_coap_header.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nanostack/coap-service/coap-service/coap_service_api.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nanostack/sal-stack-nanostack/nanostack/ns_address.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nanostack/coap-service/source/include/coap_message_handler.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nanostack/sal-stack-nanostack-eventloop/nanostack-event-loop/eventOS_event.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nanostack/sal-stack-nanostack-eventloop/nanostack-event-loop/eventOS_scheduler.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nanostack/sal-stack-nanostack-eventloop/nanostack-event-loop/eventOS_event_timer.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nanostack/sal-stack-nanostack-eventloop/nanostack-event-loop/eventOS_event.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/frameworks/nanostack-libservice/mbed-client-libservice/common_functions.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nanostack/coap-service/source/include/coap_connection_handler.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nanostack/coap-service/source/include/coap_service_api_internal.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nanostack/coap-service/source/include/coap_message_handler.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nanostack/coap-service/source/include/coap_security_handler.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/mbedtls/inc/mbedtls/config.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/mbedtls/platform/inc/platform_mbed.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/mbedtls/inc/mbedtls/config-no-entropy.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/mbedtls/inc/mbedtls/check_config.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nanostack/sal-stack-nanostack/nanostack/net_interface.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nanostack/sal-stack-nanostack/nanostack/platform/arm_hal_phy.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/nanostack/coap-service/source/include/coap_service_api_internal.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/frameworks/mbed-coap/mbed-coap/sn_coap_protocol.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/frameworks/mbed-coap/mbed-coap/sn_coap_header.h

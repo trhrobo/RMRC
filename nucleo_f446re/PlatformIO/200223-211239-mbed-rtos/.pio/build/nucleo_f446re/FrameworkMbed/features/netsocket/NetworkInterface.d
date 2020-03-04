@@ -1,0 +1,19 @@
+.pio/build/nucleo_f446re/FrameworkMbed/features/netsocket/NetworkInterface.o: \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/netsocket/NetworkInterface.cpp \
+ .pio/build/nucleo_f446re/mbed_config.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/frameworks/nanostack-libservice/mbed-client-libservice/ns_list.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/frameworks/nanostack-libservice/mbed-client-libservice/ns_types.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/netsocket/NetworkInterface.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/netsocket/nsapi_types.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/netsocket/SocketAddress.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/netsocket/nsapi_types.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/platform/mbed_toolchain.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/platform/mbed_preprocessor.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/platform/Callback.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/platform/mbed_assert.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/platform/mbed_toolchain.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/netsocket/DNS.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/features/netsocket/NetworkStack.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/platform/Callback.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/platform/mbed_error.h \
+ /home/tsuruhara/.platformio/packages/framework-mbed/platform/mbed_retarget.h
