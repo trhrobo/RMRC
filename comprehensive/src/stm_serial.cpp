@@ -2,11 +2,9 @@
 #include<pigpiod_if2.h>
 #include<ros/ros.h>
 #include<std_msgs/Float32MultiArray.h>
-#include<thread>
 #include<cstdint>
 #include<cstring>
 
-using std::thread;
 using std::cout;
 using std::endl;
 using std::memcpy;
@@ -33,6 +31,8 @@ typedef struct{
 }ReceiveFormat;
 
 void sendSerial(){
+  send_data[0] = 12.3;
+  send_data[1] = 45.6789;
   uint8_t checksum_send = 0;
   unsigned char data_h_h[2], data_h_l[2], data_l_h[2], data_l_l[2];
   //divide byte
@@ -101,6 +101,8 @@ void receiveSerial(){
         }
       }
     }
+  }else{
+	ROS_INFO("NO\n");
   }
 }
 void sendCallback(const std_msgs::Float32MultiArray &msg){
@@ -136,14 +138,10 @@ int main(int argc, char **argv) {
   std_msgs::Float32MultiArray msg_receive;
   msg_receive.data.resize(5);
 
-  thread send(sendSerial);
-  thread receive(receiveSerial);
-
   while (ros::ok()) {
-    thread send(sendSerial);
-    thread receive(receiveSerial);
-    send.join();
-    receive.join();
+    sendSerial();
+    receiveSerial();
+    ROS_INFO("%f %f %f %f %f\n", receive_result[0], receive_result[1], receive_result[2], receive_result[3], receive_result[4]);
     for(int i = 0; i < 5; ++i){
       msg_receive.data[i] = receive_result[i];
     }
