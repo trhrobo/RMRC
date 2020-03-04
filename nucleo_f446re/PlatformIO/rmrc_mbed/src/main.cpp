@@ -1,38 +1,47 @@
-#include "mbed.h"
+#include"mbed.h"
+//#include"VNH5019.h"
+#include"AMT102.h"
+#include"x_nucleo_53l0a1.h"
+#include"VNH5019.h"
 #include<stdio.h>
+#include"rtos.h"
 #include<cstring>
 #include<cstdint>
+#define DEBUG 0
+#define VL53L0_I2C_SDA   D14 
+#define VL53L0_I2C_SCL   D15 
 #define HEAD_BYTE 0xFF
 #define STX 0x02
 #define float32_t float
-//Serial raspi(USBTX, USBRX, 115200);
+//BufferedSerial raspi(PB_6, PB_7, 115200);
+
+#if DEBUG
+Serial pc(USBTX, USBRX, 115200);
+#else
 Serial raspi(PB_6, PB_7, 115200);
+#endif
+static X_NUCLEO_53L0A1 *board=NULL;
 
 uint16_t mg = 0;
-uint16_t speed_right = 0;
-uint16_t speed_left = 0;
+uint16_t speed_right{};
+uint16_t speed_left{};
 uint8_t dataByte[2];
 uint8_t receiveByte[4];
-uint8_t checksum_send = 0;
-uint8_t checksum_receive = 0;
-uint8_t pwm_right = 0;
-uint8_t pwm_left = 0;
+uint8_t checksum_send{};
+uint8_t checksum_receive{};
+uint8_t pwm_right{};
+uint8_t pwm_left{};
 
 
 //send
-float32_t send_data[5] = {};
+float32_t send_data[5]{};
 //receive
-uint8_t got_data = 0;
-uint8_t byte_now = 0;
-uint8_t byte[2] = {};
-float32_t receive_result[2] = {};
+uint8_t got_data{};
+uint8_t byte_now{};
+uint8_t byte[2]{};
+float32_t receive_result[2]{};
 
-void serialSend(){
-  send_data[0] = receive_result[0];
-  send_data[1] = receive_result[1];
-  send_data[2] = 4.4;
-  send_data[3] = 5.5;
-  send_data[4] = 6.6;
+void serialSend(){ 
   uint8_t checksum_send = 0;
   unsigned char data_h_h[5];
   unsigned char data_h_l[5];
@@ -58,7 +67,7 @@ void serialSend(){
   checksum_send += HEAD_BYTE;
   raspi.putc(STX);
   checksum_send += STX;
-  for(int i = 0; i < 5; ++i){
+  for(int i = 0; i < 2; ++i){
     for(int k = 0; k < 5; ++k){
       raspi.putc(sendFormat[i][k]);
       checksum_send += sendFormat[i][k];
@@ -69,7 +78,7 @@ void serialSend(){
 }
 
 void serialReceive(){
- uint8_t checksum_receive = 0;
+ uint8_t checksum_receive{};
   uint8_t receive_data[5];
   unsigned char data_h_h[2];
   unsigned char data_h_l[2];
@@ -80,7 +89,7 @@ void serialReceive(){
     {1, data_h_h[1], data_h_l[1], data_l_h[1], data_l_l[1]},
   };
   got_data = static_cast<uint8_t>(raspi.getc());
-  if(got_data == HEAD_BYTE){
+  if(got_data = HEAD_BYTE){
     got_data = static_cast<uint8_t>(raspi.getc());
     if(got_data == STX){
       checksum_receive += HEAD_BYTE;
@@ -110,11 +119,61 @@ void serialReceive(){
 }
 
 int main() {
+  int status;
+  uint32_t distance;
+  DevI2C *device_i2c = new DevI2C(VL53L0_I2C_SDA, VL53L0_I2C_SCL);
+    
+  /* creates the 53L0A1 expansion board singleton obj */
+  // board = X_NUCLEO_53L0A1::instance(device_i2c, A2, D8, D2);
+  board = X_NUCLEO_53L0A1::instance(device_i2c);
+  /* init the 53L0A1 expansion board with default values */
+  status = board->init_board();
+  if(status){
+    return 1;
+  }
+  #if DEBUG
+  RotaryInc rotary(D15,D14,2 * 50.8 * M_PI,200);
+  #else
+/*
+  MotorDriverPin pin_right;
+  pin_right.pin_A = 1;
+  pin_right.pin_B = 2;
+  pin_right.pin_CS = 3;
+  pin_right.pin_EN = 4;
+  pin_right.pin_PWM = 5;
+
+  MotorDriverPin pin_left;
+  pin_left.pin_A = 6;
+  pin_left.pin_B = 7;
+  pin_left.pin_CS = 8;
+  pin_left.pin_EN = 9;
+  pin_left.pin_PWM = 10;
+*/
+  MotorDriver motor_right(D15, D14, D13, D12, A1);
+  MotorDriver motor_left(D11, D10, D9, D8, A0);
+  RotaryInc rotary(D15,D14,2 * 50.8 * M_PI,200);
+  #endif
+
   while(1){
-    for(int i = 0; i < 5; ++i){
-      send_data[i] = i + 0.5;
-    }
     serialSend();
     serialReceive();
+    //get distance data
+    status = board->sensor_centre->get_distance(&distance);
+    #if DEBUG
+    long long  speed = rotary.getSpeed();
+    pc.printf("speed = %lld\n", speed);    
+    //get magnet data
+    if (magnet.read()) {
+      mg = 1;
+    } else {
+      mg = 0;
+    }
+    #else
+    //output motor
+    motor_right.setPwm(pwm_right);
+    motor_right.currentLimit();
+    motor_left.setPwm(pwm_left);
+    motor_left.currentLimit();
+    #endif
   }
 }
