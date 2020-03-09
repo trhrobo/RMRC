@@ -4,7 +4,7 @@
 #include <iostream>
 #include <ros/ros.h>
 #include <sensor_msgs/Joy.h>
-#include <std_msgs/Float64MultiArray.h>
+#include <std_msgs/Float32MultiArray.h>
 #include <vector>
 
 using std::vector;
@@ -50,11 +50,11 @@ int main(int argc, char **argv) {
   ros::init(argc, argv, "wheel_control");
   ros::NodeHandle n;
   ros::Publisher wheel_pub =
-    n.advertise<std_msgs::Float64MultiArray>("wheel", 10);
+    n.advertise<std_msgs::Float32MultiArray>("/motor_speed", 10);
   ros::Subscriber controller_sub = n.subscribe("/cmd_vel", 10, velCallback);
   ros::Rate loop_rate(1000);
 
-  std_msgs::Float64MultiArray msg;
+  std_msgs::Float32MultiArray msg;
   msg.data.resize(2);
 
   while (ros::ok()) {

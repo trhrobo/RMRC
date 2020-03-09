@@ -113,7 +113,7 @@ int main(int argc, char **argv) {
   ros::init(argc, argv, "stm_serial");
   ros::NodeHandle n;
   ros::Publisher sensor_pub = n.advertise<std_msgs::Float32MultiArray>("/nucleo/sensor_info", 30);
-  ros::Subscriber serial_send_sub = n.subscribe("motor_speed", 10, sendCallback);
+  ros::Subscriber serial_send_sub = n.subscribe("/motor_speed", 10, sendCallback);
   ros::Rate loop_rate(100);
 
   int pi = pigpio_start(0, 0);
