@@ -5,6 +5,8 @@
 #include <ros/ros.h>
 #include <sensor_msgs/Joy.h>
 
+using std::abs;
+
 comprehensive::Button command;
 geometry_msgs::Twist robot_vel;
 
@@ -16,10 +18,10 @@ namespace dozap {
   }
 }
 void joyCallback(const sensor_msgs::Joy &msg) {
-  robot_vel.linear.x = dozap::map(msg.axes[0], -1, 1, -1.5, 1.5);
-  robot_vel.linear.y = dozap::map(msg.axes[1], -1, 1, -1.5, 1.5);
+  robot_vel.linear.x = dozap::map(msg.axes[0], -1, 1, 0.5, -0.5);
+  robot_vel.linear.y = dozap::map(msg.axes[1], -1, 1, -0.5, 0.5);
   //コントローラの右側のX軸のみを利用する
-  robot_vel.angular.z = dozap::map(msg.axes[4], -1, 1, -1.5, 1.5);
+  robot_vel.angular.z = dozap::map(msg.axes[3], -1, 1, 0.5, -0.5);
 }
 int main(int argc, char **argv) {
   ros::init(argc, argv, "xbox");
@@ -31,6 +33,9 @@ int main(int argc, char **argv) {
   ros::Rate loop_rate(100);
 
   while (ros::ok()) {
+    if(abs(robot_vel.linear.x) < 0.05) robot_vel.linear.x = 0;
+    if(abs(robot_vel.linear.y) < 0.05) robot_vel.linear.y = 0;
+    if(abs(robot_vel.angular.z) < 0.05) robot_vel.angular.z = 0;
     vel_pub.publish(robot_vel);
     controller_pub.publish(command);
     ros::spinOnce();
