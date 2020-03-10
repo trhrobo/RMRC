@@ -16,7 +16,7 @@ constexpr double Kd = 1.0;
 constexpr double frequency = 45;
 vector<double> current_dynamixel_theta{0, 0, 0, 0};
 vector<double> current_dynamixel_torque{0, 0, 0, 0};
-vector<double> theta_ref{0, 0, 0, 0};
+double theta_ref[4]{0, 0, 0, 0};
 double gyro_robot{};
 double theta_front{};
 double theta_rear{};
@@ -169,14 +169,14 @@ int main(int argc, char **argv) {
   ros::Subscriber controller_sub = n.subscribe("joy", 10, joyCallback);
   ros::Rate loop_rate(45);
   flipper position[4] = {0, 1, 2, 3};
-  semiAutonomous robot_model(*n);
+  semiAutonomous robot_model(n);
   std_msgs::Float64MultiArray send;
   send.data.resize(4);
 
   while (ros::ok()) {
     //半自動モードかどうか
     if (flag_semi_autonomous) {
-      robot_model.main();
+      robot_model.main(theta_ref);
       //全てのフリッパーを同じように動かすか
     } else if (flag_all) {
       if ((axes_front_right < 0) or (axes_front_left < 0)) {
