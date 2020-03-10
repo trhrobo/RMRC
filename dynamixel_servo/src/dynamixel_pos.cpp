@@ -45,11 +45,11 @@ int main(int argc, char **argv) {
   while (ros::ok()) {
 
     for (int i = 0; i < 4; ++i) {
-        srv.request.command = "_";
-        srv.request.id = i + 1;
-        srv.request.addr_name = "Goal_Position";
-        srv.request.value = servo[i].dynamixelSet(angle_goal[i], angle_now[i]);
-        dynamixel_service.call(srv);
+      srv.request.command = "_";
+      srv.request.id = i + 1;
+      srv.request.addr_name = "Goal_Position";
+      srv.request.value = servo[i].dynamixelSet(angle_goal[i], angle_now[i]);
+      dynamixel_service.call(srv);
     }
 
     ROS_INFO("angle1= %lf | angle2= %lf | angle3 = %lf |angle4 = %lf", angle_now[0], angle_now[1], angle_now[2], angle_now[3]);

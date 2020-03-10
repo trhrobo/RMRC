@@ -19,13 +19,16 @@ int dynamixel::dynamixelSet(double goal_angle, double now_pos){
   double now_angle = now_pulse * DYNAMIXEL_RESOLUTION_ANGLE;
   if(goal_angle > now_angle){
     //ラムダ式で書き換える
-    goal_angle - now_angle > now_angle + 360 - goal_angle ? goal_pos = now_angle + 360 - goal_pos
-      : goal_pos = -(goal_angle - now_angle);
+    if(goal_angle - now_angle < 180){
+      goal_pos = goal_angle - now_anlge;
+    }
+  }else if(now_angle > goal_angle){
+    goal_pos = -(now_angle + goal_angle);
   }else{
-    now_angle - goal_angle > goal_angle + 360 - now_angle ? goal_pos = goal_angle + 360 - now_angle
-      : goal_pos = -(now_angle - goal_angle);
+    goal_pos = -(now_angle + 360 - goal_angle);
   }
-  return (goal_pos / DYNAMIXEL_RESOLUTION_ANGLE) + now_pulse + (sum_revolutions * DYNAMIXEL_RESOLUTION);
+}
+return (goal_pos / DYNAMIXEL_RESOLUTION_ANGLE) + now_pulse + (sum_revolutions * DYNAMIXEL_RESOLUTION);
 }
 double dynamixel::dynamixelTimer(){
 }
