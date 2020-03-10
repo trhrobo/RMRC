@@ -12,14 +12,14 @@ front_left:
     Profile_Acceleration: 0
     Profile_Velocity: 0
 
-back_right:
+rear_right:
     ID: 3
     Return_Delay_Time: 0
     Operating_Mode: 4
     Profile_Acceleration: 0
     Profile_Velocity: 0
 
-back_left:
+rear_left:
     ID: 4
     Return_Delay_Time: 0
     Operating_Mode: 4

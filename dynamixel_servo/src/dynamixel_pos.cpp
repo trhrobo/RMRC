@@ -5,6 +5,7 @@
 #include <trajectory_msgs/JointTrajectory.h>
 #include <sensor_msgs/JointState.h>
 #include <vector>
+#include <dynamixel_workbench_msgs/DynamixelCommand.h>
 
 using std::vector;
 
@@ -32,52 +33,27 @@ void jointCallback(const sensor_msgs::JointState &msg){
 int main(int argc, char **argv) {
   ros::init(argc, argv, "dynamixel_pos");
   ros::NodeHandle n;
-
-  ros::Publisher servo_pub = n.advertise<trajectory_msgs::JointTrajectory>(
-      "/dynamixel_workbench/joint_trajectory", 10);
-
-  // ros::Subscriber servo_sub = n.subscribe("flipper", 45, dynamixelCallback);
+  ros::ServiceClient dynamixel_service = n.serviceClient<dynamixel_workbench_msgs::DynamixelCommand>("/dynamixel_workbench/dynamixel_command");
   ros::Subscriber servo_sub = n.subscribe("flipper_semi_autonomous", 45, dynamixelCallback);
   ros::Subscriber joint_sub = n.subscribe("/dynamixel_workbench/joint_states", 10, jointCallback);
 
-  trajectory_msgs::JointTrajectory jtp0;
-
-  jtp0.header.frame_id = "base_link";
-
-  jtp0.joint_names.resize(4);
-
-  jtp0.points.resize(1);
-
-  //  jtp0.points[0].positions.resize(4);
-  jtp0.points[0].positions.resize(4);
-
-  jtp0.joint_names[0] = "front_right";
-  jtp0.joint_names[1] = "front_left";
-  jtp0.joint_names[2] = "rear_right";
-  jtp0.joint_names[3] = "rear_left";
-
-  /*
-     dynamixel servo[4] = {
-     {front_right},
-     {front_left},
-     {back_right},
-     {back_left}
-     };*/
-
   dynamixel servo[4] = {front_right, front_left, rear_right, rear_left};
 
+  dynamixel_workbench_msgs::DynamixelCommand srv;
   ros::Rate loop_rate(45);
 
   while (ros::ok()) {
 
     for (int i = 0; i < 4; ++i) {
-      jtp0.points[0].positions[i] = servo[i].dynamixelSet(angle_goal[i], angle_now[i]);
+        srv.request.command = "_";
+        srv.request.id = i + 1;
+        srv.request.addr_name = "Goal_Position";
+        srv.request.value = servo[i].dynamixelSet(angle_goal[i], angle_now[i]);
+        dynamixel_service.call(srv);
     }
 
-    jtp0.points[0].time_from_start = ros::Duration(0.02);
-    servo_pub.publish(jtp0);
-    ROS_INFO("Joint1= %lf | Joint2= %lf | Joint3 = %lf |Joint4 = %lf",
-        angle_goal[0], angle_goal[1], angle_goal[2], angle_goal[3]);
+    ROS_INFO("angle1= %lf | angle2= %lf | angle3 = %lf |angle4 = %lf", angle_now[0], angle_now[1], angle_now[2], angle_now[3]);
+    //ROS_INFO("Joint1= %lf | Joint2= %lf | Joint3 = %lf |Joint4 = %lf", angle_goal[0], angle_goal[1], angle_goal[2], angle_goal[3]);
     ros::spinOnce();
     loop_rate.sleep();
   }

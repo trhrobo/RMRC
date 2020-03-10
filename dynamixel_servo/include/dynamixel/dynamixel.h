@@ -11,7 +11,7 @@ public:
     dynamixel(int user_id);
     ~dynamixel();
     //goal_posの範囲は0-360まで
-    double dynamixelSet(double goal_angle, double now_pos);
+    int dynamixelSet(double goal_angle, double now_pos);
     double dynamixelTimer();
     double dynamixelReset();
     double angleCal(double goal_value);
