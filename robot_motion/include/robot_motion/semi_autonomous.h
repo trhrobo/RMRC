@@ -22,9 +22,6 @@ typedef struct{
 
 class SemiAutonomousBase{
   protected:
-    ros::Publisher dynamixel_pub;
-    ros::Subscriber dynamixel_sub;
-    ros::Subscriber gyro_sub;
     ros::Subscriber tof_sub;
     vector<double> current_dynamixel_pose{0, 0, 0, 0};
     vector<double> current_dynamixel_load{0, 0, 0, 0};
@@ -34,7 +31,7 @@ class SemiAutonomousBase{
     double goal_pose_right;
     double goal_pose_left;
   public:
-    SemiAutonomousBase(ros::NodeHandle *n);
+    SemiAutonomousBase();
     void init();
     void dynamixelCallback(const sensor_msgs::JointState &jointstate);
     void gyroCallback(const std_msgs::Float64 &msg);
@@ -49,7 +46,7 @@ class SemiAutonomousFront : public SemiAutonomousBase{
     ros::Subscriber psd_front_sub;
     dynamixelPose poseParamFront;
   public:
-    SemiAutonomousFront(ros::NodeHandle *n);
+    SemiAutonomousFront(double *set_array, int size);
     double psdCurve() override;
     void mainSemiAutonomous() override;
 };
@@ -59,7 +56,7 @@ class SemiAutonomousRear : public SemiAutonomousBase{
     ros::Subscriber psd_rear_sub;
     dynamixelPose poseParamRear;
   public:
-    SemiAutonomousRear(ros::NodeHandle *n);
+    SemiAutonomousRear(double *set_array, int size);
     double psdCurve() override;
     void mainSemiAutonomous() override;
 };
@@ -69,7 +66,7 @@ class semiAutonomous{
     SemiAutonomousFront *front;
     SemiAutonomousRear *rear;
   public:
-    semiAutonomous(ros::NodeHandle *n);
+    semiAutonomous(double *set_array, int size);
     ~semiAutonomous();
     void main();
 };

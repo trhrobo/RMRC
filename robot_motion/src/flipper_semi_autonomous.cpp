@@ -23,67 +23,9 @@ double theta_rear{};
 double torque_front{};
 double torque_rear{};
 
-//#define DEBUG
+#define DEBUG 1
 
 //------------------------------------------------------------------
-namespace semi_autonomous_front {
-  bool check() {
-    for (int i = 0; i < 4; ++i) {
-      if ((current_dynamixel_theta[i] + 0.5 > theta_ref[i]) and (current_dynamixel_theta[i] - 0.5 < theta_ref[i])) {
-      } else {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  inline bool judgeGrounding() {
-    return (theta_ref[0] > theta_front) && (torque_front < 0);
-  }
-
-  double set() {
-    if (semi_autonomous_front::check()) {
-      if (judgeGrounding()) {
-        theta_ref[0] -= 1.0;
-      } else {
-        theta_ref[0] += 1.0;
-      }
-      theta_ref[0] >= autonomous_max_theta ? theta_ref[0] = autonomous_max_theta : theta_ref[0] < 0
-        ? theta_ref[0] = 0 : theta_ref[0] = theta_ref[0];
-      theta_ref[1] = theta_ref[0];
-    }
-  }
-}
-//-------------------------------------------------------------------
-namespace semi_autonomous_rear {
-  bool check() {
-    for (int i = 0; i < 4; ++i) {
-      if ((current_dynamixel_theta[i] + 0.5 > theta_ref[i]) and (current_dynamixel_theta[i] - 0.5 < theta_ref[i])) {
-      } else {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  inline bool judgeGrounding() {
-    return (theta_ref[0] > theta_rear) && (torque_rear < 0) && (gyro_robot);
-  }
-
-  double set() {
-    if (semi_autonomous_rear::check()) {
-      if (judgeGrounding()) {
-        theta_ref[2] -= 1.0;
-      } else {
-        theta_ref[2] += 1.0;
-      }
-      theta_ref[2] >= original_theta ? theta_ref[2] = original_theta : theta_ref[2] < autonomous_min_theta
-        ? theta_ref[2] = autonomous_min_theta : theta_ref[2] = theta_ref[2];
-      theta_ref[3] = theta_ref[2];
-    }
-  }
-}
-//--------------------------------------------------------------------
 namespace all {
   bool check() {
     for (int i = 0; i < 4; ++i) {
@@ -152,24 +94,6 @@ void flipper::reverse() {
     theta_ref[id] -= 1.3;
   }
 }
-
-class flipperSemiAutonomous {
-  private:
-    int id[4];
-    double posCal();
-
-  public:
-    flipperSemiAutonomous(int *user_id, flipper front_right, flipper front_left, flipper back_right, flipper back_left);
-    double dynamixelSet();
-};
-
-flipperSemiAutonomous::flipperSemiAutonomous(int *user_id, flipper user_front_right, flipper user_front_left, flipper user_back_right, flipper user_back_left){
-  for (int i = 0; i < 4; ++i) {
-    id[i] = user_id[i];
-  }
-}
-
-double flipperSemiAutonomous::dynamixelSet() {}
 
 //現在角度とトルクを取得
 void jointStateCallback(const sensor_msgs::JointState &jointstate) {
@@ -245,14 +169,14 @@ int main(int argc, char **argv) {
   ros::Subscriber controller_sub = n.subscribe("joy", 10, joyCallback);
   ros::Rate loop_rate(45);
   flipper position[4] = {0, 1, 2, 3};
+  semiAutonomous robot_model(*n);
   std_msgs::Float64MultiArray send;
   send.data.resize(4);
 
   while (ros::ok()) {
     //半自動モードかどうか
     if (flag_semi_autonomous) {
-      semi_autonomous_front::set();
-      semi_autonomous_rear::set();
+      robot_model.main();
       //全てのフリッパーを同じように動かすか
     } else if (flag_all) {
       if ((axes_front_right < 0) or (axes_front_left < 0)) {
