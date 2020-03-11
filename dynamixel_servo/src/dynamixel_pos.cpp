@@ -42,10 +42,17 @@ int main(int argc, char **argv) {
   dynamixel_workbench_msgs::DynamixelCommand srv;
   ros::Rate loop_rate(45);
 
+  while(1){
+    if(angle_now[0] != 0.00){
+      break;
+    }
+    ROS_INFO("NO\n");
+    ros::spinOnce();
+  }
   while (ros::ok()) {
 
     for (int i = 0; i < 4; ++i) {
-      angle_goal[i] = 200;
+      angle_goal[i] = 270;
       srv.request.command = "_";
       srv.request.id = i + 1;
       srv.request.addr_name = "Goal_Position";
@@ -53,7 +60,7 @@ int main(int argc, char **argv) {
       dynamixel_service.call(srv);
     }
 
-    ROS_INFO("angle1= %lf | angle2= %lf | angle3 = %lf |angle4 = %lf", angle_now[0], angle_now[1], angle_now[2], angle_now[3]);
+    ROS_INFO("angle1= %lf | angle2= %lf | angle3 = %lf |angle4 = %lf", angle_now[0] + 3.14, angle_now[1] + 3.14, angle_now[2] + 3.14, angle_now[3] + 3.14);
     //ROS_INFO("Joint1= %lf | Joint2= %lf | Joint3 = %lf |Joint4 = %lf", angle_goal[0], angle_goal[1], angle_goal[2], angle_goal[3]);
     ros::spinOnce();
     loop_rate.sleep();
