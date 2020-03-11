@@ -45,6 +45,7 @@ int main(int argc, char **argv) {
   while (ros::ok()) {
 
     for (int i = 0; i < 4; ++i) {
+      angle_goal[i] = 200;
       srv.request.command = "_";
       srv.request.id = i + 1;
       srv.request.addr_name = "Goal_Position";
