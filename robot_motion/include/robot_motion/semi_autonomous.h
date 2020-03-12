@@ -22,9 +22,6 @@ typedef struct{
 
 class SemiAutonomousBase{
   protected:
-    ros::Publisher dynamixel_pub;
-    ros::Subscriber dynamixel_sub;
-    ros::Subscriber gyro_sub;
     ros::Subscriber tof_sub;
     vector<double> current_dynamixel_pose{0, 0, 0, 0};
     vector<double> current_dynamixel_load{0, 0, 0, 0};
@@ -34,13 +31,13 @@ class SemiAutonomousBase{
     double goal_pose_right;
     double goal_pose_left;
   public:
-    SemiAutonomousBase(ros::NodeHandle *n);
+    SemiAutonomousBase(ros::NodeHandle _n);
     void init();
     void dynamixelCallback(const sensor_msgs::JointState &jointstate);
     void gyroCallback(const std_msgs::Float64 &msg);
     void tofCallback(const std_msgs::Float64MultiArray &msg);
     bool dynamixelLoad();
-    virtual void mainSemiAutonomous() = 0;
+    virtual void mainSemiAutonomous(double (&set_array)[4]) = 0;
     virtual double psdCurve() = 0;
 };
 
@@ -49,9 +46,9 @@ class SemiAutonomousFront : public SemiAutonomousBase{
     ros::Subscriber psd_front_sub;
     dynamixelPose poseParamFront;
   public:
-    SemiAutonomousFront(ros::NodeHandle *n);
+    SemiAutonomousFront(ros::NodeHandle _n);
     double psdCurve() override;
-    void mainSemiAutonomous() override;
+    void mainSemiAutonomous(double (&set_array)[4]) override;
 };
 
 class SemiAutonomousRear : public SemiAutonomousBase{
@@ -59,9 +56,9 @@ class SemiAutonomousRear : public SemiAutonomousBase{
     ros::Subscriber psd_rear_sub;
     dynamixelPose poseParamRear;
   public:
-    SemiAutonomousRear(ros::NodeHandle *n);
+    SemiAutonomousRear(ros::NodeHandle _n);
     double psdCurve() override;
-    void mainSemiAutonomous() override;
+    void mainSemiAutonomous(double (&set_array)[4]) override;
 };
 
 class semiAutonomous{
@@ -69,8 +66,8 @@ class semiAutonomous{
     SemiAutonomousFront *front;
     SemiAutonomousRear *rear;
   public:
-    semiAutonomous(ros::NodeHandle *n);
+    semiAutonomous(ros::NodeHandle _n);
     ~semiAutonomous();
-    void main();
+    void main(double (&set_array)[4]);
 };
 #endif

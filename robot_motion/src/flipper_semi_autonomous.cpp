@@ -1,12 +1,23 @@
 #include <cmath>
 #include <ros/ros.h>
+#include <ros/time.h>
 #include <sensor_msgs/JointState.h>
 #include <sensor_msgs/Joy.h>
 #include <std_msgs/Float64.h>
 #include <std_msgs/Float64MultiArray.h>
+#include <trajectory_msgs/JointTrajectory.h>
 #include <vector>
 #include "robot_motion/semi_autonomous.h"
+#include "dynamixel/dynamixel.h"
+#include <dynamixel_workbench_msgs/DynamixelCommand.h>
+
 using std::vector;
+
+#define DEBUG 1
+#define front_right 0
+#define front_left 1
+#define rear_right 2
+#define rear_left 3
 
 constexpr double original_theta = 90.0;
 constexpr double autonomous_max_theta = 75.0;
@@ -16,78 +27,20 @@ constexpr double Kd = 1.0;
 constexpr double frequency = 45;
 vector<double> current_dynamixel_theta{0, 0, 0, 0};
 vector<double> current_dynamixel_torque{0, 0, 0, 0};
-vector<double> theta_ref{0, 0, 0, 0};
+vector<double> angle_goal{0, 0, 0, 0};
+vector<double> angle_now{0, 0, 0, 0};
+double theta_ref[4]{0, 0, 0, 0};
 double gyro_robot{};
 double theta_front{};
 double theta_rear{};
 double torque_front{};
 double torque_rear{};
 
-//#define DEBUG
-
 //------------------------------------------------------------------
-namespace semi_autonomous_front {
-  bool check() {
-    for (int i = 0; i < 4; ++i) {
-      if ((current_dynamixel_theta[i] + 0.5 > theta_ref[i]) and (current_dynamixel_theta[i] - 0.5 < theta_ref[i])) {
-      } else {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  inline bool judgeGrounding() {
-    return (theta_ref[0] > theta_front) && (torque_front < 0);
-  }
-
-  double set() {
-    if (semi_autonomous_front::check()) {
-      if (judgeGrounding()) {
-        theta_ref[0] -= 1.0;
-      } else {
-        theta_ref[0] += 1.0;
-      }
-      theta_ref[0] >= autonomous_max_theta ? theta_ref[0] = autonomous_max_theta : theta_ref[0] < 0
-        ? theta_ref[0] = 0 : theta_ref[0] = theta_ref[0];
-      theta_ref[1] = theta_ref[0];
-    }
-  }
-}
-//-------------------------------------------------------------------
-namespace semi_autonomous_rear {
-  bool check() {
-    for (int i = 0; i < 4; ++i) {
-      if ((current_dynamixel_theta[i] + 0.5 > theta_ref[i]) and (current_dynamixel_theta[i] - 0.5 < theta_ref[i])) {
-      } else {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  inline bool judgeGrounding() {
-    return (theta_ref[0] > theta_rear) && (torque_rear < 0) && (gyro_robot);
-  }
-
-  double set() {
-    if (semi_autonomous_rear::check()) {
-      if (judgeGrounding()) {
-        theta_ref[2] -= 1.0;
-      } else {
-        theta_ref[2] += 1.0;
-      }
-      theta_ref[2] >= original_theta ? theta_ref[2] = original_theta : theta_ref[2] < autonomous_min_theta
-        ? theta_ref[2] = autonomous_min_theta : theta_ref[2] = theta_ref[2];
-      theta_ref[3] = theta_ref[2];
-    }
-  }
-}
-//--------------------------------------------------------------------
 namespace all {
   bool check() {
     for (int i = 0; i < 4; ++i) {
-      if ((current_dynamixel_theta[i] + 0.5 > theta_ref[i]) and (current_dynamixel_theta[i] - 0.5 < theta_ref[i])) {
+      if ((current_dynamixel_theta[i] + 1 > theta_ref[i]) and (current_dynamixel_theta[i] - 1 < theta_ref[i])) {
       } else {
         return false;
       }
@@ -131,59 +84,60 @@ class flipper {
 flipper::flipper(int user_id) { id = user_id; }
 
 void flipper::forward() {
-  if ((current_dynamixel_theta[id] + 0.5 > theta_ref[id]) and (current_dynamixel_theta[id] - 0.5 < theta_ref[id])) {
+  ROS_INFO("FORWARD %d", id);
+  if ((current_dynamixel_theta[id] + 1 > theta_ref[id]) and (current_dynamixel_theta[id] - 1 < theta_ref[id])) {
 #ifdef DEBUG
     ROS_INFO("OK_FORWARD %d", id);
     ROS_INFO("theta_ref[%d] %lf current_dynamixel_theta[%d] %lf", id, theta_ref[id], id, current_dynamixel_theta[id]);
 #endif
-    theta_ref[id] += 1.3;
+    theta_ref[id] += 10;
 #ifdef DEBUG
     ROS_INFO("theta_ref_result[%d] %lf", id, theta_ref[id]);
 #endif
+  }else if ((current_dynamixel_theta[id] + 1 > theta_ref[id]) and (current_dynamixel_theta[id] > 355.5)) {
+    theta_ref[id] += 10;
   }
 }
 
 void flipper::reverse() {
-  if ((current_dynamixel_theta[id] + 0.5 > theta_ref[id]) and (current_dynamixel_theta[id] - 0.5 < theta_ref[id])) {
+  ROS_INFO("FORWARD %d", id);
+  if ((current_dynamixel_theta[id] + 1 > theta_ref[id]) and (current_dynamixel_theta[id] - 1 < theta_ref[id])) {
 #ifdef DEBUG
     ROS_INFO("OK_REVERSE %d", id);
     ROS_INFO("theta_ref[%d] %lf current_dynamixel_theta[%d] %lf", id, theta_ref[id], id, current_dynamixel_theta[id]);
 #endif
-    theta_ref[id] -= 1.3;
+    theta_ref[id] -= 10;
+#ifdef DEBUG
+    ROS_INFO("theta_ref_result[%d] %lf", id, theta_ref[id]);
+#endif
+  }else if ((current_dynamixel_theta[id] + 1 > theta_ref[id]) and (current_dynamixel_theta[id] > 355.5)) {
+    theta_ref[id] -= 10;
   }
 }
-
-class flipperSemiAutonomous {
-  private:
-    int id[4];
-    double posCal();
-
-  public:
-    flipperSemiAutonomous(int *user_id, flipper front_right, flipper front_left, flipper back_right, flipper back_left);
-    double dynamixelSet();
-};
-
-flipperSemiAutonomous::flipperSemiAutonomous(int *user_id, flipper user_front_right, flipper user_front_left, flipper user_back_right, flipper user_back_left){
-  for (int i = 0; i < 4; ++i) {
-    id[i] = user_id[i];
+/*
+void flipper::reverse() {
+  if ((current_dynamixel_theta[id] + 1 > theta_ref[id]) and (current_dynamixel_theta[id] - 1 < theta_ref[id])) {
+#ifdef DEBUG
+    ROS_INFO("OK_REVERSE %d", id);
+    ROS_INFO("theta_ref[%d] %lf current_dynamixel_theta[%d] %lf", id, theta_ref[id], id, current_dynamixel_theta[id]);
+#endif
+    theta_ref[id] -= 30;
   }
-}
-
-double flipperSemiAutonomous::dynamixelSet() {}
+}*/
 
 //現在角度とトルクを取得
 void jointStateCallback(const sensor_msgs::JointState &jointstate) {
-  current_dynamixel_theta[0] = jointstate.position[3];
-  current_dynamixel_torque[0] = jointstate.effort[3];
+  current_dynamixel_theta[0] = (jointstate.position[1] + M_PI) * 180 / M_PI;
+  current_dynamixel_torque[0] = jointstate.effort[1];
 
-  current_dynamixel_theta[1] = jointstate.position[2];
-  current_dynamixel_torque[1] = jointstate.effort[2];
+  current_dynamixel_theta[1] = (jointstate.position[0] + M_PI) * 180 / M_PI;
+  current_dynamixel_torque[1] = jointstate.effort[0];
 
-  current_dynamixel_theta[2] = jointstate.position[1];
-  current_dynamixel_torque[2] = jointstate.effort[1];
+  current_dynamixel_theta[2] = (jointstate.position[3] + M_PI) * 180 / M_PI;
+  current_dynamixel_torque[2] = jointstate.effort[3];
 
-  current_dynamixel_theta[3] = jointstate.position[0];
-  current_dynamixel_torque[3] = jointstate.effort[0];
+  current_dynamixel_theta[3] = (jointstate.position[2] + M_PI) * 180 / M_PI;
+  current_dynamixel_torque[3] = jointstate.effort[2];
 }
 
 //ロボットの現在角度を取得
@@ -223,7 +177,7 @@ void joyCallback(const sensor_msgs::Joy &controller) {
   }
   prev_reset = controller.buttons[1];
 #ifdef DEBUG
-  ROS_INFO("flag_all %d flag_semi_autonomous %d", flag_all, flag_semi_autonomous);
+  //ROS_INFO("flag_all %d flag_semi_autonomous %d", flag_all, flag_semi_autonomous);
 #endif
 }
 
@@ -239,20 +193,28 @@ int main(int argc, char **argv) {
   ros::init(argc, argv, "semi_autonomous");
   ros::NodeHandle n;
 
-  ros::Publisher semi_autonomous_pub = n.advertise<std_msgs::Float64MultiArray>("flipper_semi_autonomous", 30);
+  ros::ServiceClient dynamixel_service = n.serviceClient<dynamixel_workbench_msgs::DynamixelCommand>("/dynamixel_workbench/dynamixel_command");
   ros::Subscriber feedback_sub = n.subscribe("/dynamixel_workbench/joint_states", 10, jointStateCallback);
   ros::Subscriber gyro_sub = n.subscribe("gyro", 10, gyroCallback);
   ros::Subscriber controller_sub = n.subscribe("joy", 10, joyCallback);
-  ros::Rate loop_rate(45);
+  ros::Rate loop_rate(400);
   flipper position[4] = {0, 1, 2, 3};
-  std_msgs::Float64MultiArray send;
-  send.data.resize(4);
+  dynamixel servo[4] = {front_right, front_left, rear_right, rear_left};
+  semiAutonomous robot_model(n);
 
+  dynamixel_workbench_msgs::DynamixelCommand srv;
+  int k = 0;
   while (ros::ok()) {
+    /*while(angle_now[0] == 0.00){
+      ROS_INFO("NO\n");
+      ros::spinOnce();
+    }*/
+    for(int i = 0; i < 4; ++i){
+      if(current_dynamixel_theta[i] <= 0)current_dynamixel_theta[i] = 360 + current_dynamixel_theta[i];
+    }
     //半自動モードかどうか
     if (flag_semi_autonomous) {
-      semi_autonomous_front::set();
-      semi_autonomous_rear::set();
+      robot_model.main(theta_ref);
       //全てのフリッパーを同じように動かすか
     } else if (flag_all) {
       if ((axes_front_right < 0) or (axes_front_left < 0)) {
@@ -268,6 +230,7 @@ int main(int argc, char **argv) {
     } else {
       if (buttons_reverse) {
         if (axes_front_right < 0) {
+          ROS_INFO("OK\n");
           position[0].reverse();
         }
         if (axes_front_left < 0) {
@@ -296,11 +259,16 @@ int main(int argc, char **argv) {
     }
     // pidCal();
     for (int i = 0; i < 4; ++i) {
-      send.data[i] = theta_ref[i];
+      if(theta_ref[i] > 360)theta_ref[i] = theta_ref[i] - 360;
+      ROS_INFO("theta_ref[%d] %lf current_dynamixel_theta[%d] %lf", i, theta_ref[i], i, current_dynamixel_theta[i]);
+      srv.request.command = "_";
+      srv.request.id = i + 1;
+      srv.request.addr_name = "Goal_Position";
+      srv.request.value = servo[i].dynamixelSet(theta_ref[i], current_dynamixel_theta[i]);
+      dynamixel_service.call(srv);
     }
     theta_front = theta_ref[0];
     theta_rear = theta_ref[2];
-    semi_autonomous_pub.publish(send);
     ros::spinOnce();
     loop_rate.sleep();
   }

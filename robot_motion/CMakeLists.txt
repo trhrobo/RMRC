@@ -10,9 +10,12 @@ add_compile_options(-std=c++11)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
+  std_srvs
   geometry_msgs
   sensor_msgs
   comprehensive
+  message_generation
+  cmake_modules
 )
 
 ## System dependencies are found with CMake's conventions
@@ -105,9 +108,9 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
+  INCLUDE_DIRS include
 #  LIBRARIES robot_motion
-#  CATKIN_DEPENDS roscpp std_msgs
+  CATKIN_DEPENDS roscpp std_msgs std_srvs geometry_msgs message_runtime sensor_msgs message_generation cmake_modules
 #  DEPENDS system_lib
 )
 
@@ -137,7 +140,7 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 #add_executable(flipper src/flipper.cpp)
 add_executable(flipper_nomal src/flipper_nomal.cpp)
-add_executable(flipper_semi_autonomous src/flipper_semi_autonomous.cpp src/semi_autonomous.cpp)
+add_executable(flipper_semi_autonomous src/flipper_semi_autonomous.cpp src/semi_autonomous.cpp src/dynamixel.cpp)
 add_executable(motor_pid src/motor_pid.cpp src/pid.cpp)
 #add_executable(motor_pid src/motor_pid.cpp)
 
@@ -145,7 +148,7 @@ add_executable(motor_pid src/motor_pid.cpp src/pid.cpp)
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
 ## e.g. "rosrun someones_pkg node" instead of "rosrun someones_pkg someones_pkg_node"
-# set_target_properties(${PROJECT_NAME}_node PROPERTIES OUTPUT_NAME node PREFIX "")
+set_target_properties(flipper_semi_autonomous PROPERTIES OUTPUT_NAME flipper_semi_autonomous PREFIX "")
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
