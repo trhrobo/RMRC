@@ -90,15 +90,31 @@ void flipper::forward() {
     ROS_INFO("OK_FORWARD %d", id);
     ROS_INFO("theta_ref[%d] %lf current_dynamixel_theta[%d] %lf", id, theta_ref[id], id, current_dynamixel_theta[id]);
 #endif
-    theta_ref[id] += 30;
+    theta_ref[id] += 10;
 #ifdef DEBUG
     ROS_INFO("theta_ref_result[%d] %lf", id, theta_ref[id]);
 #endif
   }else if ((current_dynamixel_theta[id] + 1 > theta_ref[id]) and (current_dynamixel_theta[id] > 355.5)) {
-    theta_ref[id] += 30;
+    theta_ref[id] += 10;
   }
 }
 
+void flipper::reverse() {
+  ROS_INFO("FORWARD %d", id);
+  if ((current_dynamixel_theta[id] + 1 > theta_ref[id]) and (current_dynamixel_theta[id] - 1 < theta_ref[id])) {
+#ifdef DEBUG
+    ROS_INFO("OK_REVERSE %d", id);
+    ROS_INFO("theta_ref[%d] %lf current_dynamixel_theta[%d] %lf", id, theta_ref[id], id, current_dynamixel_theta[id]);
+#endif
+    theta_ref[id] -= 10;
+#ifdef DEBUG
+    ROS_INFO("theta_ref_result[%d] %lf", id, theta_ref[id]);
+#endif
+  }else if ((current_dynamixel_theta[id] + 1 > theta_ref[id]) and (current_dynamixel_theta[id] > 355.5)) {
+    theta_ref[id] -= 10;
+  }
+}
+/*
 void flipper::reverse() {
   if ((current_dynamixel_theta[id] + 1 > theta_ref[id]) and (current_dynamixel_theta[id] - 1 < theta_ref[id])) {
 #ifdef DEBUG
@@ -107,7 +123,7 @@ void flipper::reverse() {
 #endif
     theta_ref[id] -= 30;
   }
-}
+}*/
 
 //現在角度とトルクを取得
 void jointStateCallback(const sensor_msgs::JointState &jointstate) {
@@ -189,13 +205,12 @@ int main(int argc, char **argv) {
   dynamixel_workbench_msgs::DynamixelCommand srv;
   int k = 0;
   while (ros::ok()) {
-    while(angle_now[0] == 0.00){
+    /*while(angle_now[0] == 0.00){
       ROS_INFO("NO\n");
       ros::spinOnce();
-    }
+    }*/
     for(int i = 0; i < 4; ++i){
       if(current_dynamixel_theta[i] <= 0)current_dynamixel_theta[i] = 360 + current_dynamixel_theta[i];
-      ROS_INFO("theta_ref[%d] %lf current_dynamixel_theta[%d] %lf", i, theta_ref[i], i, current_dynamixel_theta[i]);
     }
     //半自動モードかどうか
     if (flag_semi_autonomous) {
@@ -215,6 +230,7 @@ int main(int argc, char **argv) {
     } else {
       if (buttons_reverse) {
         if (axes_front_right < 0) {
+          ROS_INFO("OK\n");
           position[0].reverse();
         }
         if (axes_front_left < 0) {
@@ -244,6 +260,7 @@ int main(int argc, char **argv) {
     // pidCal();
     for (int i = 0; i < 4; ++i) {
       if(theta_ref[i] > 360)theta_ref[i] = theta_ref[i] - 360;
+      ROS_INFO("theta_ref[%d] %lf current_dynamixel_theta[%d] %lf", i, theta_ref[i], i, current_dynamixel_theta[i]);
       srv.request.command = "_";
       srv.request.id = i + 1;
       srv.request.addr_name = "Goal_Position";
