@@ -64,6 +64,7 @@
   <build_export_depend>geometry_msgs</build_export_depend>
   <build_export_depend>std_srvs</build_export_depend>
   <build_export_depend>trajectory_msgs</build_export_depend>
+  <build_export_depend>message_generation</build_export_depend>
 
   <exec_depend>cmake_modules</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>

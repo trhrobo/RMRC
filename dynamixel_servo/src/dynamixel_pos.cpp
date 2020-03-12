@@ -1,12 +1,11 @@
 #include "dynamixel/dynamixel.h"
 #include <ros/ros.h>
 #include <ros/time.h>
-#include <std_msgs/Float64MultiArray.h>
 #include <trajectory_msgs/JointTrajectory.h>
 #include <sensor_msgs/JointState.h>
 #include <vector>
 #include <dynamixel_workbench_msgs/DynamixelCommand.h>
-
+#include <dynamixel_servo/DynamixelDeg.h>
 using std::vector;
 
 #define front_right 0
@@ -17,36 +16,31 @@ using std::vector;
 vector<double> angle_goal{0, 0, 0, 0};
 vector<double> angle_now{0, 0, 0, 0};
 //enum dynamixel_name { front_right, front_left, rear_right, rear_left };
-int k = 0;
-int j = 0;
-void dynamixelCallback(const std_msgs::Float64MultiArray &msg) {
-  k += 20;
-  ++j;
-  ROS_INFO("%d\n", j);
-  if(k > 360)k = 0;
-  for (int i = 0; i < msg.data.size(); ++i) {
-    //angle_goal[i] = msg.data[i];
-    angle_goal[i] = k;
-  }
-  //ROS_INFO("***********************************************************************\n");
-}
 void jointCallback(const sensor_msgs::JointState &msg){
   for(int i = 0; i < 4; ++i){
     angle_now[i] = msg.position[i];
   }
 }
 
+int k = 0;
+bool dynamixelReceive(dynamixel_servo::DynamixelDeg::Request &tx, dynamixel_servo::DynamixelDeg::Response &rx){
+  k += 30;
+  angle_goal[tx.id] = tx.data;
+  rx.check = true;
+  ROS_INFO("angle_goal[%d] = %f\n", tx.id, tx.data);
+  return true;
+}
+
 int main(int argc, char **argv) {
   ros::init(argc, argv, "dynamixel_pos");
   ros::NodeHandle n;
   ros::ServiceClient dynamixel_service = n.serviceClient<dynamixel_workbench_msgs::DynamixelCommand>("/dynamixel_workbench/dynamixel_command");
-  ros::Subscriber servo_sub = n.subscribe("flipper_semi_autonomous", 45, dynamixelCallback);
   ros::Subscriber joint_sub = n.subscribe("/dynamixel_workbench/joint_states", 10, jointCallback);
-
+  ros::ServiceServer receive_dynamixel = n.advertiseService("dynamixel_info", dynamixelReceive);
   dynamixel servo[4] = {front_right, front_left, rear_right, rear_left};
 
   dynamixel_workbench_msgs::DynamixelCommand srv;
-  ros::Rate loop_rate(100);
+  ros::Rate loop_rate(400);
 
   while(1){
     if(angle_now[0] != 0.00){
@@ -56,8 +50,10 @@ int main(int argc, char **argv) {
     ros::spinOnce();
   }
   while (ros::ok()) {
-    ROS_INFO("angle1= %lf | angle2= %lf | angle3 = %lf |angle4 = %lf", angle_goal[0], angle_goal[1], angle_goal[2], angle_goal[3]);
+    if(k > 360) k = 0;
+    //ROS_INFO("angle1= %lf | angle2= %lf | angle3 = %lf |angle4 = %lf", angle_goal[0], angle_goal[1], angle_goal[2], angle_goal[3]);
     for (int i = 0; i < 4; ++i) {
+      //angle_goal[i] = k;
       srv.request.command = "_";
       srv.request.id = i + 1;
       srv.request.addr_name = "Goal_Position";
