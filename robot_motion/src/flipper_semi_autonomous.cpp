@@ -29,7 +29,7 @@ double torque_rear{};
 namespace all {
   bool check() {
     for (int i = 0; i < 4; ++i) {
-      if ((current_dynamixel_theta[i] + 0.5 > theta_ref[i]) and (current_dynamixel_theta[i] - 0.5 < theta_ref[i])) {
+      if ((current_dynamixel_theta[i] + 1 > theta_ref[i]) and (current_dynamixel_theta[i] - 1 < theta_ref[i])) {
       } else {
         return false;
       }
@@ -73,41 +73,44 @@ class flipper {
 flipper::flipper(int user_id) { id = user_id; }
 
 void flipper::forward() {
-  if ((current_dynamixel_theta[id] + 0.5 > theta_ref[id]) and (current_dynamixel_theta[id] - 0.5 < theta_ref[id])) {
+  ROS_INFO("FORWARD %d", id);
+  if ((current_dynamixel_theta[id] + 1 > theta_ref[id]) and (current_dynamixel_theta[id] - 1 < theta_ref[id])) {
 #ifdef DEBUG
     ROS_INFO("OK_FORWARD %d", id);
     ROS_INFO("theta_ref[%d] %lf current_dynamixel_theta[%d] %lf", id, theta_ref[id], id, current_dynamixel_theta[id]);
 #endif
-    theta_ref[id] += 1.3;
+    theta_ref[id] += 10;
 #ifdef DEBUG
     ROS_INFO("theta_ref_result[%d] %lf", id, theta_ref[id]);
 #endif
+  }else if ((current_dynamixel_theta[id] + 1 > theta_ref[id]) and (current_dynamixel_theta[id] > 355.5)) {
+    theta_ref[id] += 10;
   }
 }
 
 void flipper::reverse() {
-  if ((current_dynamixel_theta[id] + 0.5 > theta_ref[id]) and (current_dynamixel_theta[id] - 0.5 < theta_ref[id])) {
+  if ((current_dynamixel_theta[id] + 1 > theta_ref[id]) and (current_dynamixel_theta[id] - 1 < theta_ref[id])) {
 #ifdef DEBUG
     ROS_INFO("OK_REVERSE %d", id);
     ROS_INFO("theta_ref[%d] %lf current_dynamixel_theta[%d] %lf", id, theta_ref[id], id, current_dynamixel_theta[id]);
 #endif
-    theta_ref[id] -= 1.3;
+    theta_ref[id] -= 10;
   }
 }
 
 //現在角度とトルクを取得
 void jointStateCallback(const sensor_msgs::JointState &jointstate) {
-  current_dynamixel_theta[0] = jointstate.position[3];
-  current_dynamixel_torque[0] = jointstate.effort[3];
+  current_dynamixel_theta[0] = (jointstate.position[1] + M_PI) * 180 / M_PI;
+  current_dynamixel_torque[0] = jointstate.effort[1];
 
-  current_dynamixel_theta[1] = jointstate.position[2];
-  current_dynamixel_torque[1] = jointstate.effort[2];
+  current_dynamixel_theta[1] = (jointstate.position[0] + M_PI) * 180 / M_PI;
+  current_dynamixel_torque[1] = jointstate.effort[0];
 
-  current_dynamixel_theta[2] = jointstate.position[1];
-  current_dynamixel_torque[2] = jointstate.effort[1];
+  current_dynamixel_theta[2] = (jointstate.position[3] + M_PI) * 180 / M_PI;
+  current_dynamixel_torque[2] = jointstate.effort[3];
 
-  current_dynamixel_theta[3] = jointstate.position[0];
-  current_dynamixel_torque[3] = jointstate.effort[0];
+  current_dynamixel_theta[3] = (jointstate.position[2] + M_PI) * 180 / M_PI;
+  current_dynamixel_torque[3] = jointstate.effort[2];
 }
 
 //ロボットの現在角度を取得
@@ -147,7 +150,7 @@ void joyCallback(const sensor_msgs::Joy &controller) {
   }
   prev_reset = controller.buttons[1];
 #ifdef DEBUG
-  ROS_INFO("flag_all %d flag_semi_autonomous %d", flag_all, flag_semi_autonomous);
+  //ROS_INFO("flag_all %d flag_semi_autonomous %d", flag_all, flag_semi_autonomous);
 #endif
 }
 
@@ -167,13 +170,20 @@ int main(int argc, char **argv) {
   ros::Subscriber feedback_sub = n.subscribe("/dynamixel_workbench/joint_states", 10, jointStateCallback);
   ros::Subscriber gyro_sub = n.subscribe("gyro", 10, gyroCallback);
   ros::Subscriber controller_sub = n.subscribe("joy", 10, joyCallback);
-  ros::Rate loop_rate(45);
+  ros::Rate loop_rate(40);
   flipper position[4] = {0, 1, 2, 3};
   semiAutonomous robot_model(n);
   std_msgs::Float64MultiArray send;
   send.data.resize(4);
 
+  int k = 0;
   while (ros::ok()) {
+    k += 30;
+    if(k > 360) k = 0;
+    for(int i = 0; i < 4; ++i){
+      if(current_dynamixel_theta[i] <= 0)current_dynamixel_theta[i] = 360 + current_dynamixel_theta[i];
+      ROS_INFO("theta_ref[%d] %lf current_dynamixel_theta[%d] %lf", i, theta_ref[i], i, current_dynamixel_theta[i]);
+    }
     //半自動モードかどうか
     if (flag_semi_autonomous) {
       robot_model.main(theta_ref);
@@ -220,7 +230,9 @@ int main(int argc, char **argv) {
     }
     // pidCal();
     for (int i = 0; i < 4; ++i) {
-      send.data[i] = theta_ref[i];
+      if(theta_ref[i] > 360)theta_ref[i] = theta_ref[i] - 360;
+      //send.data[i] = theta_ref[i];
+      send.data[i] = k;
     }
     theta_front = theta_ref[0];
     theta_rear = theta_ref[2];

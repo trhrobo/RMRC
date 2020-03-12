@@ -29,7 +29,7 @@ int dynamixel::dynamixelSet(double goal_angle, double now_pos){
     goal_pos = goal_angle + 360 - now_angle;
   }
   //return (goal_pos / DYNAMIXEL_RESOLUTION_ANGLE) + now_pulse + (sum_revolutions * DYNAMIXEL_RESOLUTION);
-  std::cout << "goal_angle = " << goal_angle << " now_angle = " << now_angle << std::endl;
+//  std::cout << "goal_angle = " << goal_angle << " now_angle = " << now_angle << std::endl;
   return (goal_pos / DYNAMIXEL_RESOLUTION_ANGLE) + (now_pos_deg / DYNAMIXEL_RESOLUTION_ANGLE);
 }
 double dynamixel::dynamixelTimer(){
