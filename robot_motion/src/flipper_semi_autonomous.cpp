@@ -9,6 +9,7 @@
 #include <array>
 #include "robot_motion/semi_autonomous.h"
 #include "dynamixel/dynamixel.h"
+#include "dynamixel.cpp"
 #include <dynamixel_workbench_msgs/DynamixelCommand.h>
 
 using std::array;
@@ -113,10 +114,6 @@ void gyroCallback(const std_msgs::Float64 &msg) { gyro_robot = msg.data; }
 
 int flag_key{};
 bool buttons_reverse = false;
-bool flag_semi_autonomous = false;
-bool prev_semi_autonomous = false;
-bool flag_all = false;
-bool prev_all = false;
 bool flag_reset = false;
 bool prev_reset = false;
 array<double, 4> controller_key{};
@@ -133,25 +130,9 @@ void joyCallback(const sensor_msgs::Joy &controller) {
   if(controller.buttons[3] == true) controller_state = keyFlag::ALL;
   if(controller.buttons[8] == true) controller_state = keyFlag::AUTO;
   if(controller.buttons[1] == true) controller_state = keyFlag::NOMAL;
-  /*
-     if ((prev_all == false) and controller.buttons[3] == true) {
-     flag_all = !flag_all;
-     }
-     prev_all = controller.buttons[3];
-  // Xboxキーが押されたらflag_semi_autonomousを切り替える
-  if ((prev_semi_autonomous == false) and controller.buttons[8] == true) {
-  flag_semi_autonomous = !flag_semi_autonomous;
-  }
-  prev_semi_autonomous = controller.buttons[8];
   // Bキーで全てのフリッパーの角度を90°
-  if ((prev_reset == false) and controller.buttons[1] == true) {
-  flag_reset = !flag_reset;
-  }
+  if ((prev_reset == false) and controller.buttons[1] == true) flag_reset = !flag_reset;
   prev_reset = controller.buttons[1];
-#ifdef DEBUG
-  //ROS_INFO("flag_all %d flag_semi_autonomous %d", flag_all, flag_semi_autonomous);
-#endif
-*/
 }
 
 int main(int argc, char **argv) {
@@ -164,7 +145,7 @@ int main(int argc, char **argv) {
   ros::Subscriber controller_sub = n.subscribe("joy", 10, joyCallback);
   ros::Rate loop_rate(400);
   flipper position[4] = {0, 1, 2, 3};
-  dynamixel servo[4] = {front_right, front_left, rear_right, rear_left};
+  dynamixel<double> servo[4] = {front_right, front_left, rear_right, rear_left};
   semiAutonomous robot_model(n);
 
   dynamixel_workbench_msgs::DynamixelCommand srv;

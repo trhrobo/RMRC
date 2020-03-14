@@ -2,19 +2,22 @@
 #include<iostream>
 #include<cmath>
 
-dynamixel::dynamixel(int user_id) : _id(user_id){
+template<class T>
+dynamixel<T>::dynamixel(int user_id) : _id(user_id){
 }
 
-dynamixel::~dynamixel(){
+template<class T>
+dynamixel<T>::~dynamixel(){
 }
 
-int dynamixel::dynamixelSet(double goal_angle, double now_pos){
+template<class T>
+int dynamixel<T>::dynamixelSet(T goal_angle, T now_pos){
   //dynamixelのパルスがrosの場合だと定義が違う可能性があるので確認必要
   //現在の位置をdynamixel一回あたりのパルス数(定数で割る)
   //now_posはラジアンであるので一旦度数方に直す
-  double goal_pos;
+  T goal_pos;
   int sum_revolutions = static_cast<int>(now_pos / 360);
-  double now_angle = now_pos - (sum_revolutions * 360);
+  T now_angle = now_pos - (sum_revolutions * 360);
   //std::cout << "goal_angle = " << goal_angle << " now_angle = " << now_angle << std::endl;
   if(now_angle < 0)now_angle = 360 + now_angle;
   if(goal_angle - now_angle > 0 and goal_angle - now_angle < 180){
@@ -30,10 +33,14 @@ int dynamixel::dynamixelSet(double goal_angle, double now_pos){
 //  std::cout << "goal_angle = " << goal_angle << " now_angle = " << now_angle << std::endl;
   return (goal_pos / DYNAMIXEL_RESOLUTION_ANGLE) + (now_pos / DYNAMIXEL_RESOLUTION_ANGLE);
 }
-double dynamixel::dynamixelTimer(){
+template<class T>
+T dynamixel<T>::dynamixelTimer(){
 }
-double dynamixel::dynamixelReset(){
+template<class T>
+T dynamixel<T>::dynamixelReset(){
 }
-double dynamixel::angleCal(double goal_value) {
+template<class T>
+T dynamixel<T>::angleCal(T goal_value) {
   return goal_value;
 }
+
