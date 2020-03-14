@@ -63,37 +63,26 @@ namespace all {
     }
   }
 }
-//--------------------------------------------------------------------
-class flipper {
-  private:
-    int id;
+//-----------------------------------------------------------------
 
-  public:
-    flipper(int user_id);
-    void forward();
-    void reverse();
-};
-
-flipper::flipper(int user_id) { id = user_id; }
-
-void flipper::forward() {
-  ROS_INFO("FORWARD %d", id);
+using calc_f = void(*)(int);
+void setRotation(int id, calc_f func){
+  func(id);
+}
+void forward(int id){
   if ((current_dynamixel_theta[id] + 1 > theta_ref[id]) and (current_dynamixel_theta[id] - 1 < theta_ref[id])) {
     theta_ref[id] += 10;
   }else if ((current_dynamixel_theta[id] + 1 > theta_ref[id]) and (current_dynamixel_theta[id] > 355.5)) {
     theta_ref[id] += 10;
   }
 }
-
-void flipper::reverse() {
-  ROS_INFO("FORWARD %d", id);
+void reverse(int id){
   if ((current_dynamixel_theta[id] + 1 > theta_ref[id]) and (current_dynamixel_theta[id] - 1 < theta_ref[id])) {
     theta_ref[id] -= 10;
   }else if ((current_dynamixel_theta[id] + 1 > theta_ref[id]) and (current_dynamixel_theta[id] > 355.5)) {
     theta_ref[id] -= 10;
   }
 }
-
 //現在角度とトルクを取得
 void jointStateCallback(const sensor_msgs::JointState &jointstate) {
   current_dynamixel_theta[0] = (jointstate.position[1] + M_PI) * 180 / M_PI;
@@ -144,7 +133,6 @@ int main(int argc, char **argv) {
   ros::Subscriber gyro_sub = n.subscribe("gyro", 10, gyroCallback);
   ros::Subscriber controller_sub = n.subscribe("joy", 10, joyCallback);
   ros::Rate loop_rate(400);
-  flipper position[4] = {0, 1, 2, 3};
   dynamixel<double> servo[4] = {front_right, front_left, rear_right, rear_left};
   semiAutonomous robot_model(n);
 
@@ -165,10 +153,12 @@ int main(int argc, char **argv) {
       default:
         for(int i = 0; i < 4; ++i){
           if(controller_key[i] < 0){
-            buttons_reverse == 1 ? position[i].reverse() : position[i].forward();
+            //buttons_reverse == 1 ? position[i].reverse() : position[i].forward();
+            buttons_reverse == 1 ? setRotation(i, reverse) : setRotation(i, forward);
           }else{
             if((i == 2 or i == 3) && controller_key[i] == true){
-              buttons_reverse == 1 ? position[i].reverse() : position[i].forward();
+              //buttons_reverse == 1 ? position[i].reverse() : position[i].forward();
+              buttons_reverse == 1 ? setRotation(i, reverse) : setRotation(i, forward);
             }
           }
         }
