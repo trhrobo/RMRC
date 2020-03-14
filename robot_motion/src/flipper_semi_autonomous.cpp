@@ -6,12 +6,12 @@
 #include <std_msgs/Float64.h>
 #include <std_msgs/Float64MultiArray.h>
 #include <trajectory_msgs/JointTrajectory.h>
-#include <vector>
+#include <array>
 #include "robot_motion/semi_autonomous.h"
 #include "dynamixel/dynamixel.h"
 #include <dynamixel_workbench_msgs/DynamixelCommand.h>
 
-using std::vector;
+using std::array;
 
 #define DEBUG 1
 #define front_right 0
@@ -22,19 +22,16 @@ using std::vector;
 constexpr double original_theta = 90.0;
 constexpr double autonomous_max_theta = 75.0;
 constexpr double autonomous_min_theta = -90.0;
-constexpr double Kp = 1.0;
-constexpr double Kd = 1.0;
-constexpr double frequency = 45;
-vector<double> current_dynamixel_theta{0, 0, 0, 0};
-vector<double> current_dynamixel_torque{0, 0, 0, 0};
-vector<double> angle_goal{0, 0, 0, 0};
-vector<double> angle_now{0, 0, 0, 0};
+array<double, 4> current_dynamixel_theta{};
+array<double, 4> current_dynamixel_torque{};
 double theta_ref[4]{0, 0, 0, 0};
 double gyro_robot{};
-double theta_front{};
-double theta_rear{};
-double torque_front{};
-double torque_rear{};
+
+enum class keyFlag{
+  NOMAL = 0,
+  ALL,
+  AUTO
+};
 
 //------------------------------------------------------------------
 namespace all {
@@ -47,24 +44,19 @@ namespace all {
     }
     return true;
   }
-
   inline double reset() {
     for (int i = 0; i < 4; ++i) {
       theta_ref[i] = original_theta;
     }
   }
   inline double setForward() {
-    if (all::check()) {
-      theta_ref[0] += 1.3;
-    }
+    if (all::check()) theta_ref[0] += 1.3;
     for (int i = 1; i < 4; ++i) {
       theta_ref[i] = theta_ref[0];
     }
   }
   inline double setReverse() {
-    if (all::check()) {
-      theta_ref[0] -= 1.3;
-    }
+    if (all::check()) theta_ref[0] -= 1.3;
     for (int i = 1; i < 4; ++i) {
       theta_ref[i] = theta_ref[0];
     }
@@ -86,14 +78,7 @@ flipper::flipper(int user_id) { id = user_id; }
 void flipper::forward() {
   ROS_INFO("FORWARD %d", id);
   if ((current_dynamixel_theta[id] + 1 > theta_ref[id]) and (current_dynamixel_theta[id] - 1 < theta_ref[id])) {
-#ifdef DEBUG
-    ROS_INFO("OK_FORWARD %d", id);
-    ROS_INFO("theta_ref[%d] %lf current_dynamixel_theta[%d] %lf", id, theta_ref[id], id, current_dynamixel_theta[id]);
-#endif
     theta_ref[id] += 10;
-#ifdef DEBUG
-    ROS_INFO("theta_ref_result[%d] %lf", id, theta_ref[id]);
-#endif
   }else if ((current_dynamixel_theta[id] + 1 > theta_ref[id]) and (current_dynamixel_theta[id] > 355.5)) {
     theta_ref[id] += 10;
   }
@@ -102,28 +87,11 @@ void flipper::forward() {
 void flipper::reverse() {
   ROS_INFO("FORWARD %d", id);
   if ((current_dynamixel_theta[id] + 1 > theta_ref[id]) and (current_dynamixel_theta[id] - 1 < theta_ref[id])) {
-#ifdef DEBUG
-    ROS_INFO("OK_REVERSE %d", id);
-    ROS_INFO("theta_ref[%d] %lf current_dynamixel_theta[%d] %lf", id, theta_ref[id], id, current_dynamixel_theta[id]);
-#endif
     theta_ref[id] -= 10;
-#ifdef DEBUG
-    ROS_INFO("theta_ref_result[%d] %lf", id, theta_ref[id]);
-#endif
   }else if ((current_dynamixel_theta[id] + 1 > theta_ref[id]) and (current_dynamixel_theta[id] > 355.5)) {
     theta_ref[id] -= 10;
   }
 }
-/*
-void flipper::reverse() {
-  if ((current_dynamixel_theta[id] + 1 > theta_ref[id]) and (current_dynamixel_theta[id] - 1 < theta_ref[id])) {
-#ifdef DEBUG
-    ROS_INFO("OK_REVERSE %d", id);
-    ROS_INFO("theta_ref[%d] %lf current_dynamixel_theta[%d] %lf", id, theta_ref[id], id, current_dynamixel_theta[id]);
-#endif
-    theta_ref[id] -= 30;
-  }
-}*/
 
 //現在角度とトルクを取得
 void jointStateCallback(const sensor_msgs::JointState &jointstate) {
@@ -143,6 +111,7 @@ void jointStateCallback(const sensor_msgs::JointState &jointstate) {
 //ロボットの現在角度を取得
 void gyroCallback(const std_msgs::Float64 &msg) { gyro_robot = msg.data; }
 
+int flag_key{};
 bool buttons_reverse = false;
 bool flag_semi_autonomous = false;
 bool prev_semi_autonomous = false;
@@ -150,43 +119,39 @@ bool flag_all = false;
 bool prev_all = false;
 bool flag_reset = false;
 bool prev_reset = false;
-double axes_front_right = 0;
-double axes_front_left = 0;
-double buttons_rear_right = 0;
-double buttons_rear_left = 0;
+array<double, 4> controller_key{};
+
+keyFlag controller_state;
 
 //コントローラ値を入力
 void joyCallback(const sensor_msgs::Joy &controller) {
   buttons_reverse = controller.buttons[2];
-  axes_front_right = controller.axes[5];
-  axes_front_left = controller.axes[2];
-  buttons_rear_right = controller.buttons[5];
-  buttons_rear_left = controller.buttons[4];
-  if ((prev_all == false) and controller.buttons[3] == true) {
-    flag_all = !flag_all;
-  }
-  prev_all = controller.buttons[3];
+  controller_key[0] = controller.axes[5];
+  controller_key[1] = controller.axes[2];
+  controller_key[2] = controller.buttons[5];
+  controller_key[3] = controller.buttons[4];
+  if(controller.buttons[3] == true) controller_state = keyFlag::ALL;
+  if(controller.buttons[8] == true) controller_state = keyFlag::AUTO;
+  if(controller.buttons[1] == true) controller_state = keyFlag::NOMAL;
+  /*
+     if ((prev_all == false) and controller.buttons[3] == true) {
+     flag_all = !flag_all;
+     }
+     prev_all = controller.buttons[3];
   // Xboxキーが押されたらflag_semi_autonomousを切り替える
   if ((prev_semi_autonomous == false) and controller.buttons[8] == true) {
-    flag_semi_autonomous = !flag_semi_autonomous;
+  flag_semi_autonomous = !flag_semi_autonomous;
   }
   prev_semi_autonomous = controller.buttons[8];
   // Bキーで全てのフリッパーの角度を90°
   if ((prev_reset == false) and controller.buttons[1] == true) {
-    flag_reset = !flag_reset;
+  flag_reset = !flag_reset;
   }
   prev_reset = controller.buttons[1];
 #ifdef DEBUG
   //ROS_INFO("flag_all %d flag_semi_autonomous %d", flag_all, flag_semi_autonomous);
 #endif
-}
-
-//角度PID
-inline void pidCal() {
-  for (int i = 0; i < 4; ++i) {
-    theta_ref[i] = Kp * (theta_ref[i] - theta_rear) +
-      Kd * ((theta_ref[i] - theta_rear) / frequency);
-  }
+*/
 }
 
 int main(int argc, char **argv) {
@@ -203,61 +168,30 @@ int main(int argc, char **argv) {
   semiAutonomous robot_model(n);
 
   dynamixel_workbench_msgs::DynamixelCommand srv;
-  int k = 0;
   while (ros::ok()) {
-    /*while(angle_now[0] == 0.00){
-      ROS_INFO("NO\n");
-      ros::spinOnce();
-    }*/
     for(int i = 0; i < 4; ++i){
       if(current_dynamixel_theta[i] <= 0)current_dynamixel_theta[i] = 360 + current_dynamixel_theta[i];
     }
-    //半自動モードかどうか
-    if (flag_semi_autonomous) {
-      robot_model.main(theta_ref);
-      //全てのフリッパーを同じように動かすか
-    } else if (flag_all) {
-      if ((axes_front_right < 0) or (axes_front_left < 0)) {
-        all::setForward();
-      }
-      if ((buttons_rear_right == true) or (buttons_rear_left == true)) {
-        all::setReverse();
-      }
-      if (flag_reset) {
-        all::reset();
-      }
-      //個別でフリッパーを動かすか
-    } else {
-      if (buttons_reverse) {
-        if (axes_front_right < 0) {
-          ROS_INFO("OK\n");
-          position[0].reverse();
+    switch(controller_state){
+      case keyFlag::ALL:
+        if ((controller_key[0] < 0) or (controller_key[1] < 0)) all::setForward();
+        if ((controller_key[2] == true) or (controller_key[3] == true)) all::setReverse();
+        if (flag_reset) all::reset();
+        break;
+      case keyFlag::AUTO:
+        robot_model.main(theta_ref);
+        break;
+      default:
+        for(int i = 0; i < 4; ++i){
+          if(controller_key[i] < 0){
+            buttons_reverse == 1 ? position[i].reverse() : position[i].forward();
+          }else{
+            if((i == 2 or i == 3) && controller_key[i] == true){
+              buttons_reverse == 1 ? position[i].reverse() : position[i].forward();
+            }
+          }
         }
-        if (axes_front_left < 0) {
-          position[1].reverse();
-        }
-        if (buttons_rear_right) {
-          position[2].reverse();
-        }
-        if (buttons_rear_left) {
-          position[3].reverse();
-        }
-      } else {
-        if (axes_front_right < 0) {
-          position[0].forward();
-        }
-        if (axes_front_left < 0) {
-          position[1].forward();
-        }
-        if (buttons_rear_right) {
-          position[2].forward();
-        }
-        if (buttons_rear_left) {
-          position[3].forward();
-        }
-      }
     }
-    // pidCal();
     for (int i = 0; i < 4; ++i) {
       if(theta_ref[i] > 360)theta_ref[i] = theta_ref[i] - 360;
       ROS_INFO("theta_ref[%d] %lf current_dynamixel_theta[%d] %lf", i, theta_ref[i], i, current_dynamixel_theta[i]);
@@ -267,8 +201,6 @@ int main(int argc, char **argv) {
       srv.request.value = servo[i].dynamixelSet(theta_ref[i], current_dynamixel_theta[i]);
       dynamixel_service.call(srv);
     }
-    theta_front = theta_ref[0];
-    theta_rear = theta_ref[2];
     ros::spinOnce();
     loop_rate.sleep();
   }
