@@ -34,8 +34,10 @@ enum class keyFlag{
   AUTO
 };
 
-//------------------------------------------------------------------
+//-----------------------------------------------------------------
+
 namespace all {
+  using calc_f = void(*)();
   bool check() {
     for (int i = 0; i < 4; ++i) {
       if ((current_dynamixel_theta[i] + 1 > theta_ref[i]) and (current_dynamixel_theta[i] - 1 < theta_ref[i])) {
@@ -45,42 +47,39 @@ namespace all {
     }
     return true;
   }
-  inline double reset() {
-    for (int i = 0; i < 4; ++i) {
-      theta_ref[i] = original_theta;
-    }
+  void setRotation(calc_f func){
+    func();
   }
-  inline double setForward() {
+  void reset() {for (int i = 0; i < 4; ++i) {theta_ref[i] = original_theta;}}
+  void forward() {
     if (all::check()) theta_ref[0] += 1.3;
-    for (int i = 1; i < 4; ++i) {
-      theta_ref[i] = theta_ref[0];
-    }
+    for (int i = 1; i < 4; ++i) {theta_ref[i] = theta_ref[0];}
   }
-  inline double setReverse() {
+  void reverse() {
     if (all::check()) theta_ref[0] -= 1.3;
-    for (int i = 1; i < 4; ++i) {
-      theta_ref[i] = theta_ref[0];
-    }
+    for (int i = 1; i < 4; ++i) {theta_ref[i] = theta_ref[0];}
   }
 }
 //-----------------------------------------------------------------
 
-using calc_f = void(*)(int);
-void setRotation(int id, calc_f func){
-  func(id);
-}
-void forward(int id){
-  if ((current_dynamixel_theta[id] + 1 > theta_ref[id]) and (current_dynamixel_theta[id] - 1 < theta_ref[id])) {
-    theta_ref[id] += 10;
-  }else if ((current_dynamixel_theta[id] + 1 > theta_ref[id]) and (current_dynamixel_theta[id] > 355.5)) {
-    theta_ref[id] += 10;
+namespace nomal{
+  using calc_f = void(*)(int);
+  void setRotation(int id, calc_f func){
+    func(id);
   }
-}
-void reverse(int id){
-  if ((current_dynamixel_theta[id] + 1 > theta_ref[id]) and (current_dynamixel_theta[id] - 1 < theta_ref[id])) {
-    theta_ref[id] -= 10;
-  }else if ((current_dynamixel_theta[id] + 1 > theta_ref[id]) and (current_dynamixel_theta[id] > 355.5)) {
-    theta_ref[id] -= 10;
+  void forward(int id){
+    if ((current_dynamixel_theta[id] + 1 > theta_ref[id]) and (current_dynamixel_theta[id] - 1 < theta_ref[id])) {
+      theta_ref[id] += 10;
+    }else if ((current_dynamixel_theta[id] + 1 > theta_ref[id]) and (current_dynamixel_theta[id] > 355.5)) {
+      theta_ref[id] += 10;
+    }
+  }
+  void reverse(int id){
+    if ((current_dynamixel_theta[id] + 1 > theta_ref[id]) and (current_dynamixel_theta[id] - 1 < theta_ref[id])) {
+      theta_ref[id] -= 10;
+    }else if ((current_dynamixel_theta[id] + 1 > theta_ref[id]) and (current_dynamixel_theta[id] > 355.5)) {
+      theta_ref[id] -= 10;
+    }
   }
 }
 //現在角度とトルクを取得
@@ -143,8 +142,8 @@ int main(int argc, char **argv) {
     }
     switch(controller_state){
       case keyFlag::ALL:
-        if ((controller_key[0] < 0) or (controller_key[1] < 0)) all::setForward();
-        if ((controller_key[2] == true) or (controller_key[3] == true)) all::setReverse();
+        if ((controller_key[0] < 0) or (controller_key[1] < 0)) all::setRotation(all::forward);
+        if ((controller_key[2] == true) or (controller_key[3] == true)) all::setRotation(all::reverse);
         if (flag_reset) all::reset();
         break;
       case keyFlag::AUTO:
@@ -153,18 +152,17 @@ int main(int argc, char **argv) {
       default:
         for(int i = 0; i < 4; ++i){
           if(controller_key[i] < 0){
-            //buttons_reverse == 1 ? position[i].reverse() : position[i].forward();
-            buttons_reverse == 1 ? setRotation(i, reverse) : setRotation(i, forward);
+            buttons_reverse == 1 ? nomal::setRotation(i, nomal::reverse) : nomal::setRotation(i, nomal::forward);
           }else{
             if((i == 2 or i == 3) && controller_key[i] == true){
-              //buttons_reverse == 1 ? position[i].reverse() : position[i].forward();
-              buttons_reverse == 1 ? setRotation(i, reverse) : setRotation(i, forward);
+              buttons_reverse == 1 ? nomal::setRotation(i, nomal::reverse) : nomal::setRotation(i, nomal::forward);
             }
           }
         }
     }
     for (int i = 0; i < 4; ++i) {
-      if(theta_ref[i] > 360)theta_ref[i] = theta_ref[i] - 360;
+      if(theta_ref[i] > 360)theta_ref[i] -= 360;
+      if(theta_ref[i] > 0)theta_ref[i] += 360;
       ROS_INFO("theta_ref[%d] %lf current_dynamixel_theta[%d] %lf", i, theta_ref[i], i, current_dynamixel_theta[i]);
       srv.request.command = "_";
       srv.request.id = i + 1;
