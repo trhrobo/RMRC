@@ -20,7 +20,7 @@ typedef struct{
   vector<double> POSE_2{0, 0};
 }dynamixelPose;
 
-class SemiAutonomousBase{
+class SemiAutoBase{
   protected:
     ros::Subscriber tof_sub;
     vector<double> current_dynamixel_pose{0, 0, 0, 0};
@@ -31,43 +31,44 @@ class SemiAutonomousBase{
     double goal_pose_right;
     double goal_pose_left;
   public:
-    SemiAutonomousBase(ros::NodeHandle _n);
+    SemiAutoBase(ros::NodeHandle _n);
     void init();
     void dynamixelCallback(const sensor_msgs::JointState &jointstate);
     void gyroCallback(const std_msgs::Float64 &msg);
     void tofCallback(const std_msgs::Float64MultiArray &msg);
     bool dynamixelLoad();
-    virtual void mainSemiAutonomous(double (&set_array)[4]) = 0;
+    virtual void mainSemiAuto(double (&set_array)[4]) = 0;
     virtual double psdCurve() = 0;
 };
 
-class SemiAutonomousFront : public SemiAutonomousBase{
+class SemiAutoFront : public SemiAutoBase{
   private:
     ros::Subscriber psd_front_sub;
     dynamixelPose poseParamFront;
   public:
-    SemiAutonomousFront(ros::NodeHandle _n);
+    SemiAutoFront(ros::NodeHandle _n);
     double psdCurve() override;
-    void mainSemiAutonomous(double (&set_array)[4]) override;
+    void mainSemiAuto(double (&set_array)[4]) override;
 };
 
-class SemiAutonomousRear : public SemiAutonomousBase{
+class SemiAutoRear : public SemiAutoBase{
   private:
     ros::Subscriber psd_rear_sub;
     dynamixelPose poseParamRear;
   public:
-    SemiAutonomousRear(ros::NodeHandle _n);
+    SemiAutoRear(ros::NodeHandle _n);
     double psdCurve() override;
-    void mainSemiAutonomous(double (&set_array)[4]) override;
+    void mainSemiAuto(double (&set_array)[4]) override;
 };
 
-class semiAutonomous{
+class semiAuto{
   private:
-    SemiAutonomousFront *front;
-    SemiAutonomousRear *rear;
+    SemiAutoFront *front;
+    SemiAutoRear *rear;
   public:
-    semiAutonomous(ros::NodeHandle _n);
-    ~semiAutonomous();
+    semiAuto(ros::NodeHandle _n);
+    ~semiAuto();
     void main(double (&set_array)[4]);
+    void poseEstimation(){}
 };
 #endif

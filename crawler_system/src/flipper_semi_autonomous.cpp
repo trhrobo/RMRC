@@ -229,7 +229,7 @@ int main(int argc, char **argv) {
   ros::Subscriber controller_sub = n.subscribe("joy", 10, joyCallback);
   ros::Rate loop_rate(400);
   dynamixel<double> servo[4] = {front_right, front_left, rear_right, rear_left};
-  semiAutonomous robot_model(n);
+  semiAuto robot_model(n);
 
   dynamixel_workbench_msgs::DynamixelCommand srv;
   while (ros::ok()) {

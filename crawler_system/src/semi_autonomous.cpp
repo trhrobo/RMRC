@@ -1,26 +1,26 @@
 #include"robot_motion/semi_autonomous.h"
 
-SemiAutonomousBase::SemiAutonomousBase(ros::NodeHandle _n){
-  tof_sub = _n.subscribe("tof_sub", 10, &SemiAutonomousBase::tofCallback, this);
+SemiAutoBase::SemiAutoBase(ros::NodeHandle _n){
+  tof_sub = _n.subscribe("tof_sub", 10, &SemiAutoBase::tofCallback, this);
 }
-void SemiAutonomousBase::init(){
+void SemiAutoBase::init(){
 }
-void SemiAutonomousBase::tofCallback(const std_msgs::Float64MultiArray &msg){
+void SemiAutoBase::tofCallback(const std_msgs::Float64MultiArray &msg){
   for(int i = 0; i < 4; ++i){
     tof_distance[i] = msg.data[i];
   }
 }
-bool SemiAutonomousBase::dynamixelLoad(){
+bool SemiAutoBase::dynamixelLoad(){
 }
 
-SemiAutonomousFront::SemiAutonomousFront(ros::NodeHandle _n) : SemiAutonomousBase(_n){
+SemiAutoFront::SemiAutoFront(ros::NodeHandle _n) : SemiAutoBase(_n){
   poseParamFront.POSE_1 = {60, 60};
   poseParamFront.POSE_2 = {20, 20};
 }
-double SemiAutonomousFront::psdCurve(){
+double SemiAutoFront::psdCurve(){
   return -(tof_distance[0] * tof_distance[0] / 250) + 40;
 }
-void SemiAutonomousFront::mainSemiAutonomous(double (&set_array)[4]){
+void SemiAutoFront::mainSemiAuto(double (&set_array)[4]){
   bool flag_dynamixel_load = this -> dynamixelLoad();
   //接地判定 && 閾値以内に障害物があるかどうかの判定
   if(tof_distance[1] < DISTANCE_THRESHOLD_DOWN && tof_distance[0] < DISTANCE_THRESHOLD_FORWARD){
@@ -32,13 +32,13 @@ void SemiAutonomousFront::mainSemiAutonomous(double (&set_array)[4]){
   }
 }
 
-SemiAutonomousRear::SemiAutonomousRear(ros::NodeHandle _n) : SemiAutonomousBase(_n){
+SemiAutoRear::SemiAutoRear(ros::NodeHandle _n) : SemiAutoBase(_n){
   poseParamRear.POSE_1 = {60, 60};
   poseParamRear.POSE_2 = {20, 20};
 }
-double SemiAutonomousRear::psdCurve(){
+double SemiAutoRear::psdCurve(){
 }
-void SemiAutonomousRear::mainSemiAutonomous(double (&set_array)[4]){
+void SemiAutoRear::mainSemiAuto(double (&set_array)[4]){
   if(tof_distance[1] > DISTANCE_THRESHOLD_DOWN && tof_distance[3] > DISTANCE_THRESHOLD_DOWN && tof_distance[0] > DISTANCE_THRESHOLD_FORWARD){
     set_array[2] = psdCurve();
     set_array[3] = psdCurve();
@@ -50,15 +50,15 @@ void SemiAutonomousRear::mainSemiAutonomous(double (&set_array)[4]){
   }
 }
 
-semiAutonomous::semiAutonomous(ros::NodeHandle _n){
-  front = new SemiAutonomousFront(_n);
-  rear = new SemiAutonomousRear(_n);
+semiAuto::semiAuto(ros::NodeHandle _n){
+  front = new SemiAutoFront(_n);
+  rear = new SemiAutoRear(_n);
 }
-semiAutonomous::~semiAutonomous(){
+semiAuto::~semiAuto(){
   delete front;
   delete rear;
 }
-void semiAutonomous::main(double (&set_array)[4]){
-  front->mainSemiAutonomous(set_array);
-  rear->mainSemiAutonomous(set_array);
+void semiAuto::main(double (&set_array)[4]){
+  front->mainSemiAuto(set_array);
+  rear->mainSemiAuto(set_array);
 }
