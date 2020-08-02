@@ -31,10 +31,10 @@ int dynamixel<T>::dynamixelSet(T goal_angle, T now_pos){
   }
   //return (goal_pos / DYNAMIXEL_RESOLUTION_ANGLE) + now_pulse + (sum_revolutions * DYNAMIXEL_RESOLUTION);
 //  std::cout << "goal_angle = " << goal_angle << " now_angle = " << now_angle << std::endl;
-  return (goal_pos / DYNAMIXEL_RESOLUTION_ANGLE) + (now_pos / DYNAMIXEL_RESOLUTION_ANGLE);
+  return(this -> torqueFB(goal_pos / DYNAMIXEL_RESOLUTION_ANGLE) + (now_pos / DYNAMIXEL_RESOLUTION_ANGLE));
 }
 template<class T>
-T dynamixel<T>::dynamixelTimer(){
+T dynamixel<T>::dynamixelTimer(){する
 }
 template<class T>
 T dynamixel<T>::dynamixelReset(){
@@ -43,4 +43,6 @@ template<class T>
 T dynamixel<T>::angleCal(T goal_value) {
   return goal_value;
 }
-
+int torqueFB(int goal_pos){
+  //ハイブリッド制御をする
+}

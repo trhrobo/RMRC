@@ -1,17 +1,16 @@
-cmake_minimum_required(VERSION 2.8.3)
-project(sensor)
+cmake_minimum_required(VERSION 3.0.2)
+project(ros_raspi)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-add_compile_options(-std=c++11)
+# add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  geometry_msgs
   roscpp
-  rospy
   std_msgs
-  sensor_msgs
   tf
 )
 
@@ -72,7 +71,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
-#   std_msgs
+#   geometry_msgs#   std_msgs
 # )
 
 ################################################
@@ -106,8 +105,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES sensor
-#  CATKIN_DEPENDS roscpp rospy std_msgs
+#  LIBRARIES ros_raspi
+#  CATKIN_DEPENDS geometry_msgs roscpp std_msgs tf
 #  DEPENDS system_lib
 )
 
@@ -118,13 +117,13 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
- include
- ${catkin_INCLUDE_DIRS}
+# include
+  ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/sensor.cpp
+#   src/${PROJECT_NAME}/ros_raspi.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -135,14 +134,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/sensor_node.cpp)
-#add_executable(encoder src/encoder.cpp)
-add_executable(encoder_speed src/encoder_speed.cpp src/encoder.cpp)
-add_executable(gy521 src/gy521.cpp)
-add_executable(gy521_pose src/gy521_pose.cpp)
-add_executable(gy521_yaw src/gy521_yaw.cpp)
-add_executable(gy521_pitch src/gy521_pitch.cpp)
-add_executable(md src/md.cpp src/vnh5019.cpp)
+# add_executable(${PROJECT_NAME}_node src/ros_raspi_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -158,37 +150,7 @@ add_executable(md src/md.cpp src/vnh5019.cpp)
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
-#target_link_libraries(encoder
-#  pigpiod_if2
-#  ${catkin_LIBRARIES}
-#)
-target_link_libraries(encoder_speed
-  ${catkin_LIBRARIES}
-  pigpiod_if2
-)
-target_link_libraries(gy521
-  ${catkin_LIBRARIES}
-  pigpiod_if2
-)
-target_link_libraries(gy521_pose
-  ${catkin_LIBRARIES}
-)
-target_link_libraries(gy521_yaw
-  pigpiod_if2
-  ${catkin_LIBRARIES}
-)
-target_link_libraries(gy521_pitch
-  pigpiod_if2
-  ${catkin_LIBRARIES}
-)
-#target_link_libraries(vnh5019
-#  pigpiod_if2
-#  ${catkin_LIBRARIES}
-#)
-target_link_libraries(md
-  pigpiod_if2
-  ${catkin_LIBRARIES}
-)
+
 #############
 ## Install ##
 #############
@@ -198,7 +160,7 @@ target_link_libraries(md
 
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
-# install(PROGRAMS
+# catkin_install_python(PROGRAMS
 #   scripts/my_python_script
 #   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 # )
@@ -236,7 +198,7 @@ target_link_libraries(md
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_sensor.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_ros_raspi.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
