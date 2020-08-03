@@ -1,3 +1,8 @@
+/**
+ * @file dynamixel.cpp
+
+ * @brief dynamixel受信実装
+**/
 #include"dynamixel/dynamixel.h"
 #include<iostream>
 #include<cmath>

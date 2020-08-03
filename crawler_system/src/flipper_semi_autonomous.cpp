@@ -1,3 +1,8 @@
+/**
+ * @file flipper_semi_autonomous.cpp
+
+ * @brief flipper制御の実装
+**/
 #include <cmath>
 #include <ros/ros.h>
 #include <ros/time.h>
@@ -38,6 +43,15 @@ array<double, 4> current_dynamixel_torque{};
 array<double, 4> theta_ref{};
 array<double, 4> pos_ref{};
 
+template<typename T>
+inline T degToRad(const T deg){
+  return deg * (M_PI / 180.0);
+}
+template<typename T>
+inline T radToDeg(const T rad){
+  return rad * (180.0 / M_PI);
+}
+
 enum class keyFlag{
   NOMAL = 0,
   ALL,
@@ -57,37 +71,41 @@ namespace safetyCheck{
 }
 
 namespace all{
-  using calc_f = void(*)();
-  void setRotation(calc_f func){
-    func();
+  //using calc_f = void(*)();
+  //関数ポインタの使い方を間違えている
+  std::function<void(void)> calc_f;
+  explicit void setRotation(const calc_f Func){
+    Func();
   }
-  void reset() {for (int i = 0; i < 4; ++i) {theta_ref[i] = original_theta;}}
+  void reset() {for (int i = 0; i < dynamixel_num.size(); ++i) {theta_ref[i] = original_theta;}}
   void forward() {
     theta_ref[0] = MAX_POSITION_VALUE;
-    for (int i = 1; i < 4; ++i) {theta_ref[i] = theta_ref[0];}
+    for (int i = 1; i < dynamixel_num.size(); ++i) {theta_ref[i] = theta_ref[0];}
   }
   void reverse() {
     theta_ref[0] = MIN_POSITION_VALUE;
-    for (int i = 1; i < 4; ++i) {theta_ref[i] = theta_ref[0];}
+    for (int i = 1; i < dynamixel_num.size(); ++i) {theta_ref[i] = theta_ref[0];}
   }
   void nomal(){
-    for (int i = 1; i < 4; ++i) {theta_ref[i] = theta_ref[0];}
+    for (int i = 1; i < dynamixel_num.size(); ++i) {theta_ref[i] = theta_ref[0];}
   }
 }
 //-----------------------------------------------------------------
 
 namespace nomal{
-  using calc_f = void(*)(int);
-  void setRotation(int id, calc_f func){
-    func(id);
+  //using calc_f = void(*)(int);
+  //関数ポインタの使い方を間違えている
+  std::function<void(void)> calc_f;
+  explicit void setRotation(const int id, const calc_f Func){
+    Func(id);
   }
-  void forward(int id){
+  void forward(const int id){
     pos_ref[id] = MAX_POSITION_VALUE;
   }
-  void reverse(int id){
+  void reverse(const int id){
     pos_ref[id] = MIN_POSITION_VALUE;
   }
-  void nomal(int id){
+  void nomal(const int id){
     pos_ref[id] = current_dynamixel_pos;
   }
 }
@@ -103,7 +121,7 @@ namespace gyroControl{
     constexpr double threshold_forward_z = 330;
     constexpr double threshold_backward_z = 30;
     Lean leanState;
-    auto leanCheck = [&](double angle_z) -> Lean{
+    auto leanCheck = [&](const double angle_z) -> Lean{
       Lean leanNow;
       if(angle_z > threshold_forward_z){
         leanState = Lean::forward;
@@ -131,11 +149,16 @@ namespace gyroControl{
 constexpr double Kp = 1.0;
 constexpr double Kd = 1.0;
 namespace DynamixelControl{
-  double TorqueControl(float theta_d){
+  template<typename T>
+  T TorqueControl(T theta_d){
     //トルク制御の実装
     //重力補償項の追加
-    double gravity_compensation = flipper_m * gravity * cos(theta_now);
-    return Kp * (theta_d - theta_now) - Kd * (angular) + gravity_compensation;
+    T gravity_compensation = flipper_m * gravity * cos(degToRad(theta_now));
+    return radToDeg<double>(Kp * (degToRad<double>(theta_d) - degToRad<double>(theta_now)) - Kd * (angular) + gravity_compensation);
+  }
+  template<typename T>
+  T PosControl(T theta_d){
+
   }
 }
 //現在角度とトルクを取得
@@ -144,7 +167,7 @@ constexpr array<int, 4> dynamixel_num{0, 1, 3, 2};
 void jointStateCallback(const sensor_msgs::JointState &jointstate) {
   for(int i = 0; i < dynamixel_num.size(); ++i){
     current_dynamixel_pos[i] = jointstate.position[dynamixel_num[i]];
-    current_dynamixel_theta[i] = (jointstate.position[dynamixel_num[i]] + M_PI) * 180 / M_PI;
+    current_dynamixel_theta[i] = degToRad<double>((jointstate.position[dynamixel_num[i]] + M_PI));
     current_dynamixel_torque[i] = jointstate.effort[dynamixel_num[i]];
   }
 }
@@ -160,14 +183,22 @@ Gyro<double> gyro_robot;
 
 //ロボットの現在角度を取得
 //rosのtfに合わせてあとで型を変える
+namespace RobotState{
 void gyroCallback(const std_msgs::Float64 &msg) {
-  auto []
   gyro_robot.x = msg.data.x;
   gyro_robot.y = msg.data.y;
   gyro_robot.z = msg.data.z;
 }
+void stateManagement(){
+  //ロボットの前後を入れ替える
+  if(front_flag == true){
+    //配列番号を変える
+    std::swap(dynamixel_num[0], dynamixel_num[2]);
+    std::swap(dynamixel_num[1], dynamixel_num[3]);
+  }
+}
+}
 
-int flag_key{};
 bool buttons_reverse = false;
 bool flag_reset = false;
 bool prev_reset = false;
@@ -207,7 +238,7 @@ bool serviceCallPos(dynamixel &servo){
 
 bool serviceCallTheta(dynamixel &servo){
   for (int i = 0; i < dynamixel_num.size(); ++i) {
-    if(theta_ref[i] > 360)theta_ref[i] -= 360;
+    if(theta_ref[i] > 360)[i] -= 360;
     if(theta_ref[i] > 0)theta_ref[i] += 360;
     ROS_INFO("theta_ref[%d] %lf current_dynamixel_theta[%d] %lf", i, theta_ref[i], i, current_dynamixel_theta[i]);
     srv.request.command = "_";

@@ -1,3 +1,8 @@
+/**
+ * @file semi_autonomous.cpp
+
+ * @brief semi_autonomous.hの実装
+**/
 #include"robot_motion/semi_autonomous.h"
 
 SemiAutoBase::SemiAutoBase(ros::NodeHandle _n){

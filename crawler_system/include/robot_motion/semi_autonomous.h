@@ -1,3 +1,7 @@
+ /**
+ * @file semi_autonomous.h
+ * @brief 半自動制御モード
+**/
 #ifndef SEMI_AUTONOMOUS_H
 #define SEMI_AUTONOMOUS_H
 
