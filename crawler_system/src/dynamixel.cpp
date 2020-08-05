@@ -39,7 +39,7 @@ int dynamixel<T>::dynamixelSet(T goal_angle, T now_pos){
   return(this -> torqueFB(goal_pos / DYNAMIXEL_RESOLUTION_ANGLE) + (now_pos / DYNAMIXEL_RESOLUTION_ANGLE));
 }
 template<class T>
-T dynamixel<T>::dynamixelTimer(){する
+T dynamixel<T>::dynamixelTimer(){
 }
 template<class T>
 T dynamixel<T>::dynamixelReset(){

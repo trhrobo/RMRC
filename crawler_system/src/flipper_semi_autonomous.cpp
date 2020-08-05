@@ -35,6 +35,10 @@ constexpr double autonomous_max_theta = 75.0;
 constexpr double autonomous_min_theta = -90.0;
 constexpr int MAX_POSITION_VALUE = 1048575;
 constexpr int MIN_POSITION_VALUE = -1048575;
+
+constexpr int DYNAMIXEL_RESOLUTION = 4096
+constexpr double DYNAMIXEL_RESOLUTION_ANGLE = 0.088
+
 constexpr bool TORQUE_ENABLE = 1;
 constexpr bool TORQUE_DISABLE = 0;
 array<double, 4> current_dynamixel_pos{};
@@ -148,27 +152,96 @@ namespace gyroControl{
 
 constexpr double Kp = 1.0;
 constexpr double Kd = 1.0;
-namespace DynamixelControl{
-  template<typename T>
-  T TorqueControl(T theta_d){
-    //トルク制御の実装
-    //重力補償項の追加
-    T gravity_compensation = flipper_m * gravity * cos(degToRad(theta_now));
-    return radToDeg<double>(Kp * (degToRad<double>(theta_d) - degToRad<double>(theta_now)) - Kd * (angular) + gravity_compensation);
-  }
-  template<typename T>
-  T PosControl(T theta_d){
+namespace DXLControl{
+  public:
+    enum class MODE{
+      POSE_CONTROL,
+      TORQUE_CONTROL
+    }
+    template<MODE dxl_mode>
+    class DXLControl(){
+      explicit DXLControl(int _ID):DXL_ID(_ID){
+        if(dxl_mode == MODE::POSE_CONTROL){
 
+        }else if(dxl_mode == MODE::TORQUE_CONTROL){
+
+        }else{
+          ROS_ERROR("this dynamixel mode is not appropriate.");
+        }
+      } 
+      template<typename T>
+      bool TorqueControl(T theta_d){
+        //トルク制御の実装
+        //重力補償項の追加
+        T gravity_compensation = flipper_m * gravity * cos(degToRad(theta_now));
+        return radToDeg<double>(Kp * (degToRad<double>(theta_d) - degToRad<double>(theta_now)) - Kd * (angular) + gravity_compensation);
+      }
+      template<typename T>
+      bool PosControl(T theta_d){
+
+      }
+    private:
+      constexpr int DXL_ID;
+  };
+  template<class T>
+  int dynamixelSet(T goal_angle, T now_pos){
+    //dynamixelのパルスがrosの場合だと定義が違う可能性があるので確認必要
+    //現在の位置をdynamixel一回あたりのパルス数(定数で割る)
+    //now_posはラジアンであるので一旦度数方に直す
+    T goal_pos;
+    int sum_revolutions = static_cast<int>(now_pos / 360);
+    T now_angle = now_pos - (sum_revolutions * 360);
+    //std::cout << "goal_angle = " << goal_angle << " now_angle = " << now_angle << std::endl;
+    if(now_angle < 0)now_angle = 360 + now_angle;
+    if(goal_angle - now_angle > 0 and goal_angle - now_angle < 180){
+      goal_pos = goal_angle - now_angle;
+    }else if(goal_angle - now_angle > 0 and goal_angle - now_angle > 180){
+      goal_pos = -(now_angle + 360 - goal_angle);
+    }else if(now_angle - goal_angle > 0 and now_angle - goal_angle < 180){
+      goal_pos = -(now_angle - goal_angle);
+    }else if(now_angle - goal_angle > 0 ){
+      goal_pos = goal_angle + 360 - now_angle;
+    }
+    //return (goal_pos / DYNAMIXEL_RESOLUTION_ANGLE) + now_pulse + (sum_revolutions * DYNAMIXEL_RESOLUTION);
+    //  std::cout << "goal_angle = " << goal_angle << " now_angle = " << now_angle << std::endl;
+    return(this -> torqueFB(goal_pos / DYNAMIXEL_RESOLUTION_ANGLE) + (now_pos / DYNAMIXEL_RESOLUTION_ANGLE));
   }
-}
-//現在角度とトルクを取得
-//dynamixelIDとjointstateの順番が違う
-constexpr array<int, 4> dynamixel_num{0, 1, 3, 2};
-void jointStateCallback(const sensor_msgs::JointState &jointstate) {
-  for(int i = 0; i < dynamixel_num.size(); ++i){
-    current_dynamixel_pos[i] = jointstate.position[dynamixel_num[i]];
-    current_dynamixel_theta[i] = degToRad<double>((jointstate.position[dynamixel_num[i]] + M_PI));
-    current_dynamixel_torque[i] = jointstate.effort[dynamixel_num[i]];
+  //NodeHandleとかもグローバル宣言にしたほうがいいかも
+  ros::ServiceClient dynamixel_service;
+  bool serviceCallPos(){
+    for(int i = 0; i < dynamixel_num.size(); ++i){
+      srv.request.command = "_";
+      srv.request.id = i + 1;
+      srv.request.addr_name = "Goal_Position";
+      srv.request.value = pos_ref[i];
+      dynamixel_service.call(srv);
+    }
+    //いるかあとで考える
+    ros::spinOnce();
+    return 
+  }
+  bool serviceCallTheta(){
+    for (int i = 0; i < dynamixel_num.size(); ++i) {
+      if(theta_ref[i] > 360)[i] -= 360;
+      if(theta_ref[i] > 0)theta_ref[i] += 360;
+      ROS_INFO("theta_ref[%d] %lf current_dynamixel_theta[%d] %lf", i, theta_ref[i], i, current_dynamixel_theta[i]);
+      srv.request.command = "_";
+      srv.request.id = i + 1;
+      srv.request.addr_name = "Goal_Position";
+      srv.request.value = dynamixelSet(theta_ref[i], current_dynamixel_theta[i]);
+      dynamixel_service.call(srv);
+    }
+    ros::spinOnce();
+  }
+  //現在角度とトルクを取得
+  //dynamixelIDとjointstateの順番が違う
+  constexpr array<int, 4> dynamixel_num{0, 1, 3, 2};
+  void jointStateCallback(const sensor_msgs::JointState &jointstate) {
+    for(int i = 0; i < dynamixel_num.size(); ++i){
+      current_dynamixel_pos[i] = jointstate.position[dynamixel_num[i]];
+      current_dynamixel_theta[i] = degToRad<double>((jointstate.position[dynamixel_num[i]] + M_PI));
+      current_dynamixel_torque[i] = jointstate.effort[dynamixel_num[i]];
+    }
   }
 }
 
@@ -221,35 +294,6 @@ void joyCallback(const sensor_msgs::Joy &controller) {
   prev_reset = controller.buttons[1];
 }
 
-//NodeHandleとかもグローバル宣言にしたほうがいいかも
-ros::ServiceClient dynamixel_service;
-bool serviceCallPos(dynamixel &servo){
-  for(int i = 0; i < dynamixel_num.size(); ++i){
-    srv.request.command = "_";
-    srv.request.id = i + 1;
-    srv.request.addr_name = "Goal_Position";
-    srv.request.value = pos_ref[i];
-    dynamixel_service.call(srv);
-  }
-  //いるかあとで考える
-  ros::spinOnce();
-  return 
-}
-
-bool serviceCallTheta(dynamixel &servo){
-  for (int i = 0; i < dynamixel_num.size(); ++i) {
-    if(theta_ref[i] > 360)[i] -= 360;
-    if(theta_ref[i] > 0)theta_ref[i] += 360;
-    ROS_INFO("theta_ref[%d] %lf current_dynamixel_theta[%d] %lf", i, theta_ref[i], i, current_dynamixel_theta[i]);
-    srv.request.command = "_";
-    srv.request.id = i + 1;
-    srv.request.addr_name = "Goal_Position";
-    srv.request.value = servo[i].dynamixelSet(theta_ref[i], current_dynamixel_theta[i]);
-    dynamixel_service.call(srv);
-  }
-  ros::spinOnce();
-}
-
 int main(int argc, char **argv) {
   ros::init(argc, argv, "semi_autonomous");
   ros::NodeHandle n;
@@ -259,7 +303,7 @@ int main(int argc, char **argv) {
   ros::Subscriber gyro_sub = n.subscribe("gyro", 10, gyroCallback);
   ros::Subscriber controller_sub = n.subscribe("joy", 10, joyCallback);
   ros::Rate loop_rate(400);
-  dynamixel<double> servo[4] = {front_right, front_left, rear_right, rear_left};
+  DXLControl servo[4] = {front_right, front_left, rear_right, rear_left};
   semiAuto robot_model(n);
 
   dynamixel_workbench_msgs::DynamixelCommand srv;
@@ -278,12 +322,14 @@ int main(int argc, char **argv) {
         }else{
           all::nomal();
         }
+        //トルク制御か位置制御か
         serviceCallPos(servo);
         break;
 
+      //半自動制御モード
       case keyFlag::AUTO:
         robot_model.main(theta_ref);
-        serviceCallTheta(servo);
+        serviceCallTheta();
         break;
 
       default:
@@ -296,7 +342,7 @@ int main(int argc, char **argv) {
             }
           }
         }
-        serviceCallPos(servo);
+        serviceCallPos();
         break;
     }
     loop_rate.sleep();
