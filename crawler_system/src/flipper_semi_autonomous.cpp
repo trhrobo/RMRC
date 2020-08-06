@@ -189,6 +189,7 @@ namespace DXLControl{
   };
   template<class T>
   int dynamixelSet(T goal_angle, T now_pos){
+    //FIXME:コードが汚い
     //dynamixelのパルスがrosの場合だと定義が違う可能性があるので確認必要
     //現在の位置をdynamixel一回あたりのパルス数(定数で割る)
     //now_posはラジアンであるので一旦度数方に直す

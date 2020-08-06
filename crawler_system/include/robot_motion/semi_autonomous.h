@@ -12,12 +12,15 @@
 
 using std::vector;
 
-constexpr int POSE_UP = 90;
-constexpr int POSE_DOWN = -90;
-constexpr int DISTANCE_THRESHOLD_FORWARD = 100;
-constexpr int DISTANCE_THRESHOLD_DOWN = 6;
+//FIXME:定数定義をスコープを付けてまとめる
+namespace DXLConstant{
+  constexpr int POSE_UP = 90;
+  constexpr int POSE_DOWN = -90;
+  constexpr int DISTANCE_THRESHOLD_FORWARD = 100;
+  constexpr int DISTANCE_THRESHOLD_DOWN = 6;
+}
 
-struct dynamixelPose{
+struct DXLPose{
   vector<double> POSE_1{0, 0};
   vector<double> POSE_2{0, 0};
 };
@@ -34,10 +37,10 @@ template<typename T>
 class SemiAutoBase{
   protected:
     ros::Subscriber tof_sub;
-    vector<T> current_dynamixel_pose{0, 0, 0, 0};
-    vector<T> current_dynamixel_load{0, 0, 0, 0};
+    vector<T> current_DXL_pose{0, 0, 0, 0};
+    vector<T> current_DXL_load{0, 0, 0, 0};
     vector<T> tof_distance{0, 0, 0, 0};
-    vector<T> goal_dynamixel_pose{0, 0, 0, 0};
+    vector<T> goal_DXL_pose{0, 0, 0, 0};
     T gyro_pose;
     T goal_pose_right;
     T goal_pose_left;
@@ -53,7 +56,7 @@ class SemiAutoBase{
         tof_distance[i] = msg.data[i];
       }
     }
-    bool dynamixelLoad(){
+    bool DXLLoad(){
     }
     virtual void operator()(double (&set_array)[4]) = 0;
     virtual T psdCurve() = 0;
@@ -63,7 +66,7 @@ template<typename T>
 class SemiAutoFront : public SemiAutoBase{
   private:
     ros::Subscriber psd_front_sub;
-    dynamixelPose poseParamFront;
+    DXLPose poseParamFront;
   public:
     //FIXME:コンストラクタを修正する(多分こんなに階層的にしないでもいいはずstatic使う？？)
     SemiAutoFront::SemiAutoFront(ros::NodeHandle _n, feedBackTypes _feedback) : SemiAutoBase(_n, _feedback){
@@ -76,7 +79,7 @@ class SemiAutoFront : public SemiAutoBase{
     }
     void SemiAutoFront::operator()(T (&set_array)[4]){
       //TODO:出力値はdeg
-      bool flag_dynamixel_load = this -> dynamixelLoad();
+      bool flag_DXL_load = this -> DXLLoad();
       //FIXME:それぞれのフィードバックの紐付けが出来ていない
       if(feedback.dist){
         //NOTE:接地判定 && 閾値以内に障害物があるかどうかの判定
@@ -88,6 +91,7 @@ class SemiAutoFront : public SemiAutoBase{
           set_array[1] = this -> poseParamFront.POSE_2[1];
         }
       }else if(feedback.pos){
+        //TODO:各フィードバック系の詳細の追加
         //NOTE:位置(角度)フィードバック
         if(feedback.dist){
           //NOTE:距離、位置(角度)フィードバック
@@ -108,7 +112,7 @@ template<typename T>
 class SemiAutoRear : public SemiAutoBase{
   private:
     ros::Subscriber psd_rear_sub;
-    dynamixelPose poseParamRear;
+    DXLPose poseParamRear;
   public:
     SemiAutoRear::SemiAutoRear(ros::NodeHandle _n, feedBackTypes _feedback) : SemiAutoBase(_n, _feedback){
       poseParamRear.POSE_1 = {60, 60};
@@ -120,10 +124,10 @@ class SemiAutoRear : public SemiAutoBase{
       //TODO:出力値はdeg
       if(feedback.dist){
           //NOTE:接地判定 && 閾値以内に障害物があるかどうかの判定
-        if(tof_distance[1] > DISTANCE_THRESHOLD_DOWN && tof_distance[3] > DISTANCE_THRESHOLD_DOWN && tof_distance[0] > DISTANCE_THRESHOLD_FORWARD){
+        if(tof_distance[1] > DXLConstant::DISTANCE_THRESHOLD_DOWN && tof_distance[3] > DXLConstant::DISTANCE_THRESHOLD_DOWN && tof_distance[0] > DXLConstant::DISTANCE_THRESHOLD_FORWARD){
           set_array[2] = psdCurve();
           set_array[3] = psdCurve();
-        }else if(tof_distance[1] > DISTANCE_THRESHOLD_DOWN|| tof_distance[0] < DISTANCE_THRESHOLD_FORWARD){
+        }else if(tof_distance[1] > DXLConstant::DISTANCE_THRESHOLD_DOWN|| tof_distance[0] < DXLConstant::DISTANCE_THRESHOLD_FORWARD){
           //変化しない
         }else{
           set_array[2] = this -> poseParamRear.POSE_1[0];
@@ -162,6 +166,6 @@ class semiAuto{
 
   void semiAuto::operator()(T (&set_array)[4]){
     this -> front(set_array);
-    this -> rearmainSemiAuto(set_array);
+    this -> rear(set_array);
   }
 }
