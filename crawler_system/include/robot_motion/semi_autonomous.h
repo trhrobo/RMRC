@@ -75,6 +75,7 @@ class SemiAutoFront : public SemiAutoBase{
       return -(tof_distance[0] * tof_distance[0] / 250) + 40;
     }
     void SemiAutoFront::operator()(T (&set_array)[4]){
+      //TODO:出力値はdeg
       bool flag_dynamixel_load = this -> dynamixelLoad();
       //FIXME:それぞれのフィードバックの紐付けが出来ていない
       if(feedback.dist){
@@ -116,18 +117,38 @@ class SemiAutoRear : public SemiAutoBase{
     T SemiAutoRear::psdCurve(){
     }
     void SemiAutoRear::operator()(T (&set_array)[4]){
-      if(tof_distance[1] > DISTANCE_THRESHOLD_DOWN && tof_distance[3] > DISTANCE_THRESHOLD_DOWN && tof_distance[0] > DISTANCE_THRESHOLD_FORWARD){
-        set_array[2] = psdCurve();
-        set_array[3] = psdCurve();
-      }else if(tof_distance[1] > DISTANCE_THRESHOLD_DOWN|| tof_distance[0] < DISTANCE_THRESHOLD_FORWARD){
-        //変化しない
-      }else{
-        set_array[2] = this -> poseParamRear.POSE_1[0];
-        set_array[3] = this -> poseParamRear.POSE_1[1];
+      //TODO:出力値はdeg
+      if(feedback.dist){
+          //NOTE:接地判定 && 閾値以内に障害物があるかどうかの判定
+        if(tof_distance[1] > DISTANCE_THRESHOLD_DOWN && tof_distance[3] > DISTANCE_THRESHOLD_DOWN && tof_distance[0] > DISTANCE_THRESHOLD_FORWARD){
+          set_array[2] = psdCurve();
+          set_array[3] = psdCurve();
+        }else if(tof_distance[1] > DISTANCE_THRESHOLD_DOWN|| tof_distance[0] < DISTANCE_THRESHOLD_FORWARD){
+          //変化しない
+        }else{
+          set_array[2] = this -> poseParamRear.POSE_1[0];
+          set_array[3] = this -> poseParamRear.POSE_1[1];
+        }    
+      }else if(feedback.pos){
+        //NOTE:位置(角度)フィードバック
+        if(feedback.dist){
+          //NOTE:距離、位置(角度)フィードバック
+        }  
+      }else if(feedback.torque){
+        //NOTE:トルクフィードバック
+        if(feedback.dist && feedback.pos){
+          //NOTE:距離、位置(角度)、トルクフィードバック
+        }else if(feedback.dist){
+          //NOTE:距離、トルクフィードバック
+        }else if(feedback.pos){      
+          //NOTE:位置(角度)、トルクフィードバック    
+        }
       }
     }
 };
 
+//FIXME:template継承を間違っているここでtemplate<typename T>するだけでいいのか？？
+template<typename T>
 class semiAuto{
   private:
     std::unique_ptr<SemiAutoFront> front(_n);

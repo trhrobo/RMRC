@@ -309,8 +309,8 @@ int main(int argc, char **argv) {
   ros::Subscriber controller_sub = n.subscribe("joy", 10, joyCallback);
   ros::Rate loop_rate(400);
   DXLControl servo[4] = {front_right, front_left, rear_right, rear_left};
-  semiAuto robot_model(n);
-
+  feedBackTypes feedback{false, false, true};
+  semiAuto<double> robot_model(n, feedback);
   dynamixel_workbench_msgs::DynamixelCommand srv;
 
   //NOTE:DXLの制御モードの指定
@@ -337,7 +337,7 @@ int main(int argc, char **argv) {
 
       //半自動制御モード
       case keyFlag::AUTO:
-        robot_model.main(theta_ref);
+        robot_model(theta_ref);
         serviceCallTheta();
         break;
 
