@@ -22,7 +22,7 @@ struct dynamixelPose{
   vector<double> POSE_2{0, 0};
 };
 
-struct feedBack{
+struct feedBackTypes{
   constexpr bool dist = false;
   constexpr bool pos = false;
   constexpr bool torque = false;
@@ -39,18 +39,19 @@ class SemiAutoBase{
     T gyro_pose;
     T goal_pose_right;
     T goal_pose_left;
+    const feedBackTypes feedback;
   public:
-    SemiAutoBase::SemiAutoBase(ros::NodeHandle _n){
+    SemiAutoBase(ros::NodeHandle _n, feedBackTypes _feedback):feedback(_feedback){
       tof_sub = _n.subscribe("tof_sub", 10, &SemiAutoBase::tofCallback, this);
     }
-    void SemiAutoBase::init(){
+    void init(){
     }
-    void SemiAutoBase::tofCallback(const std_msgs::Float64MultiArray &msg){
+    void tofCallback(const std_msgs::Float64MultiArray &msg){
       for(int i = 0; i < 4; ++i){
         tof_distance[i] = msg.data[i];
       }
     }
-    bool SemiAutoBase::dynamixelLoad(){
+    bool dynamixelLoad(){
     }
     virtual void operator()(double (&set_array)[4]) = 0;
     virtual T psdCurve() = 0;
@@ -62,10 +63,12 @@ class SemiAutoFront : public SemiAutoBase{
     ros::Subscriber psd_front_sub;
     dynamixelPose poseParamFront;
   public:
-    SemiAutoFront::SemiAutoFront(ros::NodeHandle _n) : SemiAutoBase(_n){
+    //FIXME:コンストラクタを修正する(多分こんなに階層的にしないでもいいはずstatic使う？？)
+    SemiAutoFront::SemiAutoFront(ros::NodeHandle _n, feedBackTypes _feedback) : SemiAutoBase(_n, _feedback){
       poseParamFront.POSE_1 = {60, 60};
       poseParamFront.POSE_2 = {20, 20};
     }
+    //TODO:psdCurveの実装をきちんとする
     T SemiAutoFront::psdCurve(){
       return -(tof_distance[0] * tof_distance[0] / 250) + 40;
     }
@@ -88,7 +91,7 @@ class SemiAutoRear : public SemiAutoBase{
     ros::Subscriber psd_rear_sub;
     dynamixelPose poseParamRear;
   public:
-    SemiAutoRear::SemiAutoRear(ros::NodeHandle _n) : SemiAutoBase(_n){
+    SemiAutoRear::SemiAutoRear(ros::NodeHandle _n, feedBackTypes _feedback) : SemiAutoBase(_n, _feedback){
       poseParamRear.POSE_1 = {60, 60};
       poseParamRear.POSE_2 = {20, 20};
     }
@@ -113,7 +116,7 @@ class semiAuto{
     std::unique_ptr<SemiAutoRear> rear(_n);
   public:
 
-  semiAuto(ros::NodeHandle _n):front(_n), rear(_n){
+  semiAuto(ros::NodeHandle _n, feedBackTypes _feedback):front(_n, _feedback), rear(_n, _feedback){
     //front = new SemiAutoFront(_n);
     //rear = new SemiAutoRear(_n);
   }
