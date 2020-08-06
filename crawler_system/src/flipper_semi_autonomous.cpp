@@ -21,11 +21,11 @@
 using std::array;
 using std::tuple;
 
-#define DEBUG 1
-#define front_right 0
-#define front_left 1
-#define rear_right 2
-#define rear_left 3
+//FIXME:パラメータ関係を別のファイルにまとめる
+constexpr int front_right = 0;
+constexpr int front_left = 1;
+constexpr int rear_right = 2;
+constexpr int rear_left = 3;
 
 constexpr double flipper_m = 100;
 constexpr double flipper_lg = 100;
@@ -81,16 +81,16 @@ namespace all{
   explicit void setRotation(const calc_f Func){
     Func();
   }
-  void reset() {for (int i = 0; i < dynamixel_num.size(); ++i) {theta_ref[i] = original_theta;}}
-  void forward() {
+  inline void reset() {for (int i = 0; i < dynamixel_num.size(); ++i) {theta_ref[i] = original_theta;}}
+  inline void forward() {
     theta_ref[0] = MAX_POSITION_VALUE;
     for (int i = 1; i < dynamixel_num.size(); ++i) {theta_ref[i] = theta_ref[0];}
   }
-  void reverse() {
+  inline void reverse() {
     theta_ref[0] = MIN_POSITION_VALUE;
     for (int i = 1; i < dynamixel_num.size(); ++i) {theta_ref[i] = theta_ref[0];}
   }
-  void nomal(){
+  inline void nomal(){
     for (int i = 1; i < dynamixel_num.size(); ++i) {theta_ref[i] = theta_ref[0];}
   }
 }
@@ -103,13 +103,13 @@ namespace nomal{
   explicit void setRotation(const int id, const calc_f Func){
     Func(id);
   }
-  void forward(const int id){
+  inline void forward(const int id){
     pos_ref[id] = MAX_POSITION_VALUE;
   }
-  void reverse(const int id){
+  inline void reverse(const int id){
     pos_ref[id] = MIN_POSITION_VALUE;
   }
-  void nomal(const int id){
+  inline void nomal(const int id){
     pos_ref[id] = current_dynamixel_pos;
   }
 }
@@ -153,35 +153,39 @@ namespace gyroControl{
 constexpr double Kp = 1.0;
 constexpr double Kd = 1.0;
 namespace DXLControl{
-  public:
-    enum class MODE{
-      POSE_CONTROL,
-      TORQUE_CONTROL
-    }
-    template<MODE dxl_mode>
-    class DXLControl(){
+  enum class MODE{
+    POS_CONTROL,
+    TORQUE_CONTROL
+  }
+  template<typename T, MODE dxl_mode>
+  class DXLControl(){
+    public:
       explicit DXLControl(int _ID):DXL_ID(_ID){
-        if(dxl_mode == MODE::POSE_CONTROL){
-
+        if(dxl_mode == MODE::POS_CONTROL){
+          //FIXME:関数ポインタの使い方が違う
+          funcp = this -> PosControl;
         }else if(dxl_mode == MODE::TORQUE_CONTROL){
-
+          //FIXME:関数ポインタの使い方が違う
+          funcp = this -> TorqueControl;
         }else{
           ROS_ERROR("this dynamixel mode is not appropriate.");
         }
-      } 
-      template<typename T>
+      }
       bool TorqueControl(T theta_d){
         //トルク制御の実装
         //重力補償項の追加
         T gravity_compensation = flipper_m * gravity * cos(degToRad(theta_now));
-        return radToDeg<double>(Kp * (degToRad<double>(theta_d) - degToRad<double>(theta_now)) - Kd * (angular) + gravity_compensation);
+        return radToDeg<T>(Kp * (degToRad<T>(theta_d) - degToRad<T>(theta_now)) - Kd * (angular) + gravity_compensation);
       }
-      template<typename T>
       bool PosControl(T theta_d){
-
+        //TODO:位置制御の追加
+      }
+      bool operator()(T theta_d){
+        return (*funcp)(theta_d);
       }
     private:
-      constexpr int DXL_ID;
+      const int DXL_ID;
+      int (*funcp)(int, int);
   };
   template<class T>
   int dynamixelSet(T goal_angle, T now_pos){
@@ -216,7 +220,7 @@ namespace DXLControl{
       srv.request.value = pos_ref[i];
       dynamixel_service.call(srv);
     }
-    //いるかあとで考える
+    //TODO:いるかあとで考える
     ros::spinOnce();
     return 
   }
@@ -234,7 +238,7 @@ namespace DXLControl{
     ros::spinOnce();
   }
   //現在角度とトルクを取得
-  //dynamixelIDとjointstateの順番が違う
+  //FIXME: dynamixelIDとjointstateの順番が違う
   constexpr array<int, 4> dynamixel_num{0, 1, 3, 2};
   void jointStateCallback(const sensor_msgs::JointState &jointstate) {
     for(int i = 0; i < dynamixel_num.size(); ++i){
@@ -263,6 +267,7 @@ void gyroCallback(const std_msgs::Float64 &msg) {
   gyro_robot.z = msg.data.z;
 }
 void stateManagement(){
+  //TODO:再考する
   //ロボットの前後を入れ替える
   if(front_flag == true){
     //配列番号を変える
@@ -279,7 +284,7 @@ array<double, 4> controller_key{};
 
 keyFlag controller_state;
 
-//コントローラ値を入力
+//FIXME:コントローラ値を楽に変えられるようにする
 void joyCallback(const sensor_msgs::Joy &controller) {
   buttons_reverse = controller.buttons[2];
   controller_key[0] = controller.axes[5];
@@ -307,6 +312,10 @@ int main(int argc, char **argv) {
   semiAuto robot_model(n);
 
   dynamixel_workbench_msgs::DynamixelCommand srv;
+
+  //NOTE:DXLの制御モードの指定
+  constexpr DXLControl::MODE DXL_MODE = DXLControl::MODE::TORQUE_CONTROL;
+
   while (ros::ok()) {
     for(int i = 0; i < dynamixel_num.size(); ++i){
       if(current_dynamixel_theta[i] <= 0)current_dynamixel_theta[i] = 360 + current_dynamixel_theta[i];
