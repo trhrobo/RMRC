@@ -25,7 +25,7 @@ SemiAutoFront::SemiAutoFront(ros::NodeHandle _n) : SemiAutoBase(_n){
 double SemiAutoFront::psdCurve(){
   return -(tof_distance[0] * tof_distance[0] / 250) + 40;
 }
-void SemiAutoFront::mainSemiAuto(double (&set_array)[4]){
+void SemiAutoFront::operator()(double (&set_array)[4]){
   bool flag_dynamixel_load = this -> dynamixelLoad();
   //接地判定 && 閾値以内に障害物があるかどうかの判定
   if(tof_distance[1] < DISTANCE_THRESHOLD_DOWN && tof_distance[0] < DISTANCE_THRESHOLD_FORWARD){
@@ -43,7 +43,7 @@ SemiAutoRear::SemiAutoRear(ros::NodeHandle _n) : SemiAutoBase(_n){
 }
 double SemiAutoRear::psdCurve(){
 }
-void SemiAutoRear::mainSemiAuto(double (&set_array)[4]){
+void SemiAutoRear::operator()(double (&set_array)[4]){
   if(tof_distance[1] > DISTANCE_THRESHOLD_DOWN && tof_distance[3] > DISTANCE_THRESHOLD_DOWN && tof_distance[0] > DISTANCE_THRESHOLD_FORWARD){
     set_array[2] = psdCurve();
     set_array[3] = psdCurve();
@@ -56,14 +56,13 @@ void SemiAutoRear::mainSemiAuto(double (&set_array)[4]){
 }
 
 semiAuto::semiAuto(ros::NodeHandle _n){
-  front = new SemiAutoFront(_n);
-  rear = new SemiAutoRear(_n);
+  std::unique_ptr<SemiAutoFront> front(_n);
+  std::unique_ptr<SemiAutoRear> rear(_n);
+  //front = new SemiAutoFront(_n);
+  //rear = new SemiAutoRear(_n);
 }
-semiAuto::~semiAuto(){
-  delete front;
-  delete rear;
-}
-void semiAuto::main(double (&set_array)[4]){
-  front->mainSemiAuto(set_array);
-  rear->mainSemiAuto(set_array);
+
+void semiAuto::operator()(double (&set_array)[4]){
+  this -> front(set_array);
+  this -> rearmainSemiAuto(set_array);
 }
