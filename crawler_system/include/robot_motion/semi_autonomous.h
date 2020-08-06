@@ -23,6 +23,8 @@ struct dynamixelPose{
 };
 
 struct feedBackTypes{
+  //FIXME:unionにして必ず一つの値だけを持つようにする
+  //NOTE:ここにフィードバックシステムを追加する
   constexpr bool dist = false;
   constexpr bool pos = false;
   constexpr bool torque = false;
@@ -74,15 +76,31 @@ class SemiAutoFront : public SemiAutoBase{
     }
     void SemiAutoFront::operator()(T (&set_array)[4]){
       bool flag_dynamixel_load = this -> dynamixelLoad();
-      //接地判定 && 閾値以内に障害物があるかどうかの判定
-      if(tof_distance[1] < DISTANCE_THRESHOLD_DOWN && tof_distance[0] < DISTANCE_THRESHOLD_FORWARD){
-        set_array[0] = this -> poseParamFront.POSE_1[0] - psdCurve();
-        set_array[1] = this -> poseParamFront.POSE_1[1] - psdCurve();
-      }else{
-        set_array[0] = this -> poseParamFront.POSE_2[0];
-        set_array[1] = this -> poseParamFront.POSE_2[1];
+      //FIXME:それぞれのフィードバックの紐付けが出来ていない
+      if(feedback.dist){
+        //NOTE:接地判定 && 閾値以内に障害物があるかどうかの判定
+        if(tof_distance[1] < DISTANCE_THRESHOLD_DOWN && tof_distance[0] < DISTANCE_THRESHOLD_FORWARD){
+          set_array[0] = this -> poseParamFront.POSE_1[0] - psdCurve();
+          set_array[1] = this -> poseParamFront.POSE_1[1] - psdCurve();
+        }else{
+          set_array[0] = this -> poseParamFront.POSE_2[0];
+          set_array[1] = this -> poseParamFront.POSE_2[1];
+        }
+      }else if(feedback.pos){
+        //NOTE:位置(角度)フィードバック
+        if(feedback.dist){
+          //NOTE:距離、位置(角度)フィードバック
+        }
+      }else if(feedback.torque){
+        //NOTE:トルクフィードバック
+        if(feedback.dist && feedback.pos){
+          //NOTE:距離、位置(角度)、トルクフィードバック
+        }else if(feedback.dist){
+          //NOTE:距離、トルクフィードバック
+        }else if(feedback.pos){      
+          //NOTE:位置(角度)、トルクフィードバック    
+        }
       }
-    }
 };
 
 template<typename T>
