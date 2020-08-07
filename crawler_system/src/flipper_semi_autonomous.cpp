@@ -83,7 +83,7 @@ namespace all{
   //関数ポインタの使い方を間違えている
   std::function<void(void)> calc_f;
   explicit void setRotation(const calc_f Func, DXLControl::DXLControl *DXLservo){
-    Func(DXLservo);
+    Func();
     //TODO:実装が汚い、ワザワザ関数を変えるために同じようなコードを書く必要があるのか??
     if(DXLConstant::DXL_MODE == DXLControl::MODE::POS_CONTROL){
       for(int i < 0; i < dynamixel_num.size(); ++i){
@@ -95,6 +95,8 @@ namespace all{
         DXLservo->PosDirect();
         ++DXLservo;
       }
+    }else{
+      ROS_ERROR("this dynamixel mode is not appropriate.");
     }
   }
   inline void reset() {
@@ -110,6 +112,8 @@ namespace all{
     }else if(DXLConstant::DXL_MODE == DXLControl::MODE::TORQUE_CONTROL){
       //NOTE:トルク制御
       //TODO:トルク制御の実装
+    }else{
+      ROS_ERROR("this dynamixel mode is not appropriate.");
     }
   }
   inline void reverse() {
@@ -120,6 +124,8 @@ namespace all{
     }else if(DXLConstant::DXL_MODE == DXLControl::MODE::TORQUE_CONTROL){
       //NOTE:トルク制御
       //TODO:トルク制御の実装
+    }else{
+      ROS_ERROR("this dynamixel mode is not appropriate.");
     }
   }
   inline void nomal(){
@@ -129,6 +135,8 @@ namespace all{
     }else if(DXLConstant::DXL_MODE == DXLControl::MODE::TORQUE_CONTROL){
       //NOTE:トルク制御
       //TODO:トルク制御の実装
+    }else{
+      ROS_ERROR("this dynamixel mode is not appropriate.");
     }
   }
 }
@@ -138,17 +146,50 @@ namespace nomal{
   //using calc_f = void(*)(int);
   //関数ポインタの使い方を間違えている
   std::function<void(void)> calc_f;
-  explicit void setRotation(const int id, const calc_f Func){
+  //FIXME:引数が違う気がするint idで本当にいいのか?DXLの配置位置では??
+  explicit void setRotation(const int id, const calc_f Func, DXLControl::DXLControl *DXLservo){
     Func(id);
+    if(DXLConstant::DXL_MODE == DXLControl::MODE::POS_CONTROL){
+      for(int i < 0; i < dynamixel_num.size(); ++i){
+        DXLservo->DXLservo();
+        ++DXLservo;
+      }
+    }else if(DXLConstant::DXL_MODE == DXLControl::MODE::TORQUE_CONTROL){
+      for(int i < 0; i < dynamixel_num.size(); ++i){
+        DXLservo->PosDirect();
+        ++DXLservo;
+      }
+    }
   }
   inline void forward(const int id){
     pos_ref[id] = MAX_POSITION_VALUE;
+    if(DXLConstant::DXL_MODE == DXLControl::MODE::POS_CONTROL){
+      //NOTE:位置(角度)制御
+      pos_ref[id] = MAX_POSITION_VALUE;
+    }else if(DXLConstant::DXL_MODE == DXLControl::MODE::TORQUE_CONTROL){
+      //NOTE:トルク制御
+      //TODO:トルク制御の実装
+    }
   }
   inline void reverse(const int id){
     pos_ref[id] = MIN_POSITION_VALUE;
+    if(DXLConstant::DXL_MODE == DXLControl::MODE::POS_CONTROL){
+      //NOTE:位置(角度)制御
+      pos_ref[id] = MIN_POSITION_VALUE;
+    }else if(DXLConstant::DXL_MODE == DXLControl::MODE::TORQUE_CONTROL){
+      //NOTE:トルク制御
+      //TODO:トルク制御の実装
+    }
   }
   inline void nomal(const int id){
     pos_ref[id] = current_dynamixel_pos;
+    if(DXLConstant::DXL_MODE == DXLControl::MODE::POS_CONTROL){
+      //NOTE:位置(角度)制御
+      pos_ref[id] = current_dynamixel_pos;
+    }else if(DXLConstant::DXL_MODE == DXLControl::MODE::TORQUE_CONTROL){
+      //NOTE:トルク制御
+      //TODO:トルク制御の実装
+    }
   }
 }
 
