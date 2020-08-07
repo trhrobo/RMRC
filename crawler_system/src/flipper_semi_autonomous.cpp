@@ -82,10 +82,26 @@ namespace all{
   //using calc_f = void(*)();
   //関数ポインタの使い方を間違えている
   std::function<void(void)> calc_f;
-  explicit void setRotation(const calc_f Func){
-    Func();
+  explicit void setRotation(const calc_f Func, DXLControl::DXLControl *DXLservo){
+    Func(DXLservo);
+    //TODO:実装が汚い、ワザワザ関数を変えるために同じようなコードを書く必要があるのか??
+    if(DXLConstant::DXL_MODE == DXLControl::MODE::POS_CONTROL){
+      for(int i < 0; i < dynamixel_num.size(); ++i){
+        DXLservo->DXLservo();
+        ++DXLservo;
+      }
+    }else if(DXLConstant::DXL_MODE == DXLControl::MODE::TORQUE_CONTROL){
+      for(int i < 0; i < dynamixel_num.size(); ++i){
+        DXLservo->PosDirect();
+        ++DXLservo;
+      }
+    }
   }
-  inline void reset() {for (int i = 0; i < dynamixel_num.size(); ++i) {theta_ref[i] = original_theta;}}
+  inline void reset() {
+    for (int i = 0; i < dynamixel_num.size(); ++i) {
+      theta_ref[i] = original_theta;
+    }
+  }
   inline void forward() {
     if(DXLConstant::DXL_MODE == DXLControl::MODE::POS_CONTROL){
       //NOTE:位置(角度)制御
@@ -199,6 +215,9 @@ namespace DXLControl{
       }
       bool PosControl(T theta_d){
         //TODO:位置制御の追加
+      }
+      bool PosDirect(){
+        //TODO:PosDirectに追加
       }
       bool operator()(T theta_d){
         return (*funcp)(theta_d);
