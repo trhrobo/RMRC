@@ -30,17 +30,21 @@ constexpr int rear_left = 3;
 constexpr double flipper_m = 100;
 constexpr double flipper_lg = 100;
 constexpr double gravity = 9.81;
-constexpr double original_theta = 90.0;
-constexpr double autonomous_max_theta = 75.0;
-constexpr double autonomous_min_theta = -90.0;
-constexpr int MAX_POSITION_VALUE = 1048575;
-constexpr int MIN_POSITION_VALUE = -1048575;
 
-constexpr int DYNAMIXEL_RESOLUTION = 4096
-constexpr double DYNAMIXEL_RESOLUTION_ANGLE = 0.088
-
-constexpr bool TORQUE_ENABLE = 1;
-constexpr bool TORQUE_DISABLE = 0;
+namespace DXLConstant{
+  constexpr DXLControl::MODE DXL_MODE = DXLControl::MODE::TORQUE_CONTROL;
+  constexpr double original_theta = 90.0;
+  constexpr double autonomous_max_theta = 75.0;
+  constexpr double autonomous_min_theta = -90.0;
+  constexpr int MAX_POSITION_VALUE = 1048575;
+  constexpr int MIN_POSITION_VALUE = -1048575;
+  constexpr int DYNAMIXEL_RESOLUTION = 4096;
+  constexpr double DYNAMIXEL_RESOLUTION_ANGLE = 0.088;
+  constexpr bool TORQUE_ENABLE = 1;
+  constexpr bool TORQUE_DISABLE = 0;
+  constexpr double Kp = 1.0;
+  constexpr double Kd = 1.0;
+}
 array<double, 4> current_dynamixel_pos{};
 array<double, 4> current_dynamixel_theta{};
 array<double, 4> current_dynamixel_torque{};
@@ -83,15 +87,33 @@ namespace all{
   }
   inline void reset() {for (int i = 0; i < dynamixel_num.size(); ++i) {theta_ref[i] = original_theta;}}
   inline void forward() {
-    theta_ref[0] = MAX_POSITION_VALUE;
-    for (int i = 1; i < dynamixel_num.size(); ++i) {theta_ref[i] = theta_ref[0];}
+    if(DXLConstant::DXL_MODE == DXLControl::MODE::POS_CONTROL){
+      //NOTE:位置(角度)制御
+      theta_ref[0] = MAX_POSITION_VALUE;
+      for (int i = 1; i < dynamixel_num.size(); ++i) {theta_ref[i] = theta_ref[0];}
+    }else if(DXLConstant::DXL_MODE == DXLControl::MODE::TORQUE_CONTROL){
+      //NOTE:トルク制御
+      //TODO:トルク制御の実装
+    }
   }
   inline void reverse() {
-    theta_ref[0] = MIN_POSITION_VALUE;
-    for (int i = 1; i < dynamixel_num.size(); ++i) {theta_ref[i] = theta_ref[0];}
+   if(DXLConstant::DXL_MODE == DXLControl::MODE::POS_CONTROL){
+      //NOTE:位置(角度)制御
+      theta_ref[0] = MIN_POSITION_VALUE;
+      for (int i = 1; i < dynamixel_num.size(); ++i) {theta_ref[i] = theta_ref[0];}
+    }else if(DXLConstant::DXL_MODE == DXLControl::MODE::TORQUE_CONTROL){
+      //NOTE:トルク制御
+      //TODO:トルク制御の実装
+    }
   }
   inline void nomal(){
-    for (int i = 1; i < dynamixel_num.size(); ++i) {theta_ref[i] = theta_ref[0];}
+      if(DXLConstant::DXL_MODE == DXLControl::MODE::POS_CONTROL){
+      //NOTE:位置(角度)制御
+      for (int i = 1; i < dynamixel_num.size(); ++i) {theta_ref[i] = theta_ref[0];}
+    }else if(DXLConstant::DXL_MODE == DXLControl::MODE::TORQUE_CONTROL){
+      //NOTE:トルク制御
+      //TODO:トルク制御の実装
+    }
   }
 }
 //-----------------------------------------------------------------
@@ -150,8 +172,6 @@ namespace gyroControl{
   }
 }
 
-constexpr double Kp = 1.0;
-constexpr double Kd = 1.0;
 namespace DXLControl{
   enum class MODE{
     POS_CONTROL,
@@ -187,7 +207,7 @@ namespace DXLControl{
       const int DXL_ID;
       int (*funcp)(int, int);
   };
-  template<class T>
+  template<typename T>
   int dynamixelSet(T goal_angle, T now_pos){
     //FIXME:コードが汚い
     //dynamixelのパルスがrosの場合だと定義が違う可能性があるので確認必要
@@ -309,13 +329,12 @@ int main(int argc, char **argv) {
   ros::Subscriber gyro_sub = n.subscribe("gyro", 10, gyroCallback);
   ros::Subscriber controller_sub = n.subscribe("joy", 10, joyCallback);
   ros::Rate loop_rate(400);
-  DXLControl servo[4] = {front_right, front_left, rear_right, rear_left};
+  //FIXME:多分これだとtemplate<DXLConstant::DXL_MODE>のオブジェクトが4つ生成されない??
+  DXLControl<DXLConstant::DXL_MODE> servo[4] = {front_right, front_left, rear_right, rear_left};
   feedBackTypes feedback{false, false, true};
   semiAuto<double> robot_model(n, feedback);
   dynamixel_workbench_msgs::DynamixelCommand srv;
 
-  //NOTE:DXLの制御モードの指定
-  constexpr DXLControl::MODE DXL_MODE = DXLControl::MODE::TORQUE_CONTROL;
 
   while (ros::ok()) {
     for(int i = 0; i < dynamixel_num.size(); ++i){
@@ -332,14 +351,11 @@ int main(int argc, char **argv) {
         }else{
           all::nomal();
         }
-        //トルク制御か位置制御か
-        serviceCallPos(servo);
         break;
 
       //半自動制御モード
       case keyFlag::AUTO:
         robot_model(theta_ref);
-        serviceCallTheta();
         break;
 
       default:
@@ -352,7 +368,6 @@ int main(int argc, char **argv) {
             }
           }
         }
-        serviceCallPos();
         break;
     }
     loop_rate.sleep();
