@@ -86,24 +86,56 @@ namespace safetyCheck{
 }
 
 namespace all{
-  //using calc_f = void(*)();
-  //関数ポインタの使い方を間違えている
-  std::function<void(void)> calc_f;
-  explicit void setRotation(const calc_f Func, DXLControl::DXLControl *DXLservo){
-    Func();
-    //TODO:実装が汚い、ワザワザ関数を変えるために同じようなコードを書く必要があるのか??
+  enum class setRotation{
+    forward,
+    reverse,
+    nomal
+  }
+  //FIXME:引数が違う気がするint idで本当にいいのか?DXLの配置位置では??
+  explicit void setRotation(const int id, const setRotation direction, DXLControl::DXLControl *DXLservo){
     if(DXLConstant::DXL_MODE == DXLControl::MODE::POS_CONTROL){
-      for(int i < 0; i < dynamixel_num.size(); ++i){
-        DXLservo->DXLservo();
-        ++DXLservo;
+      switch(direction){
+        case setRotation::forward:
+            ref_DXL_raw_pos[0] = DXLConstant::MAX_POSITION_VALUE;
+            for (int i = 1; i < dynamixel_num.size(); ++i) {ref_DXL_raw_pos[i] = ref_DXL_raw_pos[0];}
+          break;
+        case setRotation::reverse:
+          ref_DXL_raw_pos[0] = DXLConstant::MIN_POSITION_VALUE;
+          for (int i = 1; i < dynamixel_num.size(); ++i) {ref_DXL_raw_pos[i] = ref_DXL_raw_pos[0];}
+          break;
+        case setRotation::nomal:
+          for (int i = 1; i < dynamixel_num.size(); ++i) {ref_DXL_raw_pos[i] = ref_DXL_raw_pos[0];}
+          break;
+        case default:
+          ROS_ERROR("this direction of rotation is invalid");
+          break;
       }
-    }else if(DXLConstant::DXL_MODE == DXLControl::MODE::TORQUE_CONTROL){
       for(int i < 0; i < dynamixel_num.size(); ++i){
         DXLservo->PosDirect();
         ++DXLservo;
       }
-    }else{
-      ROS_ERROR("this dynamixel mode is not appropriate.");
+    }else if(DXLConstant::DXL_MODE == DXLControl::MODE::TORQUE_CONTROL){
+      switch(direction){
+        case setRotation::forward:
+            //NOTE:トルク制御
+            //TODO:トルク制御の実装
+          break;
+        case setRotation::reverse:
+            //NOTE:トルク制御
+            //TODO:トルク制御の実装
+          break;
+        case setRotation::nomal:
+            //NOTE:トルク制御
+            //TODO:トルク制御の実装
+          break;
+        case default:
+          ROS_ERROR("this direction of rotation is invalid");
+          break;
+      }
+      for(int i < 0; i < dynamixel_num.size(); ++i){
+        DXLservo->DXLservo();
+        ++DXLservo;
+      }
     }
   }
   //TODO:reset()の利用
@@ -112,93 +144,66 @@ namespace all{
       ref_DXL_deg[i] = DXLConstant::ORIGINAL_DEG;
     }
   }
-  inline void forward() {
-    if(DXLConstant::DXL_MODE == DXLControl::MODE::POS_CONTROL){
-      //NOTE:位置(角度)制御
-      ref_DXL_raw_pos[0] = DXLConstant::MAX_POSITION_VALUE;
-      for (int i = 1; i < dynamixel_num.size(); ++i) {ref_DXL_raw_pos[i] = ref_DXL_raw_pos[0];}
-    }else if(DXLConstant::DXL_MODE == DXLControl::MODE::TORQUE_CONTROL){
-      //NOTE:トルク制御
-      //TODO:トルク制御の実装
-    }else{
-      ROS_ERROR("this dynamixel mode is not appropriate.");
-    }
-  }
-  inline void reverse() {
-   if(DXLConstant::DXL_MODE == DXLControl::MODE::POS_CONTROL){
-      //NOTE:位置(角度)制御
-      ref_DXL_raw_pos[0] = DXLConstant::MIN_POSITION_VALUE;
-      for (int i = 1; i < dynamixel_num.size(); ++i) {ref_DXL_raw_pos[i] = ref_DXL_raw_pos[0];}
-    }else if(DXLConstant::DXL_MODE == DXLControl::MODE::TORQUE_CONTROL){
-      //NOTE:トルク制御
-      //TODO:トルク制御の実装
-    }else{
-      ROS_ERROR("this dynamixel mode is not appropriate.");
-    }
-  }
-  inline void nomal(){
-      if(DXLConstant::DXL_MODE == DXLControl::MODE::POS_CONTROL){
-      //NOTE:位置(角度)制御
-      for (int i = 1; i < dynamixel_num.size(); ++i) {ref_DXL_raw_pos[i] = ref_DXL_raw_pos[0];}
-    }else if(DXLConstant::DXL_MODE == DXLControl::MODE::TORQUE_CONTROL){
-      //NOTE:トルク制御
-      //TODO:トルク制御の実装
-    }else{
-      ROS_ERROR("this dynamixel mode is not appropriate.");
-    }
-  }
 }
 //-----------------------------------------------------------------
 
 namespace nomal{
   //using calc_f = void(*)(int);
   //関数ポインタの使い方を間違えている
-  std::function<void(void)> calc_f;
+  enum class setRotation{
+    forward,
+    reverse,
+    nomal
+  }
   //FIXME:引数が違う気がするint idで本当にいいのか?DXLの配置位置では??
-  explicit void setRotation(const int id, const calc_f Func, DXLControl::DXLControl *DXLservo){
-    Func(id);
+  explicit void setRotation(const int id, const setRotation direction, DXLControl::DXLControl *DXLservo){
     if(DXLConstant::DXL_MODE == DXLControl::MODE::POS_CONTROL){
-      for(int i < 0; i < dynamixel_num.size(); ++i){
-        DXLservo->DXLservo();
-        ++DXLservo;
+      switch(direction){
+        case setRotation::forward:
+            //NOTE:位置(角度)制御
+            ref_DXL_raw_pos[id] = DXLConstant::MAX_POSITION_VALUE;
+          break;
+        case setRotation::reverse:
+            //NOTE:位置(角度)制御
+            ref_DXL_raw_pos[id] = DXLConstant::MIN_POSITION_VALUE;
+          break;
+        case setRotation::nomal:
+            //NOTE:位置(角度)制御
+            ref_DXL_raw_pos[id] = current_DXL_raw_pos;
+          break;
+        case default:
+          ROS_ERROR("this direction of rotation is invalid");
+          break;
       }
-    }else if(DXLConstant::DXL_MODE == DXLControl::MODE::TORQUE_CONTROL){
       for(int i < 0; i < dynamixel_num.size(); ++i){
         DXLservo->PosDirect();
         ++DXLservo;
       }
-    }
-  }
-  //FIXME:わざわざforward, reveres, nomalと関数で分ける必要ある??switch case使えば良くない??
-  inline void forward(const int id){
-    if(DXLConstant::DXL_MODE == DXLControl::MODE::POS_CONTROL){
-      //NOTE:位置(角度)制御
-      ref_DXL_raw_pos[id] = DXLConstant::MAX_POSITION_VALUE;
     }else if(DXLConstant::DXL_MODE == DXLControl::MODE::TORQUE_CONTROL){
-      //NOTE:トルク制御
-      //TODO:トルク制御の実装
-    }
-  }
-  inline void reverse(const int id){
-    if(DXLConstant::DXL_MODE == DXLControl::MODE::POS_CONTROL){
-      //NOTE:位置(角度)制御
-      ref_DXL_raw_pos[id] = DXLConstant::MIN_POSITION_VALUE;
-    }else if(DXLConstant::DXL_MODE == DXLControl::MODE::TORQUE_CONTROL){
-      //NOTE:トルク制御
-      //TODO:トルク制御の実装
-    }
-  }
-  inline void nomal(const int id){
-    if(DXLConstant::DXL_MODE == DXLControl::MODE::POS_CONTROL){
-      //NOTE:位置(角度)制御
-      ref_DXL_raw_pos[id] = current_DXL_raw_pos;
-    }else if(DXLConstant::DXL_MODE == DXLControl::MODE::TORQUE_CONTROL){
-      //NOTE:トルク制御
-      //TODO:トルク制御の実装
+      switch(direction){
+        case setRotation::forward:
+            //NOTE:トルク制御
+            //TODO:トルク制御の実装
+          break;
+        case setRotation::reverse:
+            //NOTE:トルク制御
+            //TODO:トルク制御の実装
+          break;
+        case setRotation::nomal:
+            //NOTE:トルク制御
+            //TODO:トルク制御の実装
+          break;
+        case default:
+          ROS_ERROR("this direction of rotation is invalid");
+          break;
+      }
+      for(int i < 0; i < dynamixel_num.size(); ++i){
+        DXLservo->DXLservo();
+        ++DXLservo;
+      }
     }
   }
 }
-
 namespace gyroControl{
   enum class Lean{
     forward,
