@@ -20,36 +20,43 @@
 
 using std::array;
 using std::tuple;
-
+//FIXME:全ての変数、関数をnamespaceの中に入れる
+//FIXME:グローバル宣言の変数多すぎもっと参照渡し使おう
 //FIXME:パラメータ関係を別のファイルにまとめる
-constexpr int front_right = 0;
-constexpr int front_left = 1;
-constexpr int rear_right = 2;
-constexpr int rear_left = 3;
+namespace FlipperConstant{
+  //FIXME:一つずつサーボIDを管理するのは頭が悪い
+  constexpr int front_right = 0;
+  constexpr int front_left = 1;
+  constexpr int rear_right = 2;
+  constexpr int rear_left = 3;
 
-constexpr double flipper_m = 100;
-constexpr double flipper_lg = 100;
-constexpr double gravity = 9.81;
-
+  constexpr double flipper_m = 100;
+  constexpr double flipper_lg = 100;
+  constexpr double gravity = 9.81;
+}
 namespace DXLConstant{
   constexpr DXLControl::MODE DXL_MODE = DXLControl::MODE::TORQUE_CONTROL;
-  constexpr double original_theta = 90.0;
-  constexpr double autonomous_max_theta = 75.0;
-  constexpr double autonomous_min_theta = -90.0;
+  constexpr double ORIGINAL_DEG = 90.0;
+  constexpr double AUTO_MAX_DEG = 75.0;
+  constexpr double AUTO_MIN_DEG = -90.0;
   constexpr int MAX_POSITION_VALUE = 1048575;
   constexpr int MIN_POSITION_VALUE = -1048575;
   constexpr int DYNAMIXEL_RESOLUTION = 4096;
   constexpr double DYNAMIXEL_RESOLUTION_ANGLE = 0.088;
   constexpr bool TORQUE_ENABLE = 1;
   constexpr bool TORQUE_DISABLE = 0;
+  //FIXME:それぞれのサーボゲインを設ける
   constexpr double Kp = 1.0;
   constexpr double Kd = 1.0;
 }
-array<double, 4> current_dynamixel_pos{};
-array<double, 4> current_dynamixel_theta{};
-array<double, 4> current_dynamixel_torque{};
-array<double, 4> theta_ref{};
-array<double, 4> pos_ref{};
+array<double, 4>     ref_DXL_raw_pos{};
+array<double, 4> current_DXL_raw_pos{};
+
+array<double, 4>     ref_DXL_deg{};
+array<double, 4> current_DXL_deg{};
+
+array<double, 4>     ref_DXL_torque{};
+array<double, 4> current_DXL_torque{};
 
 template<typename T>
 inline T degToRad(const T deg){
@@ -99,16 +106,17 @@ namespace all{
       ROS_ERROR("this dynamixel mode is not appropriate.");
     }
   }
+  //TODO:reset()の利用
   inline void reset() {
     for (int i = 0; i < dynamixel_num.size(); ++i) {
-      theta_ref[i] = original_theta;
+      ref_DXL_deg[i] = DXLConstant::ORIGINAL_DEG;
     }
   }
   inline void forward() {
     if(DXLConstant::DXL_MODE == DXLControl::MODE::POS_CONTROL){
       //NOTE:位置(角度)制御
-      theta_ref[0] = MAX_POSITION_VALUE;
-      for (int i = 1; i < dynamixel_num.size(); ++i) {theta_ref[i] = theta_ref[0];}
+      ref_DXL_raw_pos[0] = DXLConstant::MAX_POSITION_VALUE;
+      for (int i = 1; i < dynamixel_num.size(); ++i) {ref_DXL_raw_pos[i] = ref_DXL_raw_pos[0];}
     }else if(DXLConstant::DXL_MODE == DXLControl::MODE::TORQUE_CONTROL){
       //NOTE:トルク制御
       //TODO:トルク制御の実装
@@ -119,8 +127,8 @@ namespace all{
   inline void reverse() {
    if(DXLConstant::DXL_MODE == DXLControl::MODE::POS_CONTROL){
       //NOTE:位置(角度)制御
-      theta_ref[0] = MIN_POSITION_VALUE;
-      for (int i = 1; i < dynamixel_num.size(); ++i) {theta_ref[i] = theta_ref[0];}
+      ref_DXL_raw_pos[0] = DXLConstant::MIN_POSITION_VALUE;
+      for (int i = 1; i < dynamixel_num.size(); ++i) {ref_DXL_raw_pos[i] = ref_DXL_raw_pos[0];}
     }else if(DXLConstant::DXL_MODE == DXLControl::MODE::TORQUE_CONTROL){
       //NOTE:トルク制御
       //TODO:トルク制御の実装
@@ -131,7 +139,7 @@ namespace all{
   inline void nomal(){
       if(DXLConstant::DXL_MODE == DXLControl::MODE::POS_CONTROL){
       //NOTE:位置(角度)制御
-      for (int i = 1; i < dynamixel_num.size(); ++i) {theta_ref[i] = theta_ref[0];}
+      for (int i = 1; i < dynamixel_num.size(); ++i) {ref_DXL_raw_pos[i] = ref_DXL_raw_pos[0];}
     }else if(DXLConstant::DXL_MODE == DXLControl::MODE::TORQUE_CONTROL){
       //NOTE:トルク制御
       //TODO:トルク制御の実装
@@ -161,31 +169,29 @@ namespace nomal{
       }
     }
   }
+  //FIXME:わざわざforward, reveres, nomalと関数で分ける必要ある??switch case使えば良くない??
   inline void forward(const int id){
-    pos_ref[id] = MAX_POSITION_VALUE;
     if(DXLConstant::DXL_MODE == DXLControl::MODE::POS_CONTROL){
       //NOTE:位置(角度)制御
-      pos_ref[id] = MAX_POSITION_VALUE;
+      ref_DXL_raw_pos[id] = DXLConstant::MAX_POSITION_VALUE;
     }else if(DXLConstant::DXL_MODE == DXLControl::MODE::TORQUE_CONTROL){
       //NOTE:トルク制御
       //TODO:トルク制御の実装
     }
   }
   inline void reverse(const int id){
-    pos_ref[id] = MIN_POSITION_VALUE;
     if(DXLConstant::DXL_MODE == DXLControl::MODE::POS_CONTROL){
       //NOTE:位置(角度)制御
-      pos_ref[id] = MIN_POSITION_VALUE;
+      ref_DXL_raw_pos[id] = DXLConstant::MIN_POSITION_VALUE;
     }else if(DXLConstant::DXL_MODE == DXLControl::MODE::TORQUE_CONTROL){
       //NOTE:トルク制御
       //TODO:トルク制御の実装
     }
   }
   inline void nomal(const int id){
-    pos_ref[id] = current_dynamixel_pos;
     if(DXLConstant::DXL_MODE == DXLControl::MODE::POS_CONTROL){
       //NOTE:位置(角度)制御
-      pos_ref[id] = current_dynamixel_pos;
+      ref_DXL_raw_pos[id] = current_DXL_raw_pos;
     }else if(DXLConstant::DXL_MODE == DXLControl::MODE::TORQUE_CONTROL){
       //NOTE:トルク制御
       //TODO:トルク制御の実装
@@ -298,7 +304,7 @@ namespace DXLControl{
       srv.request.command = "_";
       srv.request.id = i + 1;
       srv.request.addr_name = "Goal_Position";
-      srv.request.value = pos_ref[i];
+      srv.request.value = ref_DXL_raw_pos[i];
       dynamixel_service.call(srv);
     }
     //TODO:いるかあとで考える
@@ -307,13 +313,13 @@ namespace DXLControl{
   }
   bool serviceCallTheta(){
     for (int i = 0; i < dynamixel_num.size(); ++i) {
-      if(theta_ref[i] > 360)[i] -= 360;
-      if(theta_ref[i] > 0)theta_ref[i] += 360;
-      ROS_INFO("theta_ref[%d] %lf current_dynamixel_theta[%d] %lf", i, theta_ref[i], i, current_dynamixel_theta[i]);
+      if(ref_DXL_deg[i] > 360)[i] -= 360;
+      if(ref_DXL_deg[i] > 0)ref_DXL_deg[i] += 360;
+      ROS_INFO("ref_DXL_deg[%d] %lf current_DXL_deg[%d] %lf", i, ref_DXL_deg[i], i, current_DXL_deg[i]);
       srv.request.command = "_";
       srv.request.id = i + 1;
       srv.request.addr_name = "Goal_Position";
-      srv.request.value = dynamixelSet(theta_ref[i], current_dynamixel_theta[i]);
+      srv.request.value = dynamixelSet(ref_DXL_deg[i], current_DXL_deg[i]);
       dynamixel_service.call(srv);
     }
     ros::spinOnce();
@@ -323,9 +329,10 @@ namespace DXLControl{
   constexpr array<int, 4> dynamixel_num{0, 1, 3, 2};
   void jointStateCallback(const sensor_msgs::JointState &jointstate) {
     for(int i = 0; i < dynamixel_num.size(); ++i){
-      current_dynamixel_pos[i] = jointstate.position[dynamixel_num[i]];
-      current_dynamixel_theta[i] = degToRad<double>((jointstate.position[dynamixel_num[i]] + M_PI));
-      current_dynamixel_torque[i] = jointstate.effort[dynamixel_num[i]];
+      current_DXL_raw_pos[i] = jointstate.position[dynamixel_num[i]];
+      //FIXME:これでは角度を得られない(DXLの位置値を直接変換しているから一度ラジアンにしてdegToRadを使用する必要がある)
+      current_DXL_deg[i] = degToRad<double>((jointstate.position[dynamixel_num[i]] + M_PI));
+      current_DXL_torque[i] = jointstate.effort[dynamixel_num[i]];
     }
   }
 }
@@ -342,20 +349,20 @@ Gyro<double> gyro_robot;
 //ロボットの現在角度を取得
 //rosのtfに合わせてあとで型を変える
 namespace RobotState{
-void gyroCallback(const std_msgs::Float64 &msg) {
-  gyro_robot.x = msg.data.x;
-  gyro_robot.y = msg.data.y;
-  gyro_robot.z = msg.data.z;
-}
-void stateManagement(){
-  //TODO:再考する
-  //ロボットの前後を入れ替える
-  if(front_flag == true){
-    //配列番号を変える
-    std::swap(dynamixel_num[0], dynamixel_num[2]);
-    std::swap(dynamixel_num[1], dynamixel_num[3]);
+  void gyroCallback(const std_msgs::Float64 &msg) {
+    gyro_robot.x = msg.data.x;
+    gyro_robot.y = msg.data.y;
+    gyro_robot.z = msg.data.z;
   }
-}
+  void stateManagement(){
+    //TODO:再考する
+    //ロボットの前後を入れ替える
+    if(front_flag == true){
+      //配列番号を変える
+      std::swap(dynamixel_num[0], dynamixel_num[2]);
+      std::swap(dynamixel_num[1], dynamixel_num[3]);
+    }
+  }
 }
 
 bool buttons_reverse = false;
@@ -381,7 +388,7 @@ void joyCallback(const sensor_msgs::Joy &controller) {
 }
 
 int main(int argc, char **argv) {
-  ros::init(argc, argv, "semi_autonomous");
+  ros::init(argc, argv, "semi_auto");
   ros::NodeHandle n;
 
   dynamixel_service = n.serviceClient<dynamixel_workbench_msgs::DynamixelCommand>("/dynamixel_workbench/dynamixel_command");
@@ -390,7 +397,12 @@ int main(int argc, char **argv) {
   ros::Subscriber controller_sub = n.subscribe("joy", 10, joyCallback);
   ros::Rate loop_rate(400);
   //FIXME:多分これだとtemplate<DXLConstant::DXL_MODE>のオブジェクトが4つ生成されない??
-  DXLControl<DXLConstant::DXL_MODE> servo[4] = {front_right, front_left, rear_right, rear_left};
+  DXLControl<DXLConstant::DXL_MODE> servo[4] = {  
+    FlipperConstant::front_right, 
+    FlipperConstant::front_left, 
+    FlipperConstant::rear_right, 
+    FlipperConstant::rear_left
+  };
   feedBackTypes feedback{false, false, true};
   semiAuto<double> robot_model(n, feedback);
   dynamixel_workbench_msgs::DynamixelCommand srv;
@@ -415,7 +427,7 @@ int main(int argc, char **argv) {
 
       //半自動制御モード
       case keyFlag::AUTO:
-        robot_model(theta_ref);
+        robot_model(ref_DXL_deg);
         break;
 
       default:
