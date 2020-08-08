@@ -85,52 +85,80 @@ namespace safetyCheck{
   }
 }
 
-namespace all{
+namespace Rotation{
   enum class setRotation{
     forward,
     reverse,
     nomal
   }
+  enum class Type{
+    one,
+    all
+  }
   //FIXME:引数が違う気がするint idで本当にいいのか?DXLの配置位置では??
+  template<Type type>
   explicit void setRotation(const int id, const setRotation direction, DXLControl::DXLControl *DXLservo){
     if(DXLConstant::DXL_MODE == DXLControl::MODE::POS_CONTROL){
-      switch(direction){
-        case setRotation::forward:
+      if(type == Type::one){
+        switch(direction){
+          case setRotation::forward:
+            ref_DXL_raw_pos[id] = DXLConstant::MAX_POSITION_VALUE; 
+            break;
+          case setRotation::reverse:
+            ref_DXL_raw_pos[id] = DXLConstant::MIN_POSITION_VALUE;
+            break;
+          case setRotation::nomal:
+            ref_DXL_raw_pos[id] = current_DXL_raw_pos;
+            break;
+          case default:
+            ROS_ERROR("this direction of rotation is invalid");
+            break;
+        }
+      }else if(type == type::all){
+          switch(direction){
+          case setRotation::forward:
             ref_DXL_raw_pos[0] = DXLConstant::MAX_POSITION_VALUE;
-            for (int i = 1; i < dynamixel_num.size(); ++i) {ref_DXL_raw_pos[i] = ref_DXL_raw_pos[0];}
-          break;
-        case setRotation::reverse:
-          ref_DXL_raw_pos[0] = DXLConstant::MIN_POSITION_VALUE;
-          for (int i = 1; i < dynamixel_num.size(); ++i) {ref_DXL_raw_pos[i] = ref_DXL_raw_pos[0];}
-          break;
-        case setRotation::nomal:
-          for (int i = 1; i < dynamixel_num.size(); ++i) {ref_DXL_raw_pos[i] = ref_DXL_raw_pos[0];}
-          break;
-        case default:
-          ROS_ERROR("this direction of rotation is invalid");
-          break;
+            break;
+          case setRotation::reverse:
+            ref_DXL_raw_pos[0] = DXLConstant::MIN_POSITION_VALUE;
+            break;
+          case setRotation::nomal:
+            break;
+          case default:
+            ROS_ERROR("this direction of rotation is invalid");
+            break;
+        }
+        for (int i = 1; i < dynamixel_num.size(); ++i) {ref_DXL_raw_pos[i] = ref_DXL_raw_pos[0];}
       }
       for(int i < 0; i < dynamixel_num.size(); ++i){
         DXLservo->PosDirect();
         ++DXLservo;
       }
     }else if(DXLConstant::DXL_MODE == DXLControl::MODE::TORQUE_CONTROL){
-      switch(direction){
-        case setRotation::forward:
-            //NOTE:トルク制御
-            //TODO:トルク制御の実装
-          break;
-        case setRotation::reverse:
-            //NOTE:トルク制御
-            //TODO:トルク制御の実装
-          break;
-        case setRotation::nomal:
-            //NOTE:トルク制御
-            //TODO:トルク制御の実装
-          break;
-        case default:
-          ROS_ERROR("this direction of rotation is invalid");
-          break;
+      if(type == Type::one){
+        switch(direction){
+          case setRotation::forward:
+            break;
+          case setRotation::reverse
+            break;
+          case setRotation::nomal:
+            break;
+          case default:
+            ROS_ERROR("this direction of rotation is invalid");
+            break;
+        }
+      }else if(type == type::all){
+          switch(direction){
+          case setRotation::forward:
+            break;
+          case setRotation::reverse:
+            break;
+          case setRotation::nomal:
+            break;
+          case default:
+            ROS_ERROR("this direction of rotation is invalid");
+            break;
+        }
       }
       for(int i < 0; i < dynamixel_num.size(); ++i){
         DXLservo->DXLservo();
@@ -145,65 +173,7 @@ namespace all{
     }
   }
 }
-//-----------------------------------------------------------------
 
-namespace nomal{
-  //using calc_f = void(*)(int);
-  //関数ポインタの使い方を間違えている
-  enum class setRotation{
-    forward,
-    reverse,
-    nomal
-  }
-  //FIXME:引数が違う気がするint idで本当にいいのか?DXLの配置位置では??
-  explicit void setRotation(const int id, const setRotation direction, DXLControl::DXLControl *DXLservo){
-    if(DXLConstant::DXL_MODE == DXLControl::MODE::POS_CONTROL){
-      switch(direction){
-        case setRotation::forward:
-            //NOTE:位置(角度)制御
-            ref_DXL_raw_pos[id] = DXLConstant::MAX_POSITION_VALUE;
-          break;
-        case setRotation::reverse:
-            //NOTE:位置(角度)制御
-            ref_DXL_raw_pos[id] = DXLConstant::MIN_POSITION_VALUE;
-          break;
-        case setRotation::nomal:
-            //NOTE:位置(角度)制御
-            ref_DXL_raw_pos[id] = current_DXL_raw_pos;
-          break;
-        case default:
-          ROS_ERROR("this direction of rotation is invalid");
-          break;
-      }
-      for(int i < 0; i < dynamixel_num.size(); ++i){
-        DXLservo->PosDirect();
-        ++DXLservo;
-      }
-    }else if(DXLConstant::DXL_MODE == DXLControl::MODE::TORQUE_CONTROL){
-      switch(direction){
-        case setRotation::forward:
-            //NOTE:トルク制御
-            //TODO:トルク制御の実装
-          break;
-        case setRotation::reverse:
-            //NOTE:トルク制御
-            //TODO:トルク制御の実装
-          break;
-        case setRotation::nomal:
-            //NOTE:トルク制御
-            //TODO:トルク制御の実装
-          break;
-        case default:
-          ROS_ERROR("this direction of rotation is invalid");
-          break;
-      }
-      for(int i < 0; i < dynamixel_num.size(); ++i){
-        DXLservo->DXLservo();
-        ++DXLservo;
-      }
-    }
-  }
-}
 namespace gyroControl{
   enum class Lean{
     forward,
@@ -415,18 +385,18 @@ int main(int argc, char **argv) {
 
   while (ros::ok()) {
     for(int i = 0; i < dynamixel_num.size(); ++i){
-      if(current_dynamixel_theta[i] <= 0)current_dynamixel_theta[i] = 360 + current_dynamixel_theta[i];
+      if(current_DXL_deg[i] <= 0)current_DXL_deg[i] = 360 + current_DXL_deg[i];
     }
     switch(controller_state){
       case keyFlag::ALL:
         if ((controller_key[0] < 0) or (controller_key[1] < 0)){
-          all::setRotation(all::forward);
+          Rotation::setRotation<Rotation::Type::all>(all::forward);
         }else if((controller_key[2] == true) or (controller_key[3] == true)){
-          all::setRotation(all::reverse);
+          Rotation::setRotation<Rotation::Type::all>(all::reverse);
         }else if(flag_reset){
-          all::reset();
+          Rotation::reset();
         }else{
-          all::nomal();
+          Rotation::setRotation<Rotation::Type::all>(all::nomal);
         }
         break;
 
@@ -438,10 +408,10 @@ int main(int argc, char **argv) {
       default:
         for(int i = 0; i < dynamixel_num.size(); ++i){
           if(controller_key[i] < 0){
-            buttons_reverse == 1 ? nomal::setRotation(i, nomal::reverse) : nomal::setRotation(i, nomal::forward);
+            buttons_reverse == 1 ? Rotation::setRotation<Rotation::Type::one>(i, nomal::reverse) : Rotation::setRotation(i, nomal::forward);
           }else{
             if((i == 2 or i == 3) && controller_key[i] == true){
-              buttons_reverse == 1 ? nomal::setRotation(i, nomal::reverse) : nomal::setRotation(i, nomal::forward);
+              buttons_reverse == 1 ? Rotation::setRotation<Rotation::Type::one>(i, nomal::reverse) : Rotation::setRotation(i, nomal::forward);
             }
           }
         }
