@@ -20,11 +20,11 @@
 
 using std::array;
 using std::tuple;
-//FIXME:全ての変数、関数をnamespaceの中に入れる
-//FIXME:グローバル宣言の変数多すぎもっと参照渡し使おう
-//FIXME:パラメータ関係を別のファイルにまとめる
+//HACK:全ての変数、関数をnamespaceの中に入れる
+//HACK:グローバル宣言の変数多すぎもっと参照渡し使おう
+//HACK:パラメータ関係を別のファイルにまとめる
 namespace FlipperConstant{
-  //FIXME:一つずつサーボIDを管理するのは頭が悪い
+  //HACK:一つずつサーボIDを管理するのは頭が悪い
   constexpr int front_right = 0;
   constexpr int front_left = 1;
   constexpr int rear_right = 2;
@@ -36,7 +36,7 @@ namespace FlipperConstant{
 }
 namespace DXLConstant{
   constexpr DXLControl::MODE DXL_MODE = DXLControl::MODE::TORQUE_CONTROL;
-  constexpr double ORIGINAL_DEG = 90.0;
+  constexpr double ORIGIN_DEG = 90.0;
   constexpr double AUTO_MAX_DEG = 75.0;
   constexpr double AUTO_MIN_DEG = -90.0;
   constexpr int MAX_POSITION_VALUE = 1048575;
@@ -45,15 +45,15 @@ namespace DXLConstant{
   constexpr double DYNAMIXEL_RESOLUTION_ANGLE = 0.088;
   constexpr bool TORQUE_ENABLE = 1;
   constexpr bool TORQUE_DISABLE = 0;
-  //FIXME:それぞれのサーボゲインを設ける
+  //TODO:それぞれのサーボゲインを設ける
   constexpr double Kp = 1.0;
   constexpr double Kd = 1.0;
 }
 array<double, 4>     ref_DXL_raw_pos{};
 array<double, 4> current_DXL_raw_pos{};
 
-array<double, 4>     ref_DXL_deg{};
-array<double, 4> current_DXL_deg{};
+array<double, 4>     ref_DXL_rad{};
+array<double, 4> current_DXL_rad{};
 
 array<double, 4>     ref_DXL_torque{};
 array<double, 4> current_DXL_torque{};
@@ -91,48 +91,39 @@ namespace Rotation{
     reverse,
     nomal
   }
-  enum class Type{
+  enum class SeveralType{
     one,
     all
   }
-  //FIXME:引数が違う気がするint idで本当にいいのか?DXLの配置位置では??
-  template<Type type>
-  explicit void setRotation(const int id, const setRotation direction, DXLControl::DXLControl *DXLservo){
+  //WARNING:引数が違う気がするint idで本当にいいのか?DXLの配置位置では??
+  template<SeveralType type>
+  explicit void setRotation(const int id, const setRotation direction, DXLControl::DXLControl(&DXLservo)[dynamixel_num.size()]){
     if(DXLConstant::DXL_MODE == DXLControl::MODE::POS_CONTROL){
-      if(type == Type::one){
+      int set_id{};
+      //NOTE:Type::allではid0の値を他の値にコピーする
+      type == Type::one ? set_id = id : set_id = 0;
         switch(direction){
           case setRotation::forward:
-            ref_DXL_raw_pos[id] = DXLConstant::MAX_POSITION_VALUE; 
+            ref_DXL_raw_pos[set_id] = DXLConstant::MAX_POSITION_VALUE; 
             break;
           case setRotation::reverse:
-            ref_DXL_raw_pos[id] = DXLConstant::MIN_POSITION_VALUE;
+            ref_DXL_raw_pos[set_id] = DXLConstant::MIN_POSITION_VALUE;
             break;
           case setRotation::nomal:
-            ref_DXL_raw_pos[id] = current_DXL_raw_pos;
+            ref_DXL_raw_pos[set_id] = current_DXL_raw_pos;
             break;
           case default:
             ROS_ERROR("this direction of rotation is invalid");
             break;
         }
-      }else if(type == type::all){
-          switch(direction){
-          case setRotation::forward:
-            ref_DXL_raw_pos[0] = DXLConstant::MAX_POSITION_VALUE;
-            break;
-          case setRotation::reverse:
-            ref_DXL_raw_pos[0] = DXLConstant::MIN_POSITION_VALUE;
-            break;
-          case setRotation::nomal:
-            break;
-          case default:
-            ROS_ERROR("this direction of rotation is invalid");
-            break;
+        if(type == Type::one){
+          for (int i = 1; i < dynamixel_num.size(); ++i) {
+            ref_DXL_raw_pos[i] = ref_DXL_raw_pos[0];
+          }
         }
-        for (int i = 1; i < dynamixel_num.size(); ++i) {ref_DXL_raw_pos[i] = ref_DXL_raw_pos[0];}
       }
-      for(int i < 0; i < dynamixel_num.size(); ++i){
-        DXLservo->PosDirect();
-        ++DXLservo;
+      for(auto &DXL : DXLservo){
+        DXL.PosDirect();
       }
     }else if(DXLConstant::DXL_MODE == DXLControl::MODE::TORQUE_CONTROL){
       if(type == Type::one){
@@ -160,16 +151,16 @@ namespace Rotation{
             break;
         }
       }
-      for(int i < 0; i < dynamixel_num.size(); ++i){
-        DXLservo->DXLservo();
-        ++DXLservo;
+      for(auto &DXL : DXLservo){
+        DXL();
       }
     }
   }
-  //TODO:reset()の利用
+
   inline void reset() {
     for (int i = 0; i < dynamixel_num.size(); ++i) {
-      ref_DXL_deg[i] = DXLConstant::ORIGINAL_DEG;
+      //TODO:template化
+      ref_DXL_rad[i] = degToRad<double>(DXLConstant::ORIGIN_DEG);
     }
   }
 }
@@ -220,10 +211,10 @@ namespace DXLControl{
     public:
       explicit DXLControl(int _ID):DXL_ID(_ID){
         if(dxl_mode == MODE::POS_CONTROL){
-          //FIXME:関数ポインタの使い方が違う
+          //WARNING:関数ポインタの使い方が違う
           funcp = this -> PosControl;
         }else if(dxl_mode == MODE::TORQUE_CONTROL){
-          //FIXME:関数ポインタの使い方が違う
+          //WARNING:関数ポインタの使い方が違う
           funcp = this -> TorqueControl;
         }else{
           ROS_ERROR("this dynamixel mode is not appropriate.");
@@ -232,8 +223,8 @@ namespace DXLControl{
       bool TorqueControl(T theta_d){
         //トルク制御の実装
         //重力補償項の追加
-        T gravity_compensation = flipper_m * gravity * cos(degToRad(theta_now));
-        return radToDeg<T>(Kp * (degToRad<T>(theta_d) - degToRad<T>(theta_now)) - Kd * (angular) + gravity_compensation);
+        T gravity_compensation = flipper_m * gravity * cos(degToRad<T>(theta_now));
+        return DXLConstant::Kp * (degToRad<T>(theta_d) - degToRad<T>(theta_now)) - DXLConstant::Kd * (angular) + gravity_compensation;
       }
       bool PosControl(T theta_d){
         //TODO:位置制御の追加
@@ -250,7 +241,7 @@ namespace DXLControl{
   };
   template<typename T>
   int dynamixelSet(T goal_angle, T now_pos){
-    //FIXME:コードが汚い
+    //HACK:コードが汚い
     //dynamixelのパルスがrosの場合だと定義が違う可能性があるので確認必要
     //現在の位置をdynamixel一回あたりのパルス数(定数で割る)
     //now_posはラジアンであるので一旦度数方に直す
@@ -288,25 +279,26 @@ namespace DXLControl{
   }
   bool serviceCallTheta(){
     for (int i = 0; i < dynamixel_num.size(); ++i) {
-      if(ref_DXL_deg[i] > 360)[i] -= 360;
-      if(ref_DXL_deg[i] > 0)ref_DXL_deg[i] += 360;
-      ROS_INFO("ref_DXL_deg[%d] %lf current_DXL_deg[%d] %lf", i, ref_DXL_deg[i], i, current_DXL_deg[i]);
+      //TODO:今のままだと計算がバグる
+      if(ref_DXL_rad[i] > 360)[i] -= 360;
+      if(ref_DXL_rad[i] > 0)ref_DXL_rad[i] += 360;
+      ROS_INFO("ref_DXL_rad[%d] %lf current_DXL_rad[%d] %lf", i, ref_DXL_rad[i], i, current_DXL_rad[i]);
       srv.request.command = "_";
       srv.request.id = i + 1;
       srv.request.addr_name = "Goal_Position";
-      srv.request.value = dynamixelSet(ref_DXL_deg[i], current_DXL_deg[i]);
+      srv.request.value = dynamixelSet(ref_DXL_rad[i], current_DXL_rad[i]);
       dynamixel_service.call(srv);
     }
     ros::spinOnce();
   }
   //現在角度とトルクを取得
-  //FIXME: dynamixelIDとjointstateの順番が違う
+  //TODO: dynamixelIDとjointstateの順番が違う
   constexpr array<int, 4> dynamixel_num{0, 1, 3, 2};
   void jointStateCallback(const sensor_msgs::JointState &jointstate) {
     for(int i = 0; i < dynamixel_num.size(); ++i){
       current_DXL_raw_pos[i] = jointstate.position[dynamixel_num[i]];
       //FIXME:これでは角度を得られない(DXLの位置値を直接変換しているから一度ラジアンにしてdegToRadを使用する必要がある)
-      current_DXL_deg[i] = degToRad<double>((jointstate.position[dynamixel_num[i]] + M_PI));
+      current_DXL_rad[i] = degToRad<double>((jointstate.position[dynamixel_num[i]] + M_PI));
       current_DXL_torque[i] = jointstate.effort[dynamixel_num[i]];
     }
   }
@@ -347,7 +339,7 @@ array<double, 4> controller_key{};
 
 keyFlag controller_state;
 
-//FIXME:コントローラ値を楽に変えられるようにする
+//TODO:コントローラ値を楽に変えられるようにする
 void joyCallback(const sensor_msgs::Joy &controller) {
   buttons_reverse = controller.buttons[2];
   controller_key[0] = controller.axes[5];
@@ -371,8 +363,8 @@ int main(int argc, char **argv) {
   ros::Subscriber gyro_sub = n.subscribe("gyro", 10, gyroCallback);
   ros::Subscriber controller_sub = n.subscribe("joy", 10, joyCallback);
   ros::Rate loop_rate(400);
-  //FIXME:多分これだとtemplate<DXLConstant::DXL_MODE>のオブジェクトが4つ生成されない??
-  DXLControl<DXLConstant::DXL_MODE> servo[4] = {  
+  //REVIEW:多分これだとtemplate<DXLConstant::DXL_MODE>のオブジェクトが4つ生成されない??
+  array<DXLControl<DXLConstant::DXL_MODE>, 4> servo{  
     FlipperConstant::front_right, 
     FlipperConstant::front_left, 
     FlipperConstant::rear_right, 
@@ -385,33 +377,33 @@ int main(int argc, char **argv) {
 
   while (ros::ok()) {
     for(int i = 0; i < dynamixel_num.size(); ++i){
-      if(current_DXL_deg[i] <= 0)current_DXL_deg[i] = 360 + current_DXL_deg[i];
+      if(current_DXL_rad[i] <= 0)current_DXL_rad[i] = 360 + current_DXL_rad[i];
     }
     switch(controller_state){
       case keyFlag::ALL:
         if ((controller_key[0] < 0) or (controller_key[1] < 0)){
-          Rotation::setRotation<Rotation::Type::all>(all::forward);
+          Rotation::setRotation<Rotation::SeveralType::all>(all::forward);
         }else if((controller_key[2] == true) or (controller_key[3] == true)){
-          Rotation::setRotation<Rotation::Type::all>(all::reverse);
+          Rotation::setRotation<Rotation::SeveralType::all>(all::reverse);
         }else if(flag_reset){
           Rotation::reset();
         }else{
-          Rotation::setRotation<Rotation::Type::all>(all::nomal);
+          Rotation::setRotation<Rotation::SeveralType::all>(all::nomal);
         }
         break;
 
       //半自動制御モード
       case keyFlag::AUTO:
-        robot_model(ref_DXL_deg);
+        robot_model(ref_DXL_rad);
         break;
 
       default:
         for(int i = 0; i < dynamixel_num.size(); ++i){
           if(controller_key[i] < 0){
-            buttons_reverse == 1 ? Rotation::setRotation<Rotation::Type::one>(i, nomal::reverse) : Rotation::setRotation(i, nomal::forward);
+            buttons_reverse == 1 ? Rotation::setRotation<Rotation::SeveralType::one>(i, nomal::reverse) : Rotation::setRotation(i, nomal::forward);
           }else{
             if((i == 2 or i == 3) && controller_key[i] == true){
-              buttons_reverse == 1 ? Rotation::setRotation<Rotation::Type::one>(i, nomal::reverse) : Rotation::setRotation(i, nomal::forward);
+              buttons_reverse == 1 ? Rotation::setRotation<Rotation::SeveralType::one>(i, nomal::reverse) : Rotation::setRotation(i, nomal::forward);
             }
           }
         }
