@@ -14,6 +14,8 @@
 #include <array>
 #include <tuple>
 #include "robot_motion/semi_autonomous.h"
+#include "robot_motion/Rotation.h"
+#include "robot_motion/DXL.h"
 //#include "dynamixel/dynamixel.h"
 //#include "dynamixel.cpp"
 #include <dynamixel_workbench_msgs/DynamixelCommand.h>
@@ -21,6 +23,9 @@
 //HACK:全ての変数、関数をnamespaceの中に入れる
 //HACK:グローバル宣言の変数多すぎもっと参照渡し使おう
 //HACK:パラメータ関係を別のファイルにまとめる
+namespace DXL{
+  extern template class DXLControl
+}
 namespace FlipperConstant{
   //HACK:一つずつサーボIDを管理するのは頭が悪い
   constexpr int front_right = 0;
@@ -79,85 +84,6 @@ namespace safetyCheck{
   }
 };
 
-namespace Rotation{
-  enum class setRotationType{
-    forward,
-    reverse,
-    nomal
-  };
-  enum class severalType{
-    one,
-    all
-  };
-  //WARNING:引数が違う気がするint idで本当にいいのか?DXLの配置位置では??
-  template<severalType type>
-  void setRotation(const int id, const setRotationType direction, DXL::DXLControl(&DXLservo)[dynamixel_num.size()]){
-    if(DXL_MODE == DXL::MODE::POS_CONTROL){
-      int set_id{};
-      //NOTE:Type::allではid0の値を他の値にコピーする
-      type == severalType::one ? set_id = id : set_id = 0;
-      switch(direction){
-        case setRotationType::forward:
-          ref_DXL_raw_pos[set_id] = DXLConstant::MAX_POSITION_VALUE; 
-          break;
-        case setRotationType::reverse:
-          ref_DXL_raw_pos[set_id] = DXLConstant::MIN_POSITION_VALUE;
-          break;
-        case setRotationType::nomal:
-          ref_DXL_raw_pos[set_id] = current_DXL_raw_pos;
-          break;
-        default:
-          ROS_ERROR("this direction of rotation is invalid");
-          break;
-      }
-      if(type == severalType::one){
-        for (int i = 1; i < dynamixel_num.size(); ++i) {
-          ref_DXL_raw_pos[i] = ref_DXL_raw_pos[0];
-        }
-      }
-      for(auto &DXL : DXLservo){
-        DXL.PosDirect();
-      }
-    }else if(DXL_MODE == DXL::MODE::TORQUE_CONTROL){
-      if(type == severalType::one){
-        switch(direction){
-          case setRotationType::forward:
-            break;
-          case setRotationType::reverse:
-            break;
-          case setRotationType::nomal:
-            break;
-          default:
-            ROS_ERROR("this direction of rotation is invalid");
-            break;
-        }
-      }else if(type == severalType::all){
-          switch(direction){
-          case setRotation::forward:
-            break;
-          case setRotation::reverse:
-            break;
-          case setRotation::nomal:
-            break;
-          default:
-            ROS_ERROR("this direction of rotation is invalid");
-            break;
-        }
-      }
-      for(auto &DXL : DXLservo){
-        DXL();
-      }
-    }
-  }
-
-  inline void reset() {
-    for (int i = 0; i < dynamixel_num.size(); ++i) {
-      //TODO:template化
-      ref_DXL_rad[i] = degToRad<double>(DXLConstant::ORIGIN_DEG);
-    }
-  }
-};
-
 namespace gyroControl{
   enum class Lean{
     forward,
@@ -195,107 +121,6 @@ namespace gyroControl{
 };
 
 constexpr DXL::MODE DXL_MODE = DXL::MODE::TORQUE_CONTROL;
-namespace DXL{
-  enum class MODE{
-    POS_CONTROL,
-    TORQUE_CONTROL
-  };
-  template<typename T, MODE dxl_mode>
-  class DXLControl(){
-    public:
-      explicit DXLControl(int _ID):DXL_ID(_ID){
-        if(dxl_mode == MODE::POS_CONTROL){
-          //WARNING:関数ポインタの使い方が違う
-          funcp = this -> PosControl;
-        }else if(dxl_mode == MODE::TORQUE_CONTROL){
-          //WARNING:関数ポインタの使い方が違う
-          funcp = this -> TorqueControl;
-        }else{
-          ROS_ERROR("this dynamixel mode is not appropriate.");
-        }
-      }
-      bool TorqueControl(T theta_d){
-        //トルク制御の実装
-        //重力補償項の追加
-        T gravity_compensation = flipper_m * gravity * cos(degToRad<T>(theta_now));
-        return DXLConstant::Kp * (degToRad<T>(theta_d) - degToRad<T>(theta_now)) - DXLConstant::Kd * (angular) + gravity_compensation;
-      }
-      bool PosControl(T theta_d){
-        //TODO:位置制御の追加
-      }
-      bool PosDirect(){
-        //TODO:PosDirectに追加
-      }
-      bool operator()(T theta_d){
-        return (*funcp)(theta_d);
-      }
-    private:
-      const int DXL_ID;
-      int (*funcp)(int, int);
-  };
-  template<typename T>
-  int dynamixelSet(T goal_angle, T now_pos){
-    //HACK:コードが汚い
-    //dynamixelのパルスがrosの場合だと定義が違う可能性があるので確認必要
-    //現在の位置をdynamixel一回あたりのパルス数(定数で割る)
-    //now_posはラジアンであるので一旦度数方に直す
-    T goal_pos;
-    int sum_revolutions = static_cast<int>(now_pos / 360);
-    T now_angle = now_pos - (sum_revolutions * 360);
-    //std::cout << "goal_angle = " << goal_angle << " now_angle = " << now_angle << std::endl;
-    if(now_angle < 0)now_angle = 360 + now_angle;
-    if(goal_angle - now_angle > 0 and goal_angle - now_angle < 180){
-      goal_pos = goal_angle - now_angle;
-    }else if(goal_angle - now_angle > 0 and goal_angle - now_angle > 180){
-      goal_pos = -(now_angle + 360 - goal_angle);
-    }else if(now_angle - goal_angle > 0 and now_angle - goal_angle < 180){
-      goal_pos = -(now_angle - goal_angle);
-    }else if(now_angle - goal_angle > 0 ){
-      goal_pos = goal_angle + 360 - now_angle;
-    }
-    //return (goal_pos / DYNAMIXEL_RESOLUTION_ANGLE) + now_pulse + (sum_revolutions * DYNAMIXEL_RESOLUTION);
-    //  std::cout << "goal_angle = " << goal_angle << " now_angle = " << now_angle << std::endl;
-    return(this -> torqueFB(goal_pos / DYNAMIXEL_RESOLUTION_ANGLE) + (now_pos / DYNAMIXEL_RESOLUTION_ANGLE));
-  }
-  //NodeHandleとかもグローバル宣言にしたほうがいいかも
-  ros::ServiceClient dynamixel_service;
-  bool serviceCallPos(){
-    for(int i = 0; i < dynamixel_num.size(); ++i){
-      srv.request.command = "_";
-      srv.request.id = i + 1;
-      srv.request.addr_name = "Goal_Position";
-      srv.request.value = ref_DXL_raw_pos[i];
-      dynamixel_service.call(srv);
-    }
-    //TODO:いるかあとで考える
-    ros::spinOnce();
-    return 
-  };
-  bool serviceCallTheta(){
-    for (int i = 0; i < dynamixel_num.size(); ++i) {
-      //TODO:今のままだと計算がバグる
-      if(ref_DXL_rad[i] > 360)[i] -= 360;
-      if(ref_DXL_rad[i] > 0)ref_DXL_rad[i] += 360;
-      ROS_INFO("ref_DXL_rad[%d] %lf current_DXL_rad[%d] %lf", i, ref_DXL_rad[i], i, current_DXL_rad[i]);
-      srv.request.command = "_";
-      srv.request.id = i + 1;
-      srv.request.addr_name = "Goal_Position";
-      srv.request.value = dynamixelSet(ref_DXL_rad[i], current_DXL_rad[i]);
-      dynamixel_service.call(srv);
-    }
-    ros::spinOnce();
-  }
-  //現在角度とトルクを取得
-  //TODO: dynamixelIDとjointstateの順番が違う
-  void jointStateCallback(const sensor_msgs::JointState &jointstate) {
-    for(int i = 0; i < dynamixel_num.size(); ++i){
-      current_DXL_raw_pos[i] = jointstate.position[dynamixel_num[i]];
-      //FIXME:これでは角度を得られない(DXLの位置値を直接変換しているから一度ラジアンにしてdegToRadを使用する必要がある)
-      current_DXL_rad[i] = degToRad<double>((jointstate.position[dynamixel_num[i]] + M_PI));
-      current_DXL_torque[i] = jointstate.effort[dynamixel_num[i]];
-    }
-  }
-};
 
 template<typename T>
 struct Gyro{
@@ -353,12 +178,13 @@ int main(int argc, char **argv) {
   ros::NodeHandle n;
 
   dynamixel_service = n.serviceClient<dynamixel_workbench_msgs::DynamixelCommand>("/dynamixel_workbench/dynamixel_command");
-  ros::Subscriber feedback_sub = n.subscribe("/dynamixel_workbench/joint_states", 10, jointStateCallback);
-  ros::Subscriber gyro_sub = n.subscribe("gyro", 10, gyroCallback);
+  ros::Subscriber feedback_sub = n.subscribe("/dynamixel_workbench/joint_states", 10, DXL::jointStateCallback);
+  ros::Subscriber gyro_sub = n.subscribe("gyro", 10, RobotState::gyroCallback);
   ros::Subscriber controller_sub = n.subscribe("joy", 10, joyCallback);
   ros::Rate loop_rate(400);
   //REVIEW:多分これだとtemplate<DXLConstant::DXL_MODE>のオブジェクトが4つ生成されない??
-  std::array<DXL::DXLControl<DXL_MODE>, 4> servo{  
+  
+  std::array<DXL::DXLControl<double, DXL_MODE>, 4> servo{  
     FlipperConstant::front_right, 
     FlipperConstant::front_left, 
     FlipperConstant::rear_right, 
