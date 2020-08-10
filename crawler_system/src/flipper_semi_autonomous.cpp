@@ -14,12 +14,10 @@
 #include <array>
 #include <tuple>
 #include "robot_motion/semi_autonomous.h"
-#include "dynamixel/dynamixel.h"
-#include "dynamixel.cpp"
+//#include "dynamixel/dynamixel.h"
+//#include "dynamixel.cpp"
 #include <dynamixel_workbench_msgs/DynamixelCommand.h>
 
-using std::array;
-using std::tuple;
 //HACK:全ての変数、関数をnamespaceの中に入れる
 //HACK:グローバル宣言の変数多すぎもっと参照渡し使おう
 //HACK:パラメータ関係を別のファイルにまとめる
@@ -33,9 +31,8 @@ namespace FlipperConstant{
   constexpr double flipper_m = 100;
   constexpr double flipper_lg = 100;
   constexpr double gravity = 9.81;
-}
+};
 namespace DXLConstant{
-  constexpr DXLControl::MODE DXL_MODE = DXLControl::MODE::TORQUE_CONTROL;
   constexpr double ORIGIN_DEG = 90.0;
   constexpr double AUTO_MAX_DEG = 75.0;
   constexpr double AUTO_MIN_DEG = -90.0;
@@ -48,15 +45,17 @@ namespace DXLConstant{
   //TODO:それぞれのサーボゲインを設ける
   constexpr double Kp = 1.0;
   constexpr double Kd = 1.0;
-}
-array<double, 4>     ref_DXL_raw_pos{};
-array<double, 4> current_DXL_raw_pos{};
+};
+std::array<double, 4>     ref_DXL_raw_pos{};
+std::array<double, 4> current_DXL_raw_pos{};
 
-array<double, 4>     ref_DXL_rad{};
-array<double, 4> current_DXL_rad{};
+std::array<double, 4>     ref_DXL_rad{};
+std::array<double, 4> current_DXL_rad{};
 
-array<double, 4>     ref_DXL_torque{};
-array<double, 4> current_DXL_torque{};
+std::array<double, 4>     ref_DXL_torque{};
+std::array<double, 4> current_DXL_torque{};
+
+constexpr std::array<int, 4> dynamixel_num{0, 1, 3, 2};
 
 template<typename T>
 inline T degToRad(const T deg){
@@ -76,69 +75,63 @@ enum class keyFlag{
 //-----------------------------------------------------------------
 namespace safetyCheck{
   //過負荷の確認
-  void torque_limit{
-    try{
-
-    }catch{
-
-    }
+  void torque_limit(){
   }
-}
+};
 
 namespace Rotation{
-  enum class setRotation{
+  enum class setRotationType{
     forward,
     reverse,
     nomal
-  }
-  enum class SeveralType{
+  };
+  enum class severalType{
     one,
     all
-  }
+  };
   //WARNING:引数が違う気がするint idで本当にいいのか?DXLの配置位置では??
-  template<SeveralType type>
-  explicit void setRotation(const int id, const setRotation direction, DXLControl::DXLControl(&DXLservo)[dynamixel_num.size()]){
-    if(DXLConstant::DXL_MODE == DXLControl::MODE::POS_CONTROL){
+  template<severalType type>
+  void setRotation(const int id, const setRotationType direction, DXL::DXLControl(&DXLservo)[dynamixel_num.size()]){
+    if(DXL_MODE == DXL::MODE::POS_CONTROL){
       int set_id{};
       //NOTE:Type::allではid0の値を他の値にコピーする
-      type == Type::one ? set_id = id : set_id = 0;
-        switch(direction){
-          case setRotation::forward:
-            ref_DXL_raw_pos[set_id] = DXLConstant::MAX_POSITION_VALUE; 
-            break;
-          case setRotation::reverse:
-            ref_DXL_raw_pos[set_id] = DXLConstant::MIN_POSITION_VALUE;
-            break;
-          case setRotation::nomal:
-            ref_DXL_raw_pos[set_id] = current_DXL_raw_pos;
-            break;
-          case default:
-            ROS_ERROR("this direction of rotation is invalid");
-            break;
-        }
-        if(type == Type::one){
-          for (int i = 1; i < dynamixel_num.size(); ++i) {
-            ref_DXL_raw_pos[i] = ref_DXL_raw_pos[0];
-          }
+      type == severalType::one ? set_id = id : set_id = 0;
+      switch(direction){
+        case setRotationType::forward:
+          ref_DXL_raw_pos[set_id] = DXLConstant::MAX_POSITION_VALUE; 
+          break;
+        case setRotationType::reverse:
+          ref_DXL_raw_pos[set_id] = DXLConstant::MIN_POSITION_VALUE;
+          break;
+        case setRotationType::nomal:
+          ref_DXL_raw_pos[set_id] = current_DXL_raw_pos;
+          break;
+        default:
+          ROS_ERROR("this direction of rotation is invalid");
+          break;
+      }
+      if(type == severalType::one){
+        for (int i = 1; i < dynamixel_num.size(); ++i) {
+          ref_DXL_raw_pos[i] = ref_DXL_raw_pos[0];
         }
       }
       for(auto &DXL : DXLservo){
         DXL.PosDirect();
       }
-    }else if(DXLConstant::DXL_MODE == DXLControl::MODE::TORQUE_CONTROL){
-      if(type == Type::one){
+    }else if(DXL_MODE == DXL::MODE::TORQUE_CONTROL){
+      if(type == severalType::one){
         switch(direction){
-          case setRotation::forward:
+          case setRotationType::forward:
             break;
-          case setRotation::reverse
+          case setRotationType::reverse:
             break;
-          case setRotation::nomal:
+          case setRotationType::nomal:
             break;
-          case default:
+          default:
             ROS_ERROR("this direction of rotation is invalid");
             break;
         }
-      }else if(type == type::all){
+      }else if(type == severalType::all){
           switch(direction){
           case setRotation::forward:
             break;
@@ -146,7 +139,7 @@ namespace Rotation{
             break;
           case setRotation::nomal:
             break;
-          case default:
+          default:
             ROS_ERROR("this direction of rotation is invalid");
             break;
         }
@@ -163,14 +156,14 @@ namespace Rotation{
       ref_DXL_rad[i] = degToRad<double>(DXLConstant::ORIGIN_DEG);
     }
   }
-}
+};
 
 namespace gyroControl{
   enum class Lean{
     forward,
     backward,
     nomal
-  }
+  };
   Lean gyroFeedback(){
     //ラジアンと角度を全体で管理する
     constexpr double threshold_forward_z = 330;
@@ -199,13 +192,14 @@ namespace gyroControl{
         break;
     }
   }
-}
+};
 
-namespace DXLControl{
+constexpr DXL::MODE DXL_MODE = DXL::MODE::TORQUE_CONTROL;
+namespace DXL{
   enum class MODE{
     POS_CONTROL,
     TORQUE_CONTROL
-  }
+  };
   template<typename T, MODE dxl_mode>
   class DXLControl(){
     public:
@@ -276,7 +270,7 @@ namespace DXLControl{
     //TODO:いるかあとで考える
     ros::spinOnce();
     return 
-  }
+  };
   bool serviceCallTheta(){
     for (int i = 0; i < dynamixel_num.size(); ++i) {
       //TODO:今のままだと計算がバグる
@@ -293,7 +287,6 @@ namespace DXLControl{
   }
   //現在角度とトルクを取得
   //TODO: dynamixelIDとjointstateの順番が違う
-  constexpr array<int, 4> dynamixel_num{0, 1, 3, 2};
   void jointStateCallback(const sensor_msgs::JointState &jointstate) {
     for(int i = 0; i < dynamixel_num.size(); ++i){
       current_DXL_raw_pos[i] = jointstate.position[dynamixel_num[i]];
@@ -302,14 +295,14 @@ namespace DXLControl{
       current_DXL_torque[i] = jointstate.effort[dynamixel_num[i]];
     }
   }
-}
+};
 
 template<typename T>
 struct Gyro{
   T x;
   T y;
   T z;
-}
+};
 
 Gyro<double> gyro_robot; 
 
@@ -324,18 +317,19 @@ namespace RobotState{
   void stateManagement(){
     //TODO:再考する
     //ロボットの前後を入れ替える
+    /*
     if(front_flag == true){
       //配列番号を変える
       std::swap(dynamixel_num[0], dynamixel_num[2]);
       std::swap(dynamixel_num[1], dynamixel_num[3]);
-    }
+    }*/
   }
-}
+};
 
 bool buttons_reverse = false;
 bool flag_reset = false;
 bool prev_reset = false;
-array<double, 4> controller_key{};
+std::array<double, 4> controller_key{};
 
 keyFlag controller_state;
 
@@ -364,7 +358,7 @@ int main(int argc, char **argv) {
   ros::Subscriber controller_sub = n.subscribe("joy", 10, joyCallback);
   ros::Rate loop_rate(400);
   //REVIEW:多分これだとtemplate<DXLConstant::DXL_MODE>のオブジェクトが4つ生成されない??
-  array<DXLControl<DXLConstant::DXL_MODE>, 4> servo{  
+  std::array<DXL::DXLControl<DXL_MODE>, 4> servo{  
     FlipperConstant::front_right, 
     FlipperConstant::front_left, 
     FlipperConstant::rear_right, 
@@ -382,13 +376,13 @@ int main(int argc, char **argv) {
     switch(controller_state){
       case keyFlag::ALL:
         if ((controller_key[0] < 0) or (controller_key[1] < 0)){
-          Rotation::setRotation<Rotation::SeveralType::all>(all::forward);
+          Rotation::setRotation<Rotation::severalType::all>(0, Rotation::setRotationType::forward, servo);
         }else if((controller_key[2] == true) or (controller_key[3] == true)){
-          Rotation::setRotation<Rotation::SeveralType::all>(all::reverse);
+          Rotation::setRotation<Rotation::severalType::all>(0, Rotation::setRotationType::reverse, servo);
         }else if(flag_reset){
           Rotation::reset();
         }else{
-          Rotation::setRotation<Rotation::SeveralType::all>(all::nomal);
+          Rotation::setRotation<Rotation::severalType::all>(0, Rotation::setRotationType::nomal, servo);
         }
         break;
 
@@ -400,10 +394,11 @@ int main(int argc, char **argv) {
       default:
         for(int i = 0; i < dynamixel_num.size(); ++i){
           if(controller_key[i] < 0){
-            buttons_reverse == 1 ? Rotation::setRotation<Rotation::SeveralType::one>(i, nomal::reverse) : Rotation::setRotation(i, nomal::forward);
+            //TODO:reverse??
+            buttons_reverse == 1 ? Rotation::setRotation<Rotation::severalType::one>(i, Rotation::setRotationType::reverse, servo) : Rotation::setRotation<Rotation::severalType::one>(i, Rotation::setRotationType::forward, servo);
           }else{
             if((i == 2 or i == 3) && controller_key[i] == true){
-              buttons_reverse == 1 ? Rotation::setRotation<Rotation::SeveralType::one>(i, nomal::reverse) : Rotation::setRotation(i, nomal::forward);
+              buttons_reverse == 1 ? Rotation::setRotation<Rotation::severalType::one>(i, Rotation::setRotationType::reverse, servo) : Rotation::setRotation<Rotation::severalType::one>(i, Rotation::setRotationType::forward, servo);
             }
           }
         }

@@ -2,6 +2,9 @@
  * @file semi_autonomous.h
  * @brief 半自動制御モード
 **/
+#ifndef SEMI_AUTO_H
+#define SEMI_AUTO_H
+
 #include<iostream>
 #include<ros/ros.h>
 #include<vector>
@@ -28,10 +31,10 @@ struct DXLPose{
 struct feedBackTypes{
   //FIXME:unionにして必ず一つの値だけを持つようにする
   //NOTE:ここにフィードバックシステムを追加する
-  constexpr bool dist = false;
-  constexpr bool pos = false;
-  constexpr bool torque = false;
-}
+  bool dist = false;
+  bool pos = false;
+  bool torque = false;
+};
 
 template<typename T>
 class SemiAutoBase{
@@ -63,22 +66,23 @@ class SemiAutoBase{
 };
 
 template<typename T>
-class SemiAutoFront : public SemiAutoBase{
+class SemiAutoFront : public SemiAutoBase<T>{
   private:
     ros::Subscriber psd_front_sub;
     DXLPose poseParamFront;
   public:
     //FIXME:コンストラクタを修正する(多分こんなに階層的にしないでもいいはずstatic使う？？)
-    SemiAutoFront::SemiAutoFront(ros::NodeHandle _n, feedBackTypes _feedback) : SemiAutoBase(_n, _feedback){
+    SemiAutoFront(ros::NodeHandle _n, feedBackTypes _feedback) : SemiAutoBase<T>(_n, _feedback){
       poseParamFront.POSE_1 = {60, 60};
       poseParamFront.POSE_2 = {20, 20};
     }
     //TODO:psdCurveの実装をきちんとする
-    T SemiAutoFront::psdCurve(){
-      return -(tof_distance[0] * tof_distance[0] / 250) + 40;
+    T psdCurve(){
+      //return -(tof_distance[0] * tof_distance[0] / 250) + 40;
     }
-    void SemiAutoFront::operator()(T (&set_array)[4]){
+    void operator()(T (&set_array)[4]){
       //TODO:出力値はdeg
+      /*
       bool flag_DXL_load = this -> DXLLoad();
       //FIXME:それぞれのフィードバックの紐付けが出来ていない
       if(feedback.dist){
@@ -105,23 +109,25 @@ class SemiAutoFront : public SemiAutoBase{
         }else if(feedback.pos){      
           //NOTE:位置(角度)、トルクフィードバック    
         }
-      }
+      }*/
+    }
 };
 
 template<typename T>
-class SemiAutoRear : public SemiAutoBase{
+class SemiAutoRear : public SemiAutoBase<T>{
   private:
     ros::Subscriber psd_rear_sub;
     DXLPose poseParamRear;
   public:
-    SemiAutoRear::SemiAutoRear(ros::NodeHandle _n, feedBackTypes _feedback) : SemiAutoBase(_n, _feedback){
+    SemiAutoRear(ros::NodeHandle _n, feedBackTypes _feedback) : SemiAutoBase<T>(_n, _feedback){
       poseParamRear.POSE_1 = {60, 60};
       poseParamRear.POSE_2 = {20, 20};
     }
-    T SemiAutoRear::psdCurve(){
+    T psdCurve(){
     }
-    void SemiAutoRear::operator()(T (&set_array)[4]){
+    void operator()(T (&set_array)[4]){
       //TODO:出力値はdeg
+      /*
       if(feedback.dist){
           //NOTE:接地判定 && 閾値以内に障害物があるかどうかの判定
         if(tof_distance[1] > DXLConstant::DISTANCE_THRESHOLD_DOWN && tof_distance[3] > DXLConstant::DISTANCE_THRESHOLD_DOWN && tof_distance[0] > DXLConstant::DISTANCE_THRESHOLD_FORWARD){
@@ -147,7 +153,7 @@ class SemiAutoRear : public SemiAutoBase{
         }else if(feedback.pos){      
           //NOTE:位置(角度)、トルクフィードバック    
         }
-      }
+      }*/
     }
 };
 
@@ -155,17 +161,16 @@ class SemiAutoRear : public SemiAutoBase{
 template<typename T>
 class semiAuto{
   private:
-    std::unique_ptr<SemiAutoFront> front(_n);
-    std::unique_ptr<SemiAutoRear> rear(_n);
+    std::unique_ptr<SemiAutoFront<T>> front;
+    std::unique_ptr<SemiAutoRear<T>> rear;
   public:
-
-  semiAuto(ros::NodeHandle _n, feedBackTypes _feedback):front(_n, _feedback), rear(_n, _feedback){
-    //front = new SemiAutoFront(_n);
-    //rear = new SemiAutoRear(_n);
-  }
-
-  void semiAuto::operator()(T (&set_array)[4]){
-    this -> front(set_array);
-    this -> rear(set_array);
-  }
-}
+    semiAuto(ros::NodeHandle _n, feedBackTypes _feedback){
+      front = new SemiAutoFront<T>(_n, _feedback);
+      rear = new SemiAutoRear<T>(_n, _feedback);
+    }
+    void operator()(T (&set_array)[4]){
+      this -> front(set_array);
+      this -> rear(set_array);
+    }
+};
+#endif
