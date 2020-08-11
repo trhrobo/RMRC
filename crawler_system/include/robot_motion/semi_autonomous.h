@@ -31,9 +31,9 @@ struct DXLPose{
 struct feedBackTypes{
   //FIXME:unionにして必ず一つの値だけを持つようにする
   //NOTE:ここにフィードバックシステムを追加する
-  bool dist = false;
-  bool pos = false;
-  bool torque = false;
+  bool dist;
+  bool pos;
+  bool torque;
 };
 
 template<typename T>

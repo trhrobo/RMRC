@@ -139,7 +139,7 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 #add_executable(flipper src/flipper.cpp)
-add_executable(flipper_semi_autonomous src/flipper_semi_autonomous.cpp)
+add_executable(flipper_semi_autonomous src/flipper_semi_autonomous.cpp src/DXL.cpp src/Rotation.cpp)
 add_executable(motor_pid src/motor_pid.cpp src/pid.cpp)
 #add_executable(motor_pid src/motor_pid.cpp)
 
