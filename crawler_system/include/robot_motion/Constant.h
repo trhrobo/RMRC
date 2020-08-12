@@ -1,8 +1,11 @@
-#ifndef Constant_H_
-#define Constant_H_
-#include<array>
+//#ifndef Constant_H_
+//#define Constant_H_
+#pragma once
 #include"robot_motion/DXL.h"
-using std::array;
+#include<array>
+namespace DXL{
+  enum class MODE;
+};
 namespace FlipperConstant{
   //HACK:一つずつサーボIDを管理するのは頭が悪い
   constexpr int front_right = 0;
@@ -28,16 +31,16 @@ namespace DXLConstant{
   constexpr double Kp = 1.0;
   constexpr double Kd = 1.0;
 };
-constexpr std::array<int, 4> dynamixel_num{0, 1, 3, 2};
 
 std::array<double, 4>     ref_DXL_raw_pos{};
 std::array<double, 4> current_DXL_raw_pos{};
 
-std::array<double, 4>     ref_DXL_rad{};
+//std::array<double, 4>     ref_DXL_rad{};
+double ref_DXL_rad[4]{};
 std::array<double, 4> current_DXL_rad{};
 
 std::array<double, 4>     ref_DXL_torque{};
 std::array<double, 4> current_DXL_torque{};
-const DXL::MODE DXL_MODE = DXL::MODE::TORQUE_CONTROL;
-
-#endif
+inline constexpr DXL::MODE DXL_MODE = DXL::MODE::TORQUE_CONTROL;
+inline constexpr std::array<int, 4> dynamixel_num{0, 1, 3, 2};
+//#endif

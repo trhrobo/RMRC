@@ -1,18 +1,21 @@
 #include"robot_motion/DXL.h"
+#include"robot_motion/Constant.h"
+#include"robot_motion/flipper_util.h"
+#include<ros/ros.h>
 template<typename T, DXL::MODE dxl_mode>
-DXL::DXLControl::DXLControl(int _ID):DXL_ID(_ID){
-    if(dxl_mode == MODE::POS_CONTROL){
+DXL::DXLControl<T, dxl_mode>::DXLControl(int _ID):DXL_ID(_ID){
+    if(dxl_mode == DXL::MODE::POS_CONTROL){
       //WARNING:関数ポインタの使い方が違う
-      funcp = this -> PosControl;
-    }else if(dxl_mode == MODE::TORQUE_CONTROL){
+      funcp = DXL::DXLControl<T, dxl_mode>::PosControl;
+    }else if(dxl_mode == DXL::MODE::TORQUE_CONTROL){
       //WARNING:関数ポインタの使い方が違う
-      funcp = this -> TorqueControl;
+      funcp = DXL::DXLControl<T, dxl_mode>::TorqueControl;
     }else{
       ROS_ERROR("this dynamixel mode is not appropriate.");
     }
 }
 template<typename T, DXL::MODE dxl_mode>
-bool DXL::DXLControl::TorqueControl(T theta_d){
+bool DXL::DXLControl<T, dxl_mode>::TorqueControl(T theta_d){
     //トルク制御の実装
     //重力補償項の追加
     //あとでangular実装
@@ -22,16 +25,19 @@ bool DXL::DXLControl::TorqueControl(T theta_d){
     return DXLConstant::Kp * (degToRad<T>(theta_d) - degToRad<T>(theta_now)) - DXLConstant::Kd * (angular) + gravity_compensation;
 }
 template<typename T, DXL::MODE dxl_mode>
-bool DXL::DXLControl::PosControl(T theta_d){
+bool DXL::DXLControl<T, dxl_mode>::PosControl(T theta_d){
     //TODO:位置制御の追加
 }
 template<typename T, DXL::MODE dxl_mode>
-bool DXL::DXLControl::PosDirect(){
+bool DXL::DXLControl<T, dxl_mode>::PosDirect(){
     //TODO:PosDirectに追加
 }
 template<typename T, DXL::MODE dxl_mode>
-bool DXL::DXLControl::operator()(T theta_d){
-    return (*funcp)(theta_d);
+bool DXL::DXLControl<T, dxl_mode>::operator()(){
+  //FIXME:operator引数
+  //theta_dはグローバル変数で宣言してるはず
+  //return (*funcp)(theta_d);
+  return true;
 }
 
 template<typename T>

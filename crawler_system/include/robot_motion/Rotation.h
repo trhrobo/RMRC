@@ -1,11 +1,14 @@
-#ifndef Rotation_H_
-#define Rotation_H_
-
-#include"robot_motion/DXL.h"
+//#ifndef Rotation_H_
+//#define Rotation_H_
+#pragma once
+#include<array>
 #include"robot_motion/Constant.h"
-#include"robot_motion/flipper_util.h"
-#include<ros/ros.h>
-
+namespace DXL{
+  enum class MODE;
+  
+  template<typename T, MODE dxl_mode>
+  class DXLControl;
+};
 namespace Rotation{
   enum class setRotationType{
     forward,
@@ -17,10 +20,9 @@ namespace Rotation{
     all
   };
   //WARNING:引数が違う気がするint idで本当にいいのか?DXLの配置位置では??
-  template<severalType type>
-  void setRotation(const int id, const setRotationType direction, DXL::DXLControl<double, DXL::MODE>(&DXLservo)[dynamixel_num.size()]);
+  void setRotation(const int id, const severalType type, const setRotationType direction, DXL::DXLControl<double, DXL_MODE>(&DXLservo)[dynamixel_num.size()]);
 
-  inline void reset();
+  void reset();
 };
 
-#endif
+//#endif

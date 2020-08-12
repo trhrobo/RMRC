@@ -1,8 +1,11 @@
 #include"robot_motion/Rotation.h"
+#include"robot_motion/DXL.h"
+#include"robot_motion/flipper_util.h"
+#include<ros/ros.h>
 
 //WARNING:引数が違う気がするint idで本当にいいのか?DXLの配置位置では??
-template<severalType type>
-void Rotation::setRotation(const int id, const setRotationType direction, DXL::DXLControl<double, DXL::MODE>(&DXLservo)[dynamixel_num.size()]){
+
+void Rotation::setRotation(const int id, const Rotation::severalType type, const Rotation::setRotationType direction, DXL::DXLControl<double, DXL_MODE>(&DXLservo)[dynamixel_num.size()]){
     if(DXL_MODE == DXL::MODE::POS_CONTROL){
         int set_id{};
         //NOTE:Type::allではid0の値を他の値にコピーする
@@ -15,7 +18,7 @@ void Rotation::setRotation(const int id, const setRotationType direction, DXL::D
             ref_DXL_raw_pos[set_id] = DXLConstant::MIN_POSITION_VALUE;
             break;
           case setRotationType::nomal:
-              ref_DXL_raw_pos[set_id] = current_DXL_raw_pos;
+              ref_DXL_raw_pos[set_id] = current_DXL_raw_pos[set_id];
               break;
           default:
               ROS_ERROR("this direction of rotation is invalid");
@@ -61,7 +64,7 @@ void Rotation::setRotation(const int id, const setRotationType direction, DXL::D
     }
 }
 
-inline void Rotation::reset() {
+void Rotation::reset() {
   for (int i = 0; i < dynamixel_num.size(); ++i) {
     //TODO:template化
     ref_DXL_rad[i] = degToRad<double>(DXLConstant::ORIGIN_DEG);

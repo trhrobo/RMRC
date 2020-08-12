@@ -164,13 +164,12 @@ class semiAuto{
     std::unique_ptr<SemiAutoFront<T>> front;
     std::unique_ptr<SemiAutoRear<T>> rear;
   public:
-    semiAuto(ros::NodeHandle _n, feedBackTypes _feedback){
-      front = new SemiAutoFront<T>(_n, _feedback);
-      rear = new SemiAutoRear<T>(_n, _feedback);
-    }
+    semiAuto(ros::NodeHandle _n, feedBackTypes _feedback)
+      : front(new SemiAutoFront<T>(_n, _feedback)), 
+        rear(new SemiAutoRear<T>(_n, _feedback)){}
     void operator()(T (&set_array)[4]){
-      this -> front(set_array);
-      this -> rear(set_array);
+      (*front)(set_array);
+      (*rear)(set_array);
     }
 };
 #endif

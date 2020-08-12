@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(robot_motion)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-add_compile_options(-std=c++11)
+add_compile_options(-std=c++1z)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -161,6 +161,11 @@ add_dependencies(motor_pid ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED
 #  ${catkin_LIBRARIES}
 #)
 target_link_libraries(flipper_semi_autonomous
+  robot_motion/semi_autonomous
+  robot_motion/Rotation
+  robot_motion/DXL
+  robot_motion/Constant
+  robot_motion/flipper_util
   ${catkin_LIBRARIES}
 )
 target_link_libraries(motor_pid

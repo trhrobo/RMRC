@@ -25,7 +25,6 @@
 //HACK:全ての変数、関数をnamespaceの中に入れる
 //HACK:グローバル宣言の変数多すぎもっと参照渡し使おう
 //HACK:パラメータ関係を別のファイルにまとめる
-const DXL::MODE DXL_MODE = DXL::MODE::TORQUE_CONTROL;
 
 enum class keyFlag{
   NOMAL = 0,
@@ -198,13 +197,13 @@ int main(int argc, char **argv) {
     switch(controller_state){
       case keyFlag::ALL:
         if ((controller_key[0] < 0) or (controller_key[1] < 0)){
-          Rotation::setRotation<Rotation::severalType::all>(0, Rotation::setRotationType::forward, servo);
+          Rotation::setRotation(0, Rotation::severalType::all, Rotation::setRotationType::forward, servo);
         }else if((controller_key[2] == true) or (controller_key[3] == true)){
-          Rotation::setRotation<Rotation::severalType::all>(0, Rotation::setRotationType::reverse, servo);
+          Rotation::setRotation(0, Rotation::severalType::all, Rotation::setRotationType::reverse, servo);
         }else if(flag_reset){
           Rotation::reset();
         }else{
-          Rotation::setRotation<Rotation::severalType::all>(0, Rotation::setRotationType::nomal, servo);
+          Rotation::setRotation(0, Rotation::severalType::all, Rotation::setRotationType::nomal, servo);
         }
         break;
 
@@ -217,10 +216,10 @@ int main(int argc, char **argv) {
         for(int i = 0; i < dynamixel_num.size(); ++i){
           if(controller_key[i] < 0){
             //TODO:reverse??
-            buttons_reverse == 1 ? Rotation::setRotation<Rotation::severalType::one>(i, Rotation::setRotationType::reverse, servo) : Rotation::setRotation<Rotation::severalType::one>(i, Rotation::setRotationType::forward, servo);
+            buttons_reverse == 1 ? Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::forward, servo) : Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::forward, servo);
           }else{
             if((i == 2 or i == 3) && controller_key[i] == true){
-              buttons_reverse == 1 ? Rotation::setRotation<Rotation::severalType::one>(i, Rotation::setRotationType::reverse, servo) : Rotation::setRotation<Rotation::severalType::one>(i, Rotation::setRotationType::forward, servo);
+              buttons_reverse == 1 ? Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::forward, servo) : Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::forward, servo);
             }
           }
         }
