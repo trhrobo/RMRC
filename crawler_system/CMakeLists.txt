@@ -139,7 +139,7 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 #add_executable(flipper src/flipper.cpp)
-add_executable(flipper_semi_autonomous src/flipper_semi_autonomous.cpp src/DXL.cpp src/Rotation.cpp)
+add_executable(flipper_semi_autonomous src/flipper_semi_autonomous.cpp src/DXL.cpp src/Rotation.cpp src/Constant.cpp)
 add_executable(motor_pid src/motor_pid.cpp src/pid.cpp)
 #add_executable(motor_pid src/motor_pid.cpp)
 
@@ -161,11 +161,6 @@ add_dependencies(motor_pid ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED
 #  ${catkin_LIBRARIES}
 #)
 target_link_libraries(flipper_semi_autonomous
-  robot_motion/semi_autonomous
-  robot_motion/Rotation
-  robot_motion/DXL
-  robot_motion/Constant
-  robot_motion/flipper_util
   ${catkin_LIBRARIES}
 )
 target_link_libraries(motor_pid

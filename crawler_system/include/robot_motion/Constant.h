@@ -32,15 +32,15 @@ namespace DXLConstant{
   constexpr double Kd = 1.0;
 };
 
-std::array<double, 4>     ref_DXL_raw_pos{};
-std::array<double, 4> current_DXL_raw_pos{};
+inline std::array<double, 4>     ref_DXL_raw_pos{};
+inline std::array<double, 4> current_DXL_raw_pos{};
 
 //std::array<double, 4>     ref_DXL_rad{};
-double ref_DXL_rad[4]{};
-std::array<double, 4> current_DXL_rad{};
+inline double ref_DXL_rad[4]{};
+inline std::array<double, 4> current_DXL_rad{};
 
-std::array<double, 4>     ref_DXL_torque{};
-std::array<double, 4> current_DXL_torque{};
+inline std::array<double, 4>     ref_DXL_torque{};
+inline std::array<double, 4> current_DXL_torque{};
 inline constexpr DXL::MODE DXL_MODE = DXL::MODE::TORQUE_CONTROL;
 inline constexpr std::array<int, 4> dynamixel_num{0, 1, 3, 2};
 //#endif

@@ -6,10 +6,10 @@ template<typename T, DXL::MODE dxl_mode>
 DXL::DXLControl<T, dxl_mode>::DXLControl(int _ID):DXL_ID(_ID){
     if(dxl_mode == DXL::MODE::POS_CONTROL){
       //WARNING:関数ポインタの使い方が違う
-      funcp = DXL::DXLControl<T, dxl_mode>::PosControl;
+      funcp = &DXL::DXLControl<T, dxl_mode>::PosControl;
     }else if(dxl_mode == DXL::MODE::TORQUE_CONTROL){
       //WARNING:関数ポインタの使い方が違う
-      funcp = DXL::DXLControl<T, dxl_mode>::TorqueControl;
+      funcp = &DXL::DXLControl<T, dxl_mode>::TorqueControl;
     }else{
       ROS_ERROR("this dynamixel mode is not appropriate.");
     }
@@ -41,7 +41,7 @@ bool DXL::DXLControl<T, dxl_mode>::operator()(){
 }
 
 template<typename T>
-int dynamixelSet(T goal_angle, T now_pos){
+int DXL::dynamixelSet(T goal_angle, T now_pos){
     //HACK:コードが汚い
     //dynamixelのパルスがrosの場合だと定義が違う可能性があるので確認必要
     //現在の位置をdynamixel一回あたりのパルス数(定数で割る)

@@ -13,10 +13,11 @@
 #include <trajectory_msgs/JointTrajectory.h>
 #include <array>
 #include <tuple>
+#include "robot_motion/Constant.h"
+#include "robot_motion/DXL.h"
+//#include "DXL.cpp"
 #include "robot_motion/semi_autonomous.h"
 #include "robot_motion/Rotation.h"
-#include "robot_motion/DXL.h"
-#include "robot_motion/Constant.h"
 #include "robot_motion/flipper_util.h"
 //#include "dynamixel/dynamixel.h"
 //#include "dynamixel.cpp"

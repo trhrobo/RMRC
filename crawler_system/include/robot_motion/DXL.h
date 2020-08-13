@@ -1,6 +1,4 @@
-#ifndef DXL_H_
-#define DXL_H_
-
+#pragma once
 namespace DXL{
   enum class MODE{
     POS_CONTROL,
@@ -21,4 +19,3 @@ namespace DXL{
   template<typename T>
   int dynamixelSet(T goal_angle, T now_pos);
 };
-#endif
