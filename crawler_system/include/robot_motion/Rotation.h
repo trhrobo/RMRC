@@ -1,5 +1,8 @@
-//#ifndef Rotation_H_
-//#define Rotation_H_
+/**
+ * @file Rotation.h
+
+ * @brief Rotationの宣言
+**/
 #pragma once
 #include<array>
 #include"robot_motion/Constant.h"
@@ -24,5 +27,3 @@ namespace Rotation{
 
   void reset();
 };
-
-//#endif

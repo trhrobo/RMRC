@@ -1,3 +1,8 @@
+/**
+ * @file Rotation.cpp
+
+ * @brief Rotationの実装
+**/
 #include"robot_motion/Rotation.h"
 #include"robot_motion/DXL.h"
 #include"robot_motion/flipper_util.h"

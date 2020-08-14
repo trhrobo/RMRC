@@ -1,3 +1,8 @@
+/**
+ * @file DXL.h
+
+ * @brief DXLの宣言
+**/
 #pragma once
 namespace DXL{
   enum class MODE{

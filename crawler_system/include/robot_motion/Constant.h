@@ -1,35 +1,42 @@
-//#ifndef Constant_H_
-//#define Constant_H_
+/**
+ * @file Constant.h
+
+ * @brief Constantの宣言
+**/
 #pragma once
 #include"robot_motion/DXL.h"
 #include<array>
 namespace DXL{
   enum class MODE;
+  template<typename T, MODE dxl_mode>
+  class DXLControl;
+  template<typename T>
+  int dynamixelSet(T goal_angle, T now_pos);
 };
 namespace FlipperConstant{
   //HACK:一つずつサーボIDを管理するのは頭が悪い
-  constexpr int front_right = 0;
-  constexpr int front_left = 1;
-  constexpr int rear_right = 2;
-  constexpr int rear_left = 3;
+  inline constexpr int front_right = 0;
+  inline constexpr int front_left = 1;
+  inline constexpr int rear_right = 2;
+  inline constexpr int rear_left = 3;
 
-  constexpr double flipper_m = 100;
-  constexpr double flipper_lg = 100;
-  constexpr double gravity = 9.81;
+  inline constexpr double flipper_m = 100;
+  inline constexpr double flipper_lg = 100;
+  inline constexpr double gravity = 9.81;
 };
 namespace DXLConstant{
-  constexpr double ORIGIN_DEG = 90.0;
-  constexpr double AUTO_MAX_DEG = 75.0;
-  constexpr double AUTO_MIN_DEG = -90.0;
-  constexpr int MAX_POSITION_VALUE = 1048575;
-  constexpr int MIN_POSITION_VALUE = -1048575;
-  constexpr int DYNAMIXEL_RESOLUTION = 4096;
-  constexpr double DYNAMIXEL_RESOLUTION_ANGLE = 0.088;
-  constexpr bool TORQUE_ENABLE = 1;
-  constexpr bool TORQUE_DISABLE = 0;
+  inline constexpr double ORIGIN_DEG = 90.0;
+  inline constexpr double AUTO_MAX_DEG = 75.0;
+  inline constexpr double AUTO_MIN_DEG = -90.0;
+  inline constexpr int MAX_POSITION_VALUE = 1048575;
+  inline constexpr int MIN_POSITION_VALUE = -1048575;
+  inline constexpr int DYNAMIXEL_RESOLUTION = 4096;
+  inline constexpr double DYNAMIXEL_RESOLUTION_ANGLE = 0.088;
+  inline constexpr bool TORQUE_ENABLE = 1;
+  inline constexpr bool TORQUE_DISABLE = 0;
   //TODO:それぞれのサーボゲインを設ける
-  constexpr double Kp = 1.0;
-  constexpr double Kd = 1.0;
+  inline constexpr double Kp = 1.0;
+  inline constexpr double Kd = 1.0;
 };
 
 inline std::array<double, 4>     ref_DXL_raw_pos{};
@@ -43,4 +50,3 @@ inline std::array<double, 4>     ref_DXL_torque{};
 inline std::array<double, 4> current_DXL_torque{};
 inline constexpr DXL::MODE DXL_MODE = DXL::MODE::TORQUE_CONTROL;
 inline constexpr std::array<int, 4> dynamixel_num{0, 1, 3, 2};
-//#endif

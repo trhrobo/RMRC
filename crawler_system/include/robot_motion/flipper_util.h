@@ -1,6 +1,9 @@
-#ifndef UTIL_H_
-#define UTIL_H_
+/**
+ * @file flipper_util.h
 
+ * @brief flipper_utilの宣言
+**/
+#pragma once
 #include<cmath>
 
 template<typename T>
@@ -11,5 +14,3 @@ template<typename T>
 inline T radToDeg(const T rad){
   return rad * (180.0 / M_PI);
 }
-
-#endif

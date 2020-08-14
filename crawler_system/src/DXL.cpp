@@ -1,3 +1,8 @@
+/**
+ * @file DXL.cpp
+
+ * @brief DXL.hの実装
+**/
 #include"robot_motion/DXL.h"
 #include"robot_motion/Constant.h"
 #include"robot_motion/flipper_util.h"
