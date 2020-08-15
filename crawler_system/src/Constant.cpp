@@ -3,5 +3,4 @@
 
  * @brief Constant.hの実装
 **/
-#include"robot_motion/DXL.h"
-#include<array>
+#include"robot_motion/Constant.h"

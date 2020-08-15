@@ -5,13 +5,9 @@
 **/
 #pragma once
 #include<array>
+#include"robot_motion/flipper_util.h"
 #include"robot_motion/Constant.h"
-namespace DXL{
-  enum class MODE;
-  
-  template<typename T, MODE dxl_mode>
-  class DXLControl;
-};
+#include"robot_motion/DXL.h"
 namespace Rotation{
   enum class setRotationType{
     forward,

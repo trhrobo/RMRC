@@ -3,7 +3,6 @@
 
  * @brief semi_autonomous.hの実装
 **/
-#include"robot_motion/semi_autonomous.h"
 
 SemiAutoBase::SemiAutoBase(ros::NodeHandle _n){
   tof_sub = _n.subscribe("tof_sub", 10, &SemiAutoBase::tofCallback, this);

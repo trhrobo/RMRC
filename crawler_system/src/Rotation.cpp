@@ -3,11 +3,8 @@
 
  * @brief Rotationの実装
 **/
-#include"robot_motion/Rotation.h"
-#include"robot_motion/DXL.h"
-#include"robot_motion/flipper_util.h"
 #include<ros/ros.h>
-
+#include"robot_motion/Rotation.h"
 //WARNING:引数が違う気がするint idで本当にいいのか?DXLの配置位置では??
 
 void Rotation::setRotation(const int id, const Rotation::severalType type, const Rotation::setRotationType direction, DXL::DXLControl<double, DXL_MODE>(&DXLservo)[dynamixel_num.size()]){

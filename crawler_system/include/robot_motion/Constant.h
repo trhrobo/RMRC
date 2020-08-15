@@ -3,15 +3,15 @@
 
  * @brief Constantの宣言
 **/
-#pragma once
-#include"robot_motion/DXL.h"
+#ifndef CONSTANT
+#define CONSTANT
+
 #include<array>
 namespace DXL{
-  enum class MODE;
-  template<typename T, MODE dxl_mode>
-  class DXLControl;
-  template<typename T>
-  int dynamixelSet(T goal_angle, T now_pos);
+  enum class MODE{
+    POS_CONTROL,
+    TORQUE_CONTROL
+  };
 };
 namespace FlipperConstant{
   //HACK:一つずつサーボIDを管理するのは頭が悪い
@@ -48,5 +48,7 @@ inline std::array<double, 4> current_DXL_rad{};
 
 inline std::array<double, 4>     ref_DXL_torque{};
 inline std::array<double, 4> current_DXL_torque{};
-inline constexpr DXL::MODE DXL_MODE = DXL::MODE::TORQUE_CONTROL;
-inline constexpr std::array<int, 4> dynamixel_num{0, 1, 3, 2};
+constexpr DXL::MODE DXL_MODE = DXL::MODE::TORQUE_CONTROL;
+constexpr std::array<int, 4> dynamixel_num{0, 1, 3, 2};
+
+#endif

@@ -2,8 +2,7 @@
  * @file semi_autonomous.h
  * @brief 半自動制御モード
 **/
-#ifndef SEMI_AUTO_H
-#define SEMI_AUTO_H
+#pragma once
 
 #include<iostream>
 #include<ros/ros.h>
@@ -12,9 +11,10 @@
 #include<std_msgs/Float64MultiArray.h>
 #include<std_msgs/Float64.h>
 #include<memory>
+#include"flipper_util.h"
+#include"robot_motion/Constant.h"
 
 using std::vector;
-
 //FIXME:定数定義をスコープを付けてまとめる
 namespace DXLConstant{
   constexpr int POSE_UP = 90;
@@ -172,4 +172,3 @@ class semiAuto{
       (*rear)(set_array);
     }
 };
-#endif

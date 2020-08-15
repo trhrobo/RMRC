@@ -4,7 +4,6 @@
  * @brief DXL.hの実装
 **/
 #include"robot_motion/DXL.h"
-#include"robot_motion/Constant.h"
 #include"robot_motion/flipper_util.h"
 #include<ros/ros.h>
 template<typename T, DXL::MODE dxl_mode>
@@ -69,4 +68,3 @@ int DXL::dynamixelSet(T goal_angle, T now_pos){
     //  std::cout << "goal_angle = " << goal_angle << " now_angle = " << now_angle << std::endl;
     return(goal_pos / DXLConstant::DYNAMIXEL_RESOLUTION_ANGLE) + (now_pos / DXLConstant::DYNAMIXEL_RESOLUTION_ANGLE);
 }
-  
