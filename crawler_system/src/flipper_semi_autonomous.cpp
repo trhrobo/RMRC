@@ -37,15 +37,23 @@ enum class keyFlag{
   AUTO
 };
 
-//-----------------------------------------------------------------
-/*namespace safetyCheck{
+template<typename T>
+struct Gyro{
+  T x;
+  T y;
+  T z;
+};
+
+Gyro<double> gyro_robot; 
+
+namespace safetyCheck{
   //過負荷の確認
   void torque_limit(){
   }
 };
 
 namespace gyroControl{
-  enum class Lean{
+  enum class Lean : int{
     forward,
     backward,
     nomal
@@ -65,8 +73,8 @@ namespace gyroControl{
         leanState = Lean::nomal;
       }
       return leanState; 
-    }
-    swith(leanCheck(gyro_robot.z)){
+    };
+    switch(leanCheck(gyro_robot.z)){
       case Lean::forward:
         //前傾姿勢の場合はコンプライアンス制御をする
         break;
@@ -79,38 +87,29 @@ namespace gyroControl{
     }
   }
 };
-*/
 
-template<typename T>
-struct Gyro{
-  T x;
-  T y;
-  T z;
-};
-
-Gyro<double> gyro_robot; 
-
+//-----------------------------------------------------------------
+//TODO:front_flagを機能するようにする
+bool front_flag = false;
 //ロボットの現在角度を取得
 //rosのtfに合わせてあとで型を変える
-/*
 namespace RobotState{
-  void gyroCallback(const std_msgs::Float64 &msg) {
-    gyro_robot.x = msg.data.x;
-    gyro_robot.y = msg.data.y;
-    gyro_robot.z = msg.data.z;
+  void gyroCallback(const std_msgs::Float64MultiArray &msg) {
+    if(msg.data.size() != 3){ROS_ERROR("gyro message is invalid");}
+    gyro_robot.x = msg.data[0];
+    gyro_robot.y = msg.data[1];
+    gyro_robot.z = msg.data[2];
   }
   void stateManagement(){
     //TODO:再考する
     //ロボットの前後を入れ替える
-    /*
     if(front_flag == true){
       //配列番号を変える
-      std::swap(dynamixel_num[0], dynamixel_num[2]);
-      std::swap(dynamixel_num[1], dynamixel_num[3]);
+      //std::swap(dynamixel_num[0], dynamixel_num[2]);
+      //std::swap(dynamixel_num[1], dynamixel_num[3]);
     }
   }
 };
-*/
 bool buttons_reverse = false;
 bool flag_reset = false;
 bool prev_reset = false;
