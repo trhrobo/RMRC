@@ -3,9 +3,9 @@
 
  * @brief DXL.hの実装
 **/
+#include<ros/ros.h>
 #include"robot_motion/DXL.h"
 #include"robot_motion/flipper_util.h"
-#include<ros/ros.h>
 template<typename T, DXL::MODE dxl_mode>
 DXL::DXLControl<T, dxl_mode>::DXLControl(int _ID):DXL_ID(_ID){
     if(dxl_mode == DXL::MODE::POS_CONTROL){
