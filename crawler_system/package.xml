@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>robot_motion</name>
+  <name>crawler_system</name>
   <version>0.0.0</version>
-  <description>The robot_motion package</description>
+  <description>The crawler_system package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
@@ -19,7 +19,7 @@
   <!-- Url tags are optional, but multiple are allowed, one per tag -->
   <!-- Optional attribute type can be: website, bugtracker, or repository -->
   <!-- Example: -->
-  <!-- <url type="website">http://wiki.ros.org/robot_motion</url> -->
+  <!-- <url type="website">http://wiki.ros.org/crawler_system</url> -->
 
 
   <!-- Author tags are optional, multiple are allowed, one per tag -->
@@ -75,7 +75,6 @@
   <exec_depend>message_runtime</exec_depend>
   <exec_depend>dynamixel_workbench_msgs</exec_depend>
   <exec_depend>dynamixel_workbench_msgs_containing_custom_srv</exec_depend>
-
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
