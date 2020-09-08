@@ -48,7 +48,7 @@ inline std::array<double, 4> current_DXL_rad{};
 
 inline std::array<double, 4>     ref_DXL_torque{};
 inline std::array<double, 4> current_DXL_torque{};
-constexpr DXL::MODE DXL_MODE = DXL::MODE::TORQUE_CONTROL;
+constexpr DXL::MODE DXL_MODE = DXL::MODE::POS_CONTROL;
 const std::array<int, 4> dynamixel_num{0, 1, 3, 2};
 
 #endif

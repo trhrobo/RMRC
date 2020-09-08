@@ -26,8 +26,8 @@ void Rotation::setRotation(const int id, const Rotation::severalType type, const
               ROS_ERROR("this direction of rotation is invalid");
               break;
         }
-        if(type == severalType::one){
-            for (int i = 1; i < dynamixel_num.size(); ++i) {
+        if(type == severalType::all){
+            for(int i = 1; i < dynamixel_num.size(); ++i){
                 ref_DXL_raw_pos[i] = ref_DXL_raw_pos[0];
             }
         }

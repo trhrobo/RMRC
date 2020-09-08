@@ -220,11 +220,14 @@ int main(int argc, char **argv) {
         for(int i = 0; i < dynamixel_num.size(); ++i){
           if(controller_key[i] < 0){
             //TODO:reverse??
-            buttons_reverse == 1 ? Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::forward, servo) : Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::forward, servo);
+            //FIXME:nomalの追加
+            buttons_reverse == 1 ? Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::reverse, servo) : Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::forward, servo);
           }else{
             if((i == 2 or i == 3) && controller_key[i] == true){
-              buttons_reverse == 1 ? Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::forward, servo) : Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::forward, servo);
+              buttons_reverse == 1 ? Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::reverse, servo) : Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::forward, servo);
             }
+          }else{
+            Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::nomal, servo);
           }
         }
         break;
