@@ -124,9 +124,9 @@ void joyCallback(const sensor_msgs::Joy &controller) {
   controller_key[1] = controller.axes[2];
   controller_key[2] = controller.buttons[5];
   controller_key[3] = controller.buttons[4];
-  if(controller.buttons[3] == true) controller_state = keyFlag::ALL;
-  if(controller.buttons[8] == true) controller_state = keyFlag::AUTO;
-  if(controller.buttons[1] == true) controller_state = keyFlag::NOMAL;
+  if(controller.buttons[3] == true)controller_state = keyFlag::ALL;
+  if(controller.buttons[8] == true)controller_state = keyFlag::AUTO;
+  if(controller.buttons[1] == true)controller_state = keyFlag::NOMAL;
   // Bキーで全てのフリッパーの角度を90°
   if ((prev_reset == false) and controller.buttons[1] == true) flag_reset = !flag_reset;
   prev_reset = controller.buttons[1];
@@ -195,6 +195,7 @@ int main(int argc, char **argv) {
 
 
   while (ros::ok()) {
+    ros::spinOnce();
     for(int i = 0; i < dynamixel_num.size(); ++i){
       if(current_DXL_rad[i] <= 0)current_DXL_rad[i] = 360 + current_DXL_rad[i];
     }
@@ -218,16 +219,18 @@ int main(int argc, char **argv) {
 
       default:
         for(int i = 0; i < dynamixel_num.size(); ++i){
-          if(controller_key[i] < 0){
-            //TODO:reverse??
-            //FIXME:nomalの追加
-            buttons_reverse == 1 ? Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::reverse, servo) : Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::forward, servo);
-          }else{
-            if((i == 2 or i == 3) && controller_key[i] == true){
+          if(i == 0 or i == 1){
+            if(controller_key[i] < 0){
               buttons_reverse == 1 ? Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::reverse, servo) : Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::forward, servo);
+            }else{
+              Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::nomal, servo);
             }
-          }else{
-            Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::nomal, servo);
+          }else if(i == 2 or i == 3){
+            if(controller_key[i] == true){
+              buttons_reverse == 1 ? Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::reverse, servo) : Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::forward, servo);
+            }else{
+              Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::nomal, servo);
+            }
           }
         }
         break;
