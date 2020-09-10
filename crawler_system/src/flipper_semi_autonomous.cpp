@@ -26,7 +26,6 @@
 
 using std::vector;
 
-//HACK:全ての変数、関数をnamespaceの中に入れる
 //HACK:グローバル宣言の変数多すぎもっと参照渡し使おう
 //HACK:パラメータ関係を別のファイルにまとめる
 #include<ros/ros.h>

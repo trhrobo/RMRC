@@ -14,14 +14,17 @@ void Rotation::setRotation(const int id, const Rotation::severalType type, const
         type == severalType::one ? set_id = id : set_id = 0;
         switch(direction){
           case setRotationType::forward:
+            ROS_INFO("forward");
             ref_DXL_raw_pos[set_id] = DXLConstant::MAX_POSITION_VALUE; 
             break;
           case setRotationType::reverse:
+            ROS_INFO("reverse");
             ref_DXL_raw_pos[set_id] = DXLConstant::MIN_POSITION_VALUE;
             break;
           case setRotationType::nomal:
-              ref_DXL_raw_pos[set_id] = current_DXL_raw_pos[set_id];
-              break;
+            ROS_INFO("nomal");
+            ref_DXL_raw_pos[set_id] = current_DXL_raw_pos[set_id];
+            break;
           default:
               ROS_ERROR("this direction of rotation is invalid");
               break;
