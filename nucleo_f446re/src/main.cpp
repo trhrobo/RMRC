@@ -1,139 +1,89 @@
-#include"mbed.h"
-//#include"VNH5019.h"
-#include"AMT102.h"
-#include"x_nucleo_53l0a1.h"
-#include"VNH5019.h"
-#include<stdio.h>
-#include"rtos.h"
+#include "mbed.h"
+#include "AMT102.h"
+#include "VNH5019.h"
+#include "VL53L0X.h"
+#include "serial.h"
+#include "BNO055.h"
+#include "pid.h"
+#include <stdio.h>
+#include "rtos.h"
+#include <cstring>
+#include <cstdint>
+#include <array>
 #define DEBUG 0
-#define VL53L0_I2C_SDA   D14
-#define VL53L0_I2C_SCL   D15
-//BufferedSerial raspi(PB_6, PB_7, 115200);
+#define float32_t float
+#define range1_addr (0x56)
+#define range2_addr (0x60)
+#define range3_addr (0x6A)
+#define range4_addr (0x74)
+#define range1_XSHUT D7
+#define range2_XSHUT D8
+#define range3_XSHUT D2
+#define range4_XSHUT D3
+#define SDA D14
+#define SCL D15
 
-#if DEBUG
-Serial pc(USBTX, USBRX, 115200);
-#else
-Serial raspi(PB_6, PB_7, 115200);
-#endif
-static X_NUCLEO_53L0A1 *board=NULL;
-Thread sendThread;
-Thread receiveThread;
-
-uint16_t mg = 0;
-uint16_t speed_right{};
-uint16_t speed_left{};
-uint8_t dataByte[2];
-uint8_t receiveByte[4];
-uint8_t checksum_send{};
-uint8_t checksum_receive{};
-uint8_t pwm_right{};
-uint8_t pwm_left{};
-
-void serialSend(){
-    //serial send magnet data;
-    dataByte[0] = (mg >> 8) & 0xFF;
-    dataByte[1] = (mg >> 0) & 0xFF;
-    // send.putc(HEAD_BYTE);
-    raspi.putc(0x02);
-
-    for (int i = 0; i < 2; ++i) {
-      if ((dataByte[i] == 0x7D) || (dataByte[i] == 0x02)) {
-        raspi.putc(0x7D);
-        checksum_send += 0x7D;
-        raspi.putc(dataByte[i] ^ 0x20);
-        checksum_send += dataByte[i] ^ 0x20;
-      } else {
-        raspi.putc(dataByte[i]);
-        checksum_send += dataByte[i];
-      }
-    }
-    raspi.putc(checksum_send);
-}
-
-void serialReceive(){
-
-    if (static_cast<uint8_t>(raspi.getc()) == 0x02) {
-      for (int i = 0; i < 4; ++i) {
-        uint8_t nowByte = static_cast<uint8_t>(raspi.getc());
-        if (nowByte == 0x7D) {
-          checksum_receive += 0x7D;
-          uint8_t nextByte = static_cast<uint8_t>(raspi.getc());
-          receiveByte[i] = nextByte ^ 0x20;
-          checksum_receive += nextByte;
-        } else {
-          receiveByte[i] = nowByte;
-          checksum_receive += nowByte;
-        }
-      }
-      uint8_t checksum = static_cast<uint8_t>(raspi.getc());
-      if (checksum_receive == checksum) {
-        speed_right = static_cast<uint16_t>(((receiveByte[0] << 8) && 0xFF00) |
-                                            ((receiveByte[1] << 0) && 0x00FF));
-        speed_left = static_cast<uint16_t>(((receiveByte[2] << 8) && 0xFF00) |
-                                           ((receiveByte[3] << 0) && 0x00FF));
-      }
-    }
-}
-
-int main() {
-  sendThread.start(serialSend);
-  receiveThread.start(serialReceive);
-  int status;
-  uint32_t distance;
-  DevI2C *device_i2c = new DevI2C(VL53L0_I2C_SDA, VL53L0_I2C_SCL);
-
-  /* creates the 53L0A1 expansion board singleton obj */
-  // board = X_NUCLEO_53L0A1::instance(device_i2c, A2, D8, D2);
-  board = X_NUCLEO_53L0A1::instance(device_i2c);
-  /* init the 53L0A1 expansion board with default values */
-  status = board->init_board();
-  if(status){
-    return 1;
-  }
-  #if DEBUG
-  RotaryInc rotary(D15,D14,2 * 50.8 * M_PI,200);
-  #else
-/*
-  MotorDriverPin pin_right;
-  pin_right.pin_A = 1;
-  pin_right.pin_B = 2;
-  pin_right.pin_CS = 3;
-  pin_right.pin_EN = 4;
-  pin_right.pin_PWM = 5;
-
-  MotorDriverPin pin_left;
-  pin_left.pin_A = 6;
-  pin_left.pin_B = 7;
-  pin_left.pin_CS = 8;
-  pin_left.pin_EN = 9;
-  pin_left.pin_PWM = 10;
-*/
+using std::array;
+static DevI2C devI2c(SDA, SCL);
+int main()
+{
+  array<float32_t, 5> send_data;
+  array<float32_t, 2> receive_data;
+  //create Instance
+  BNO055 bno(&devI2c);
   MotorDriver motor_right(D15, D14, D13, D12, A1);
   MotorDriver motor_left(D11, D10, D9, D8, A0);
-  RotaryInc rotary(D15,D14,2 * 50.8 * M_PI,200);
-  #endif
+  RotaryInc rotary_right(D15, D14, 2 * 50.8 * M_PI, 200);
+  RotaryInc rotary_left(D0, D1, 2 * 50.8 * M_PI, 200);
+  pidCal pid_right_motor(1, 1, 1);
+  pidCal pid_left_motor(1, 1, 1);
+  SerialRaspi serial(PB_6, PB_7);
+  static DigitalOut shutdown1_pin(range1_XSHUT);
+  static VL53L0X range1(&devI2c, &shutdown1_pin, NC);
+  static DigitalOut shutdown2_pin(range2_XSHUT);
+  static VL53L0X range2(&devI2c, &shutdown2_pin, NC);
+  static DigitalOut shutdown3_pin(range3_XSHUT);
+  static VL53L0X range3(&devI2c, &shutdown3_pin, NC);
+  static DigitalOut shutdown4_pin(range4_XSHUT);
+  static VL53L0X range4(&devI2c, &shutdown4_pin, NC);
+  /*Initial all sensors*/
+  range1.init_sensor(range1_addr);
+  range2.init_sensor(range2_addr);
+  range3.init_sensor(range3_addr);
+  range4.init_sensor(range4_addr);
 
-  while (1) {
-    //get distance data
-    status = board->sensor_centre->get_distance(&distance);
-    #if DEBUG
-    long long  speed = rotary.getSpeed();
-    pc.printf("speed = %lld\n", speed);
-    //get magnet data
-    if (magnet.read()) {
-      mg = 1;
-    } else {
-      mg = 0;
-    }
-    #else
+  /*Get datas*/
+  uint32_t distance1;
+  uint32_t distance2;
+  uint32_t distance3;
+  uint32_t distance4;
+
+  int status1;
+  int status2;
+  int status3;
+  int status4;
+  float gyro;
+  while (1){
+    bno.setmode(OPERATION_MODE_IMUPLUS);
+    bno.get_angles();
+    gyro = bno.euler.yaw;
+    status1 = range1.get_distance(&distance1);
+    status2 = range2.get_distance(&distance2);
+    status3 = range3.get_distance(&distance3);
+    status4 = range4.get_distance(&distance4);
+    send_data[0] = distance1;
+    send_data[1] = distance2;
+    send_data[2] = distance3;
+    send_data[3] = distance4;
+    send_data[4] = gyro;
+    long long speed_right = rotary_right.getSpeed();
+    long long speed_left = rotary_left.getSpeed();
+    float pid_right = pid_right_motor.pidUpdate(receive_data[0], speed_right);
+    float pid_left = pid_left_motor.pidUpdate(receive_data[1], speed_left);
     //output motor
-    motor_right.setPwm(pwm_right);
-    motor_right.currentLimit();
-    motor_left.setPwm(pwm_left);
-    motor_left.currentLimit();
-    #endif
+    motor_right.mdMain(pid_right);
+    motor_left.mdMain(pid_left);
+    serial.serialMain(send_data, receive_data);
   }
-  sendThread.join();
-  receiveThread.join();
 }
 

@@ -30,12 +30,8 @@ class MotorDriver{
         _pin_CS(CS);
         _pin_EN(EN);
         }*/
-        MotorDriver(PinName pin_A, PinName pin_B, PinName pin_PWM, PinName pin_EN, PinName pin_CS) : _pin_A(pin_A), _pin_B(pin_B), _pin_PWM(pin_PWM), _pin_EN(pin_EN), _pin_CS(pin_CS){
-            //_pin_A = 0;
-            //_pin_B = 0;
-            //_pin_PWM = 0;
-            //_pin_EN = 0;
-        }
+        MotorDriver(PinName pin_A, PinName pin_B, PinName pin_PWM, PinName pin_EN, PinName pin_CS);
+        void mdMain(int pwm);
         void setPwm(int pwm);
         bool currentLimit();
     private:

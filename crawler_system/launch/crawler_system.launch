@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<launch>
+    <node name = "joy_node" pkg = "joy" type = "joy_node"/>
+    <node name = "flipper_semi_autonomous" pkg = "crawler_system" type = "flipper_semi_autonomous"/>
+</launch>
