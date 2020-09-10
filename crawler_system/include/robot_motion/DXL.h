@@ -54,6 +54,7 @@ bool DXL::DXLControl<T, dxl_mode>::PosControl(T theta_d){
 template<typename T, DXL::MODE dxl_mode>
 bool DXL::DXLControl<T, dxl_mode>::PosDirect(){
     //TODO:PosDirectに追加
+
 }
 template<typename T, DXL::MODE dxl_mode>
 bool DXL::DXLControl<T, dxl_mode>::operator()(){

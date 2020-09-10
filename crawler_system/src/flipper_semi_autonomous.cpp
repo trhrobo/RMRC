@@ -217,19 +217,20 @@ int main(int argc, char **argv) {
         break;
 
       default:
+        auto judge = [&](int dxl_num) -> bool{
+          if(dxl_num == 0 or dxl_num == 1){
+            return controller_key[dxl_num] < 0 ? true : false;
+          }else if(dxl_num == 2 or dxl_num == 3){
+            return controller_key[dxl_num] == true ? true : false;
+          }
+        };
         for(int i = 0; i < dynamixel_num.size(); ++i){
-          if(i == 0 or i == 1){
-            if(controller_key[i] < 0){
-              buttons_reverse == 1 ? Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::reverse, servo) : Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::forward, servo);
-            }else{
-              Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::nomal, servo);
-            }
-          }else if(i == 2 or i == 3){
-            if(controller_key[i] == true){
-              buttons_reverse == 1 ? Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::reverse, servo) : Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::forward, servo);
-            }else{
-              Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::nomal, servo);
-            }
+          if(judge(i) == true and buttons_reverse == true){
+            Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::reverse, servo);
+          }else if(judge(i) == true and buttons_reverse == false){
+            Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::forward, servo);
+          }else if(judge(i) == false){
+            Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::nomal, servo);
           }
         }
         break;
