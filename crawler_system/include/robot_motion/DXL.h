@@ -12,9 +12,9 @@ namespace DXL{
   template<typename T, DXL::MODE dxl_mode>
   class DXLControl{
     public:
-      DXLControl(int _ID);
-      bool TorqueControl(T theta_d);
-      bool PosControl(T theta_d);
+      DXLControl(int);
+      bool TorqueControl(T);
+      bool PosControl(T);
       bool PosDirect();
       bool operator()();
     private:
@@ -22,7 +22,7 @@ namespace DXL{
       bool (DXLControl::*funcp)(T);
   };
   template<typename T>
-  int dynamixelSet(T goal_angle, T now_pos);
+  int dynamixelSet(T, T);
 };
 
 template<typename T, DXL::MODE dxl_mode>
@@ -62,28 +62,8 @@ bool DXL::DXLControl<T, dxl_mode>::operator()(){
   //return (*funcp)(theta_d);
   return true;
 }
-
 template<typename T>
-int DXL::dynamixelSet(T goal_angle, T now_pos){
-    //HACK:コードが汚い
-    //dynamixelのパルスがrosの場合だと定義が違う可能性があるので確認必要
-    //現在の位置をdynamixel一回あたりのパルス数(定数で割る)
-    //now_posはラジアンであるので一旦度数方に直す
-    T goal_pos;
-    int sum_revolutions = static_cast<int>(now_pos / 360);
-    T now_angle = now_pos - (sum_revolutions * 360);
-    //std::cout << "goal_angle = " << goal_angle << " now_angle = " << now_angle << std::endl;
-    if(now_angle < 0)now_angle = 360 + now_angle;
-    if(goal_angle - now_angle > 0 and goal_angle - now_angle < 180){
-      goal_pos = goal_angle - now_angle;
-    }else if(goal_angle - now_angle > 0 and goal_angle - now_angle > 180){
-      goal_pos = -(now_angle + 360 - goal_angle);
-    }else if(now_angle - goal_angle > 0 and now_angle - goal_angle < 180){
-      goal_pos = -(now_angle - goal_angle);
-    }else if(now_angle - goal_angle > 0 ){
-      goal_pos = goal_angle + 360 - now_angle;
-    }
-    //return (goal_pos / DYNAMIXEL_RESOLUTION_ANGLE) + now_pulse + (sum_revolutions * DYNAMIXEL_RESOLUTION);
-    //  std::cout << "goal_angle = " << goal_angle << " now_angle = " << now_angle << std::endl;
-    return(goal_pos / DXLConstant::DYNAMIXEL_RESOLUTION_ANGLE) + (now_pos / DXLConstant::DYNAMIXEL_RESOLUTION_ANGLE);
+int DXL::dynamixelSet(T goal_rad, T now_rad){
+  double goal_pos = goal_rad - fmod(now_rad, M_PI * 2);
+  return static_cast<int>(goal_pos);
 }
