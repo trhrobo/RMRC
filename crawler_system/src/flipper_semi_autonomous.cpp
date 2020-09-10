@@ -17,11 +17,8 @@
 #include <memory>
 #include "robot_motion/flipper_util.h"
 #include "robot_motion/Constant.h"
-#include "robot_motion/DXL.h"
 #include "robot_motion/semi_autonomous.h"
 #include "robot_motion/Rotation.h"
-//#include "dynamixel/dynamixel.h"
-//#include "dynamixel.cpp"
 #include <dynamixel_workbench_msgs/DynamixelCommand.h>
 
 using std::vector;
@@ -149,13 +146,11 @@ bool serviceCallPos(){
 bool serviceCallTheta(){
   for (int i = 0; i < dynamixel_num.size(); ++i) {
     //TODO:今のままだと計算がバグる
-    if(ref_DXL_rad[i] > 360)ref_DXL_rad[i] -= 360;
-    if(ref_DXL_rad[i] > 0)ref_DXL_rad[i] += 360;
-    ROS_INFO("ref_DXL_rad[%d] %lf current_DXL_rad[%d] %lf", i, ref_DXL_rad[i], i, current_DXL_rad[i]);
     srv.request.command = "_";
     srv.request.id = i + 1;
     srv.request.addr_name = "Goal_Position";
-    srv.request.value = DXL::dynamixelSet<double>(ref_DXL_rad[i], current_DXL_rad[i]);
+    double ref_rad = ref_DXL_rad[i] + (current_DXL_rad_raw[i] - current_DXL_rad[i]);
+    srv.request.value = ref_rad * (DXLConstant::DYNAMIXEL_RESOLUTION / (M_PI * 2));
     dynamixel_service.call(srv);
   }
   ros::spinOnce();
@@ -164,9 +159,8 @@ bool serviceCallTheta(){
 //TODO: dynamixelIDとjointstateの順番が違う
 void jointStateCallback(const sensor_msgs::JointState &jointstate) {
   for(int i = 0; i < dynamixel_num.size(); ++i){
-    current_DXL_raw_pos[i] = jointstate.position[dynamixel_num[i]];
-    //FIXME:これでは角度を得られない(DXLの位置値を直接変換しているから一度ラジアンにしてdegToRadを使用する必要がある)
-    current_DXL_rad[i] = degToRad<double>((jointstate.position[dynamixel_num[i]] + M_PI));
+    current_DXL_rad_raw[i] = jointstate.position[dynamixel_num[i]];
+    current_DXL_rad[i] = fmod(jointstate.position[dynamixel_num[i]], M_PI * 2);
     current_DXL_torque[i] = jointstate.effort[dynamixel_num[i]];
   }
 }
@@ -179,15 +173,6 @@ int main(int argc, char **argv) {
   //ros::Subscriber gyro_sub = n.subscribe("gyro", 10, RobotState::gyroCallback);
   ros::Subscriber controller_sub = n.subscribe("joy", 10, joyCallback);
   ros::Rate loop_rate(400);
-  //REVIEW:多分これだとtemplate<DXLConstant::DXL_MODE>のオブジェクトが4つ生成されない??
-
-  //std::array<DXL::DXLControl<double, DXL_MODE>, 4> servo{  
-  DXL::DXLControl<double, DXL_MODE> servo[4]{  
-    FlipperConstant::front_right, 
-    FlipperConstant::front_left, 
-    FlipperConstant::rear_right, 
-    FlipperConstant::rear_left
-  };
   feedBackTypes feedback{false, false, true};
   semiAuto<double> robot_model(n, feedback);
   dynamixel_workbench_msgs::DynamixelCommand srv;
@@ -195,25 +180,24 @@ int main(int argc, char **argv) {
 
   while (ros::ok()) {
     ros::spinOnce();
-    for(int i = 0; i < dynamixel_num.size(); ++i){
-      if(current_DXL_rad[i] <= 0)current_DXL_rad[i] = 360 + current_DXL_rad[i];
-    }
     switch(controller_state){
       case keyFlag::ALL:
         if ((controller_key[0] < 0) or (controller_key[1] < 0)){
-          Rotation::setRotation(0, Rotation::severalType::all, Rotation::setRotationType::forward, servo);
+          Rotation::setRotation(0, Rotation::severalType::all, Rotation::setRotationType::forward);
         }else if((controller_key[2] == true) or (controller_key[3] == true)){
-          Rotation::setRotation(0, Rotation::severalType::all, Rotation::setRotationType::reverse, servo);
+          Rotation::setRotation(0, Rotation::severalType::all, Rotation::setRotationType::reverse);
         }else if(flag_reset){
           Rotation::reset();
         }else{
-          Rotation::setRotation(0, Rotation::severalType::all, Rotation::setRotationType::nomal, servo);
+          Rotation::setRotation(0, Rotation::severalType::all, Rotation::setRotationType::nomal);
         }
+        serviceCallPos();
         break;
 
       //半自動制御モード
       case keyFlag::AUTO:
         robot_model(ref_DXL_rad);
+        serviceCallTheta();
         break;
 
       default:
@@ -226,13 +210,14 @@ int main(int argc, char **argv) {
         };
         for(int i = 0; i < dynamixel_num.size(); ++i){
           if(judge(i) == true and buttons_reverse == true){
-            Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::reverse, servo);
+            Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::reverse);
           }else if(judge(i) == true and buttons_reverse == false){
-            Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::forward, servo);
+            Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::forward);
           }else if(judge(i) == false){
-            Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::nomal, servo);
+            Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::nomal);
           }
         }
+        serviceCallPos();
         break;
     }
     loop_rate.sleep();

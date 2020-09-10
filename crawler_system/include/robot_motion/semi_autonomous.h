@@ -126,7 +126,6 @@ class SemiAutoRear : public SemiAutoBase<T>{
     T psdCurve(){
     }
     void operator()(T (&set_array)[4]){
-      //TODO:出力値はdeg
       /*
       if(feedback.dist){
           //NOTE:接地判定 && 閾値以内に障害物があるかどうかの判定

@@ -45,6 +45,7 @@ inline std::array<double, 4> current_DXL_raw_pos{};
 //std::array<double, 4>     ref_DXL_rad{};
 inline double ref_DXL_rad[4]{};
 inline std::array<double, 4> current_DXL_rad{};
+inline std::array<double, 4> current_DXL_rad_raw{};
 
 inline std::array<double, 4>     ref_DXL_torque{};
 inline std::array<double, 4> current_DXL_torque{};

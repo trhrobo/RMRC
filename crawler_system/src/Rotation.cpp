@@ -7,7 +7,7 @@
 #include"robot_motion/Rotation.h"
 //WARNING:引数が違う気がするint idで本当にいいのか?DXLの配置位置では??
 
-void Rotation::setRotation(const int id, const Rotation::severalType type, const Rotation::setRotationType direction, DXL::DXLControl<double, DXL_MODE>(&DXLservo)[dynamixel_num.size()]){
+void Rotation::setRotation(const int id, const Rotation::severalType type, const Rotation::setRotationType direction){
     if(DXL_MODE == DXL::MODE::POS_CONTROL){
         int set_id{};
         //NOTE:Type::allではid0の値を他の値にコピーする
@@ -34,9 +34,6 @@ void Rotation::setRotation(const int id, const Rotation::severalType type, const
                 ref_DXL_raw_pos[i] = ref_DXL_raw_pos[0];
             }
         }
-        for(auto &DXL : DXLservo){
-            DXL.PosDirect();
-        }
     }else if(DXL_MODE == DXL::MODE::TORQUE_CONTROL){
         if(type == severalType::one){
             switch(direction){
@@ -62,9 +59,6 @@ void Rotation::setRotation(const int id, const Rotation::severalType type, const
                     ROS_ERROR("this direction of rotation is invalid");
                     break;
             }
-        }
-        for(auto &DXL : DXLservo){
-          DXL();
         }
     }
 }
