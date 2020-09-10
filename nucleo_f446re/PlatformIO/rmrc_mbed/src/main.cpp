@@ -15,7 +15,7 @@
 //BufferedSerial raspi(PB_6, PB_7, 115200);
 
 #if DEBUG
-Serial pc(USBTX, USBRX, 115200);
+Serial pc(USBTX, USBRX, 115200include/    lib/        PlatformIO/ src/        );
 #else
 Serial raspi(PB_6, PB_7, 115200);
 #endif
