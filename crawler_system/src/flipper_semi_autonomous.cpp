@@ -45,6 +45,7 @@ Gyro<double> gyro_robot;
 namespace safetyCheck{
   //過負荷の確認
   void torque_limit(){
+    
   }
 };
 
@@ -173,10 +174,8 @@ int main(int argc, char **argv) {
   //ros::Subscriber gyro_sub = n.subscribe("gyro", 10, RobotState::gyroCallback);
   ros::Subscriber controller_sub = n.subscribe("joy", 10, joyCallback);
   ros::Rate loop_rate(400);
-  feedBackTypes feedback{false, false, true};
-  semiAuto<double> robot_model(n, feedback);
+  semiAuto robot_model(n);
   dynamixel_workbench_msgs::DynamixelCommand srv;
-
 
   while (ros::ok()) {
     ros::spinOnce();

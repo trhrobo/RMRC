@@ -6,16 +6,14 @@
 
 #include<iostream>
 #include<ros/ros.h>
-#include<vector>
 #include<sensor_msgs/JointState.h>
 #include<std_msgs/Float64MultiArray.h>
 #include<std_msgs/Float64.h>
 #include<memory>
 #include"flipper_util.h"
 #include"robot_motion/Constant.h"
+#include<array>
 
-using std::vector;
-//FIXME:定数定義をスコープを付けてまとめる
 namespace DXLConstant{
   constexpr int POSE_UP = 90;
   constexpr int POSE_DOWN = -90;
@@ -24,33 +22,35 @@ namespace DXLConstant{
 }
 
 struct DXLPose{
-  vector<double> POSE_1{0, 0};
-  vector<double> POSE_2{0, 0};
+  std::array<double, 2> POSE_1{};
+  std::array<double, 2> POSE_2{};
 };
 
-struct feedBackTypes{
-  //FIXME:unionにして必ず一つの値だけを持つようにする
-  //NOTE:ここにフィードバックシステムを追加する
-  bool dist;
-  bool pos;
-  bool torque;
-};
-
-template<typename T>
 class SemiAutoBase{
   protected:
+    enum class FB_Pattern{
+        posFB,
+        torqueFB,
+        dist_posFB,
+        dist_torqueFB,
+    };
+    FB_Pattern FB_MODE;
     ros::Subscriber tof_sub;
-    vector<T> current_DXL_pose{0, 0, 0, 0};
-    vector<T> current_DXL_load{0, 0, 0, 0};
-    vector<T> tof_distance{0, 0, 0, 0};
-    vector<T> goal_DXL_pose{0, 0, 0, 0};
-    T gyro_pose;
-    T goal_pose_right;
-    T goal_pose_left;
-    const feedBackTypes feedback;
+    std::array<double, 4> current_DXL_pose{};
+    std::array<double, 4> current_DXL_load{};
+    std::array<double, 4> tof_distance{};
+    std::array<double, 4> goal_DXL_pose{};
+    double gyro_pose;
+    double goal_pose_right;
+    double goal_pose_left;
   public:
-    SemiAutoBase(ros::NodeHandle _n, feedBackTypes _feedback):feedback(_feedback){
+    SemiAutoBase(ros::NodeHandle _n){
       tof_sub = _n.subscribe("tof_sub", 10, &SemiAutoBase::tofCallback, this);
+      if(flag_dist == true){
+        DXL_MODE == DXL::MODE::POS_CONTROL ? FB_MODE = FB_Pattern::posFB : FB_MODE = FB_Pattern::torqueFB;
+      }else{
+        DXL_MODE == DXL::MODE::POS_CONTROL ? FB_MODE = FB_Pattern::dist_posFB : FB_MODE = FB_Pattern::dist_torqueFB;
+      }
     }
     void init(){
     }
@@ -62,111 +62,63 @@ class SemiAutoBase{
     bool DXLLoad(){
     }
     virtual void operator()(double (&set_array)[4]) = 0;
-    virtual T psdCurve() = 0;
 };
 
-template<typename T>
-class SemiAutoFront : public SemiAutoBase<T>{
+class SemiAutoFront : public SemiAutoBase{
   private:
     ros::Subscriber psd_front_sub;
     DXLPose poseParamFront;
   public:
-    //FIXME:コンストラクタを修正する(多分こんなに階層的にしないでもいいはずstatic使う？？)
-    SemiAutoFront(ros::NodeHandle _n, feedBackTypes _feedback) : SemiAutoBase<T>(_n, _feedback){
-      poseParamFront.POSE_1 = {60, 60};
-      poseParamFront.POSE_2 = {20, 20};
+    SemiAutoFront(ros::NodeHandle _n) : SemiAutoBase(_n){
+      //poseParamFront.POSE_1 = {, };
+      //poseParamFront.POSE_2 = {, };
     }
-    //TODO:psdCurveの実装をきちんとする
-    T psdCurve(){
-      //return -(tof_distance[0] * tof_distance[0] / 250) + 40;
-    }
-    void operator()(T (&set_array)[4]){
-      //TODO:出力値はdeg
-      /*
-      bool flag_DXL_load = this -> DXLLoad();
-      //FIXME:それぞれのフィードバックの紐付けが出来ていない
-      if(feedback.dist){
-        //NOTE:接地判定 && 閾値以内に障害物があるかどうかの判定
-        if(tof_distance[1] < DISTANCE_THRESHOLD_DOWN && tof_distance[0] < DISTANCE_THRESHOLD_FORWARD){
-          set_array[0] = this -> poseParamFront.POSE_1[0] - psdCurve();
-          set_array[1] = this -> poseParamFront.POSE_1[1] - psdCurve();
-        }else{
-          set_array[0] = this -> poseParamFront.POSE_2[0];
-          set_array[1] = this -> poseParamFront.POSE_2[1];
-        }
-      }else if(feedback.pos){
-        //TODO:各フィードバック系の詳細の追加
-        //NOTE:位置(角度)フィードバック
-        if(feedback.dist){
-          //NOTE:距離、位置(角度)フィードバック
-        }
-      }else if(feedback.torque){
-        //NOTE:トルクフィードバック
-        if(feedback.dist && feedback.pos){
-          //NOTE:距離、位置(角度)、トルクフィードバック
-        }else if(feedback.dist){
-          //NOTE:距離、トルクフィードバック
-        }else if(feedback.pos){      
-          //NOTE:位置(角度)、トルクフィードバック    
-        }
-      }*/
+    void operator()(double (&set_array)[4]){
+      switch(FB_MODE){
+        case FB_Pattern::posFB:
+          break;
+        case FB_Pattern::torqueFB:
+          break;
+        case FB_Pattern::dist_posFB:
+          break;
+        case FB_Pattern::dist_torqueFB:
+          break;
+      }
     }
 };
 
-template<typename T>
-class SemiAutoRear : public SemiAutoBase<T>{
+class SemiAutoRear : public SemiAutoBase{
   private:
     ros::Subscriber psd_rear_sub;
     DXLPose poseParamRear;
   public:
-    SemiAutoRear(ros::NodeHandle _n, feedBackTypes _feedback) : SemiAutoBase<T>(_n, _feedback){
-      poseParamRear.POSE_1 = {60, 60};
-      poseParamRear.POSE_2 = {20, 20};
+    SemiAutoRear(ros::NodeHandle _n) : SemiAutoBase(_n){
+      //poseParamRear.POSE_1 = {60, 60};
+      //poseParamRear.POSE_2 = {20, 20};
     }
-    T psdCurve(){
-    }
-    void operator()(T (&set_array)[4]){
-      /*
-      if(feedback.dist){
-          //NOTE:接地判定 && 閾値以内に障害物があるかどうかの判定
-        if(tof_distance[1] > DXLConstant::DISTANCE_THRESHOLD_DOWN && tof_distance[3] > DXLConstant::DISTANCE_THRESHOLD_DOWN && tof_distance[0] > DXLConstant::DISTANCE_THRESHOLD_FORWARD){
-          set_array[2] = psdCurve();
-          set_array[3] = psdCurve();
-        }else if(tof_distance[1] > DXLConstant::DISTANCE_THRESHOLD_DOWN|| tof_distance[0] < DXLConstant::DISTANCE_THRESHOLD_FORWARD){
-          //変化しない
-        }else{
-          set_array[2] = this -> poseParamRear.POSE_1[0];
-          set_array[3] = this -> poseParamRear.POSE_1[1];
-        }    
-      }else if(feedback.pos){
-        //NOTE:位置(角度)フィードバック
-        if(feedback.dist){
-          //NOTE:距離、位置(角度)フィードバック
-        }  
-      }else if(feedback.torque){
-        //NOTE:トルクフィードバック
-        if(feedback.dist && feedback.pos){
-          //NOTE:距離、位置(角度)、トルクフィードバック
-        }else if(feedback.dist){
-          //NOTE:距離、トルクフィードバック
-        }else if(feedback.pos){      
-          //NOTE:位置(角度)、トルクフィードバック    
-        }
-      }*/
+    void operator()(double (&set_array)[4]){
+      switch(FB_MODE){
+        case FB_Pattern::posFB:
+          break;
+        case FB_Pattern::torqueFB:
+          break;
+        case FB_Pattern::dist_posFB:
+          break;
+        case FB_Pattern::dist_torqueFB:
+          break;
+      }
     }
 };
 
-//FIXME:template継承を間違っているここでtemplate<typename T>するだけでいいのか？？
-template<typename T>
 class semiAuto{
   private:
-    std::unique_ptr<SemiAutoFront<T>> front;
-    std::unique_ptr<SemiAutoRear<T>> rear;
+    std::unique_ptr<SemiAutoFront> front;
+    std::unique_ptr<SemiAutoRear> rear;
   public:
-    semiAuto(ros::NodeHandle _n, feedBackTypes _feedback)
-      : front(new SemiAutoFront<T>(_n, _feedback)), 
-        rear(new SemiAutoRear<T>(_n, _feedback)){}
-    void operator()(T (&set_array)[4]){
+    semiAuto(ros::NodeHandle _n)
+      : front(new SemiAutoFront(_n)), 
+        rear(new SemiAutoRear(_n)){}
+    void operator()(double (&set_array)[4]){
       (*front)(set_array);
       (*rear)(set_array);
     }

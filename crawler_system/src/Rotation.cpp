@@ -38,13 +38,13 @@ void Rotation::setRotation(const int id, const Rotation::severalType type, const
         if(type == severalType::one){
             switch(direction){
                 case setRotationType::forward:
-                  ref_DXL_torque[i] = 30;
+                  ref_DXL_torque[id] = 30;
                   break;
                 case setRotationType::reverse:
-                  ref_DXL_torque[i] = -30;
+                  ref_DXL_torque[id] = -30;
                   break;
                 case setRotationType::nomal:
-                  ref_DXL_torque[i] = current_DXL_torque[i];
+                  ref_DXL_torque[id] = current_DXL_torque[id];
                   break;
                 default:
                   ROS_ERROR("this direction of rotation is invalid");
@@ -64,7 +64,7 @@ void Rotation::setRotation(const int id, const Rotation::severalType type, const
                   break;
                 case setRotationType::nomal:
                   for(int i = 0; i < 4; ++i){
-                    ref_DXL_torque[i] = current_DXL_torque[i];
+                    ref_DXL_torque[id] = current_DXL_torque[i];
                   }
                   break;
                 default:
