@@ -98,12 +98,9 @@ namespace RobotState{
     gyro_robot.z = msg.data[2];
   }
   void stateManagement(){
-    //TODO:再考する
-    //ロボットの前後を入れ替える
     if(front_flag == true){
-      //配列番号を変える
-      //std::swap(dynamixel_num[0], dynamixel_num[2]);
-      //std::swap(dynamixel_num[1], dynamixel_num[3]);
+      std::swap(dynamixel_num[0], dynamixel_num[2]);
+      std::swap(dynamixel_num[1], dynamixel_num[3]);
     }
   }
 };

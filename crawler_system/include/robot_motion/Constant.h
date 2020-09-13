@@ -51,6 +51,6 @@ inline std::array<double, 4>     ref_DXL_torque{};
 inline std::array<double, 4> current_DXL_torque{};
 constexpr DXL::MODE DXL_MODE = DXL::MODE::POS_CONTROL;
 constexpr bool flag_dist = true;
-const std::array<int, 4> dynamixel_num{0, 1, 3, 2};
+inline std::array<int, 4> dynamixel_num{0, 1, 3, 2};
 
 #endif
