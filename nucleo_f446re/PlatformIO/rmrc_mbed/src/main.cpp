@@ -41,28 +41,9 @@ int main() {
   if(status){
     return 1;
   }
-  #if DEBUG
-  RotaryInc rotary(D15,D14,2 * 50.8 * M_PI,200);
-  #else
-/*
-  MotorDriverPin pin_right;
-  pin_right.pin_A = 1;
-  pin_right.pin_B = 2;
-  pin_right.pin_CS = 3;
-  pin_right.pin_EN = 4;
-  pin_right.pin_PWM = 5;
-
-  MotorDriverPin pin_left;
-  pin_left.pin_A = 6;
-  pin_left.pin_B = 7;
-  pin_left.pin_CS = 8;
-  pin_left.pin_EN = 9;
-  pin_left.pin_PWM = 10;
-*/
   MotorDriver motor_right(D15, D14, D13, D12, A1);
   MotorDriver motor_left(D11, D10, D9, D8, A0);
   RotaryInc rotary(D15,D14,2 * 50.8 * M_PI,200);
-  #endif
 
   while(1){
     serialSend(send, raspi);
