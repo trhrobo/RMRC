@@ -12,14 +12,12 @@
 #define ADDRESS_DEFALUT 0b0101001 // 0x29
 #define ADDRESS_00 (ADDRESS_DEFALUT + 2)
 #define DEBUG 0
-//BufferedSerial raspi(PB_6, PB_7, 115200);
 
 #if DEBUG
 Serial pc(USBTX, USBRX, 115200);
 #else
 Serial raspi(PB_6, PB_7, 115200);
 #endif
-//static X_NUCLEO_53L0A1 *board=NULL;
 
 uint16_t speed_right{};
 uint16_t speed_left{};
