@@ -29,8 +29,10 @@ uint8_t pwm_left{};
 int main() {
   I2C i2c(PB_9, PB_8);
   Timer tof_timer;
-  float send[4]{};
-  float receive[4]{};
+  //tof_front, tof_back, gyro_roll, gyro_pitch, gyro_yaw
+  float send[5]{};
+  //speed, direction
+  float receive[2]{};
  
   VL53L0X tof[2]{
     VL53L0X(i2c, tof_timer),
@@ -51,20 +53,11 @@ int main() {
     int address = ADDRESS_00 + (i * 2);
     tof[i].setAddress(address);
   }
-//  DevI2C *device_i2c = new DevI2C(VL53L0_I2C_SDA, VL53L0_I2C_SCL);
-    
-  /* creates the 53L0A1 expansion board singleton obj */
-  // board = X_NUCLEO_53L0A1::instance(device_i2c, A2, D8, D2);
-//  board = X_NUCLEO_53L0A1::instance(device_i2c);
-  /* init the 53L0A1 expansion board with default values */
-//  status = board->init_board();
-//  if(status){
-//    return 1;
-//  }
   MotorDriver motor_right(D15, D14, D13, D12, A1);
   MotorDriver motor_left(D11, D10, D9, D8, A0);
   RotaryInc rotary(D15,D14,2 * 50.8 * M_PI,200);
   uint16_t tof_data[2] = {};
+  float gyro_roll = 0, gyro_pitch = 0, gyro_yaw = 0;
   while(1){
     for(int i = 0; i < 2; ++i){
       tof_data[i] = tof[i].readRangeContinuousMillimeters();
@@ -72,14 +65,13 @@ int main() {
         return -1;
       }
     }
+    send[0] = tof_data[0];
+    send[1] = tof_data[1];
+    send[2] = gyro_roll;
+    send[3] = gyro_pitch;
+    send[4] = gyro_yaw;
     serialSend(send, raspi);
     serialReceive(receive, raspi);
-    //get distance data
-    /*
-    status = board->sensor_centre->get_distance(&distance);
-    long long  speed = rotary.getSpeed();
-    pc.printf("speed = %lld\n", speed);    
-    */
     //output motor
     motor_right.setPwm(pwm_right);
     motor_right.currentLimit();
