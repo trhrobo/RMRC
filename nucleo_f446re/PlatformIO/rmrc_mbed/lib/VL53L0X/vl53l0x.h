@@ -3,6 +3,7 @@
 
 #include <mbed.h>
 #define MAX_BUFFER_SIZE 10
+#define VL53L0X_MBED_NON_BLOCKING 1
 class VL53L0X
 {
   public:
