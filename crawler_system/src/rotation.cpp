@@ -4,7 +4,7 @@
  * @brief Rotationの実装
 **/
 #include<ros/ros.h>
-#include"robot_motion/Rotation.h"
+#include"robot_motion/rotation.h"
 //WARNING:引数が違う気がするint idで本当にいいのか?DXLの配置位置では??
 
 void Rotation::setRotation(const int id, const Rotation::severalType type, const Rotation::setRotationType direction){

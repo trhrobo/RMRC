@@ -46,16 +46,16 @@ class pigpio{
         uint8_t uart_read(){
             return  static_cast<uint8_t>(serial_read_byte(_pi, _serial_handle));
         }
-        void i2c_open(uint8_t dev_id){
+        void i2c_open(int32_t dev_id){
             gpio_handle_ = Pigpiod::gpio().checkHandle();
             uint8_t dummy_flag = 0;
             i2c_handle_ = i2c_open(gpio_handle_, 1, dev_id, dummy_flag);
             return i2c_handle_ < 0 ? 0 : 1;
         }
-        void i2c_write(uint8_t reg, uint8_t data){
+        void i2c_write(int32_t reg, int32_t data){
             i2c_write_byte_data(gpio_handle_, i2c_handle_, reg, data);
         }
-        uint8_t i2c_read(uint8_t reg){
+        uint8_t i2c_read(int32_t reg){
             return static_cast<uint8_t>(i2c_read_byte_data(gpio_handle_, i2c_handle_, reg));
         }
     private:
@@ -64,7 +64,7 @@ class pigpio{
         static pigpio *_instance;
         const int _baudrate;
         const char *_port;
-        int _pi;
-        int _serial_handle;
+        int32_t _pi;
+        int32_t _serial_handle;
 }; 
 }

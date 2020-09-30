@@ -16,9 +16,9 @@
 #include <vector>
 #include <memory>
 #include "robot_motion/flipper_util.h"
-#include "robot_motion/Constant.h"
+#include "robot_motion/constant.h"
 #include "robot_motion/semi_autonomous.h"
-#include "robot_motion/Rotation.h"
+#include "robot_motion/rotation.h"
 #include <dynamixel_workbench_msgs/DynamixelCommand.h>
 
 using std::vector;

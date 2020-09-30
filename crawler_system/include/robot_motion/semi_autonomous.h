@@ -11,7 +11,7 @@
 #include<std_msgs/Float64.h>
 #include<memory>
 #include"flipper_util.h"
-#include"robot_motion/Constant.h"
+#include"robot_motion/constant.h"
 #include<array>
 
 namespace DXLConstant{

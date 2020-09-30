@@ -6,7 +6,7 @@
 #pragma once
 #include<array>
 #include"robot_motion/flipper_util.h"
-#include"robot_motion/Constant.h"
+#include"robot_motion/constant.h"
 namespace Rotation{
   enum class setRotationType{
     forward,
