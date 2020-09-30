@@ -53,7 +53,7 @@ int main() {
     tof[i].startContinuous(0);
     pc.printf("%u\n", tof[i].getAddress());
   }
-  //MotorDriver motor_right(D5, D4, PB_2, D12, A1);
+ // MotorDriver motor_right(D5, D4, PB_2, D12, A1);
 //  MotorDriver motor_left(D11, D10, D9, D8, A0);
 //  RotaryInc rotary(D15,D14,2 * 50.8 * M_PI,200);
   uint16_t tof_data[2] = {};

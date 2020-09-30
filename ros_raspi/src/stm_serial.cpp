@@ -1,12 +1,9 @@
-#include<iostream>
 #include<pigpiod_if2.h>
 #include<ros/ros.h>
 #include<std_msgs/Float32MultiArray.h>
 #include<cstdint>
 #include<cstring>
 
-using std::cout;
-using std::endl;
 using std::memcpy;
 
 #define HEAD_BYTE 0xFF
@@ -126,12 +123,12 @@ int main(int argc, char **argv) {
     if (serial_handle < 0) {
       throw serial_handle;
     } else {
-      cout << "Serial Initialize complete" << endl;
+      ROS_INFO("Serial Initialize complete");
     }
   }
 
   catch (int _serial_handle) {
-    cout << "Serial Initialize Failed" << endl;
+    ROS_INFO("Serial Initialize Failed");
     return 1;
   }
 
