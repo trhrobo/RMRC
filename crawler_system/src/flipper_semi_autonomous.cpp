@@ -27,24 +27,16 @@ using std::vector;
 //HACK:パラメータ関係を別のファイルにまとめる
 #include<ros/ros.h>
 
-enum class keyFlag{
-  NOMAL = 0,
-  ALL,
-  AUTO
-};
+enum class keyFlag{nomal, all, semi_auto};
 
 template<typename T>
-struct Gyro{
-  T x;
-  T y;
-  T z;
-};
+struct Gyro{T x, y, z;};
 
 Gyro<double> gyro_robot; 
 
 namespace safetyCheck{
   //過負荷の確認
-  void torque_limit(){
+  void torqueLimit(){
     
   }
 };
@@ -60,7 +52,7 @@ namespace gyroControl{
     constexpr double threshold_forward_z = 330;
     constexpr double threshold_backward_z = 30;
     Lean leanState;
-    auto leanCheck = [&](const double angle_z) -> Lean{
+    auto leanCheck = [=, &leanState](const double angle_z) -> Lean{
       Lean leanNow;
       if(angle_z > threshold_forward_z){
         leanState = Lean::forward;
@@ -118,9 +110,9 @@ void joyCallback(const sensor_msgs::Joy &controller) {
   controller_key[1] = controller.axes[2];
   controller_key[2] = controller.buttons[5];
   controller_key[3] = controller.buttons[4];
-  if(controller.buttons[3] == true)controller_state = keyFlag::ALL;
-  if(controller.buttons[8] == true)controller_state = keyFlag::AUTO;
-  if(controller.buttons[1] == true)controller_state = keyFlag::NOMAL;
+  if(controller.buttons[3] == true)controller_state = keyFlag::all;
+  if(controller.buttons[8] == true)controller_state = keyFlag::semi_auto;
+  if(controller.buttons[1] == true)controller_state = keyFlag::nomal;
   // Bキーで全てのフリッパーの角度を90°
   if ((prev_reset == false) and controller.buttons[1] == true) flag_reset = !flag_reset;
   prev_reset = controller.buttons[1];
@@ -134,7 +126,7 @@ bool serviceCallPos(){
     srv.request.command = "_";
     srv.request.id = i + 1;
     srv.request.addr_name = "Goal_Position";
-    srv.request.value = ref_DXL_raw_pos[i];
+    srv.request.value = ref_dxl_raw_pos[i];
     dynamixel_service.call(srv);
   }
   //TODO:いるかあとで考える
@@ -147,8 +139,8 @@ bool serviceCallTheta(){
     srv.request.command = "_";
     srv.request.id = i + 1;
     srv.request.addr_name = "Goal_Position";
-    double ref_rad = ref_DXL_rad[i] + (current_DXL_rad_raw[i] - current_DXL_rad[i]);
-    srv.request.value = ref_rad * (DXLConstant::DYNAMIXEL_RESOLUTION / (M_PI * 2));
+    double ref_rad = ref_dxl_rad[i] + (current_dxl_rad_raw[i] - current_dxl_rad[i]);
+    srv.request.value = ref_rad * (dxl_constant::dynamixel_resolution / (M_PI * 2));
     dynamixel_service.call(srv);
   }
   ros::spinOnce();
@@ -157,9 +149,9 @@ bool serviceCallTheta(){
 //TODO: dynamixelIDとjointstateの順番が違う
 void jointStateCallback(const sensor_msgs::JointState &jointstate) {
   for(int i = 0; i < dynamixel_num.size(); ++i){
-    current_DXL_rad_raw[i] = jointstate.position[dynamixel_num[i]];
-    current_DXL_rad[i] = fmod(jointstate.position[dynamixel_num[i]], M_PI * 2);
-    current_DXL_torque[i] = jointstate.effort[dynamixel_num[i]];
+    current_dxl_rad_raw[i] = jointstate.position[dynamixel_num[i]];
+    current_dxl_rad[i] = fmod(jointstate.position[dynamixel_num[i]], M_PI * 2);
+    current_dxl_torque[i] = jointstate.effort[dynamixel_num[i]];
   }
 }
 int main(int argc, char **argv) {
@@ -177,27 +169,27 @@ int main(int argc, char **argv) {
   while (ros::ok()) {
     ros::spinOnce();
     switch(controller_state){
-      case keyFlag::ALL:
+      case keyFlag::all:
         if ((controller_key[0] < 0) or (controller_key[1] < 0)){
-          Rotation::setRotation(0, Rotation::severalType::all, Rotation::setRotationType::forward);
+          rotation::setRotation(0, rotation::severalType::all, rotation::setRotationType::forward);
         }else if((controller_key[2] == true) or (controller_key[3] == true)){
-          Rotation::setRotation(0, Rotation::severalType::all, Rotation::setRotationType::reverse);
+          rotation::setRotation(0, rotation::severalType::all, rotation::setRotationType::reverse);
         }else if(flag_reset){
-          Rotation::reset();
+          rotation::reset();
         }else{
-          Rotation::setRotation(0, Rotation::severalType::all, Rotation::setRotationType::nomal);
+          rotation::setRotation(0, rotation::severalType::all, rotation::setRotationType::nomal);
         }
         serviceCallPos();
         break;
 
       //半自動制御モード
-      case keyFlag::AUTO:
-        robot_model(ref_DXL_rad);
+      case keyFlag::semi_auto:
+        robot_model(ref_dxl_rad);
         serviceCallTheta();
         break;
 
       default:
-        auto judge = [&](int dxl_num) -> bool{
+        auto judge = [=](int dxl_num) -> bool{
           if(dxl_num == 0 or dxl_num == 1){
             return controller_key[dxl_num] < 0 ? true : false;
           }else if(dxl_num == 2 or dxl_num == 3){
@@ -206,11 +198,11 @@ int main(int argc, char **argv) {
         };
         for(int i = 0; i < dynamixel_num.size(); ++i){
           if(judge(i) == true and buttons_reverse == true){
-            Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::reverse);
+            rotation::setRotation(i, rotation::severalType::one, rotation::setRotationType::reverse);
           }else if(judge(i) == true and buttons_reverse == false){
-            Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::forward);
+            rotation::setRotation(i, rotation::severalType::one, rotation::setRotationType::forward);
           }else if(judge(i) == false){
-            Rotation::setRotation(i, Rotation::severalType::one, Rotation::setRotationType::nomal);
+            rotation::setRotation(i, rotation::severalType::one, rotation::setRotationType::nomal);
           }
         }
         serviceCallPos();

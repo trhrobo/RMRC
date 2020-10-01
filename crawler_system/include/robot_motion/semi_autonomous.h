@@ -14,11 +14,11 @@
 #include"robot_motion/constant.h"
 #include<array>
 
-namespace DXLConstant{
-  constexpr int POSE_UP = 90;
-  constexpr int POSE_DOWN = -90;
-  constexpr int DISTANCE_THRESHOLD_FORWARD = 100;
-  constexpr int DISTANCE_THRESHOLD_DOWN = 6;
+namespace dxl_constant{
+  constexpr int pose_up = 90;
+  constexpr int pose_down = -90;
+  constexpr int distance_threshold_forward = 100;
+  constexpr int distance_threshold_down = 6;
 }
 
 struct DXLPose{
@@ -36,10 +36,10 @@ class SemiAutoBase{
     };
     FB_Pattern FB_MODE;
     ros::Subscriber tof_sub;
-    std::array<double, 4> current_DXL_pose{};
-    std::array<double, 4> current_DXL_load{};
+    std::array<double, 4> current_dxl_pose{};
+    std::array<double, 4> current_dxl_load{};
     std::array<double, 4> tof_distance{};
-    std::array<double, 4> goal_DXL_pose{};
+    std::array<double, 4> goal_dxl_pose{};
     double gyro_pose;
     double goal_pose_right;
     double goal_pose_left;
@@ -47,9 +47,9 @@ class SemiAutoBase{
     SemiAutoBase(ros::NodeHandle _n){
       tof_sub = _n.subscribe("tof_sub", 10, &SemiAutoBase::tofCallback, this);
       if(flag_dist == true){
-        DXL_MODE == DXL::MODE::POS_CONTROL ? FB_MODE = FB_Pattern::posFB : FB_MODE = FB_Pattern::torqueFB;
+        dxl_mode == dxl::Mode::pos_control ? FB_MODE = FB_Pattern::posFB : FB_MODE = FB_Pattern::torqueFB;
       }else{
-        DXL_MODE == DXL::MODE::POS_CONTROL ? FB_MODE = FB_Pattern::dist_posFB : FB_MODE = FB_Pattern::dist_torqueFB;
+        dxl_mode == dxl::Mode::pos_control ? FB_MODE = FB_Pattern::dist_posFB : FB_MODE = FB_Pattern::dist_torqueFB;
       }
     }
     void init(){

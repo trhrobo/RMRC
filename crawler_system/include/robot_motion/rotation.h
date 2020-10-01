@@ -7,7 +7,7 @@
 #include<array>
 #include"robot_motion/flipper_util.h"
 #include"robot_motion/constant.h"
-namespace Rotation{
+namespace rotation{
   enum class setRotationType{
     forward,
     reverse,
