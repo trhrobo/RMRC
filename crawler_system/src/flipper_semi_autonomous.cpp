@@ -19,6 +19,7 @@
 #include "robot_motion/constant.h"
 #include "robot_motion/semi_autonomous.h"
 #include "robot_motion/rotation.h"
+#include "robot_motion/imu.h"
 #include <dynamixel_workbench_msgs/DynamixelCommand.h>
 
 using std::vector;
@@ -29,10 +30,8 @@ using std::vector;
 
 enum class keyFlag{nomal, all, semi_auto};
 
-template<typename T>
-struct Gyro{T x, y, z;};
 
-Gyro<double> gyro_robot; 
+Imu<double> imu; 
 
 namespace safetyCheck{
   //過負荷の確認
@@ -63,7 +62,7 @@ namespace gyroControl{
       }
       return leanState; 
     };
-    switch(leanCheck(gyro_robot.z)){
+    switch(leanCheck(imu.z)){
       case Lean::forward:
         //前傾姿勢の場合はコンプライアンス制御をする
         break;
@@ -85,9 +84,9 @@ bool front_flag = false;
 namespace RobotState{
   void gyroCallback(const std_msgs::Float64MultiArray &msg) {
     if(msg.data.size() != 3){ROS_ERROR("gyro message is invalid");}
-    gyro_robot.x = msg.data[0];
-    gyro_robot.y = msg.data[1];
-    gyro_robot.z = msg.data[2];
+    imu.x = msg.data[0];
+    imu.y = msg.data[1];
+    imu.z = msg.data[2];
   }
   void stateManagement(){
     if(front_flag == true){
@@ -184,7 +183,7 @@ int main(int argc, char **argv) {
 
       //半自動制御モード
       case keyFlag::semi_auto:
-        robot_model(ref_dxl_rad);
+        robot_model(ref_dxl_rad, std::move(imu));
         serviceCallTheta();
         break;
 
