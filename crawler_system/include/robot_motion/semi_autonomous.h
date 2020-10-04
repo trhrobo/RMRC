@@ -22,11 +22,6 @@ namespace dxl_constant{
   constexpr int distance_threshold_down = 6;
 }
 
-struct FlipperPose{
-  std::array<double, 2> POSE_1{};
-  std::array<double, 2> POSE_2{};
-};
-
 class SemiAutoBase{
   protected:
     enum class FeedBackPattern{
@@ -66,34 +61,30 @@ class SemiAutoBase{
         _tof_distance[i] = msg.data[i];
       }
     }
-    virtual void operator()(double (&set_array)[4]) = 0;
+    virtual void operator()(double (&dxl_rad)[4], Imu<double> &&imu) = 0;
 };
 
 class SemiAutoFront : public SemiAutoBase{
   private:
     ros::Subscriber _psd_front_sub;
-    FlipperPose _poseParamFront;
   public:
-    SemiAutoFront(ros::NodeHandle _n) : SemiAutoBase(_n){
-      //poseParamFront.POSE_1 = {, };
-      //poseParamFront.POSE_2 = {, };
-    }
-    void operator()(double (&set_array)[4], Imu<double> &&imu){
+    using SemiAutoBase::SemiAutoBase;
+    void operator()(double (&dxl_rad)[4], Imu<double> &&imu){
       enum class FlipperMode{
         mode0, mode1, mode2, mode3, mode0_indiv, mode1_indiv, mode2_indiv, mode3_indiv
       };
       enum class ImuMode{
         mode0, mode1, mode2, mode3
       };
-      auto touchObstacle = [=](FrontFlipper flipper) -> std::tuple<bool, bool>{
+      auto touchObstacle = [=]() -> std::tuple<bool, bool>{
         return std::forward_as_tuple(true, true);
-      }
+      };
       auto imuModeDetector = [=](){
         return ImuMode::mode0;
-      }
+      };
       auto flipperModeJudge = [=](){
         bool touch_right, touch_left;
-        std::tie(touch_right, touch_left) = touchObstracle();
+        std::tie(touch_right, touch_left) = touchObstacle();
         if((touch_right == false or touch_left == false) and imuModeDetector() == ImuMode::mode2){
           return FlipperMode::mode2;
         }
@@ -103,14 +94,23 @@ class SemiAutoFront : public SemiAutoBase{
         if(touch_right == true or touch_left == true){
           return FlipperMode::mode1_indiv;
         }
-        return flipperMode::mode0;
-      }
+        return FlipperMode::mode0;
+      };
       switch(flipperModeJudge()){
         case FlipperMode::mode0:
+          for(int i = 0; i < 2; ++i){
+            dxl_rad[i] = M_PI / 4;          
+          }
           break;
         case FlipperMode::mode1:
+          for(int i = 0; i < 2; ++i){
+            dxl_rad[i] = 0;
+          }
           break;
         case FlipperMode::mode2:
+          for(int i = 0; i < 2; ++i){
+            dxl_rad[i] = -imu.x;
+          }
           break;
         case FlipperMode::mode1_indiv:
           break;
@@ -123,13 +123,9 @@ class SemiAutoFront : public SemiAutoBase{
 class SemiAutoRear : public SemiAutoBase{
   private:
     ros::Subscriber _psd_rear_sub;
-    FlipperPose _poseParamRear;
   public:
-    SemiAutoRear(ros::NodeHandle _n) : SemiAutoBase(_n){
-      //poseParamRear.POSE_1 = {60, 60};
-      //poseParamRear.POSE_2 = {20, 20};
-    }
-    void operator()(double (&set_array)[4], Imu<double> &&imu){
+    using SemiAutoBase::SemiAutoBase;
+    void operator()(double (&dxl_rad)[4], Imu<double> &&imu){
       switch(_feedback_mode){
         case FeedBackPattern::pos_feedback:
           break;
@@ -143,18 +139,17 @@ class SemiAutoRear : public SemiAutoBase{
     }
 };
 
-class semiAuto{
+class SemiAuto{
   private:
     std::unique_ptr<SemiAutoFront> _front;
     std::unique_ptr<SemiAutoRear> _rear;
     Imu<double> _imu;
   public:
-    semiAuto(ros::NodeHandle _n)
-      : _front(new SemiAutoFront(_n)), 
-        _rear(new SemiAutoRear(_n)){}
-    void operator()(double (&set_array)[4], Imu<double> &&imu){
-      (*_front)(set_array, std::forward<Imu<double>>(imu));
+    SemiAuto(ros::NodeHandle _n) : _front(new SemiAutoFront(_n)), 
+                                   _rear(new SemiAutoRear(_n)){}
+    void operator()(double (&dxl_rad)[4], Imu<double> &&imu){
+      (*_front)(dxl_rad, std::forward<Imu<double>>(imu));
       //完全転送されたオブジェクトにはnullptr入るはずやからこれバグるくね？？
-      (*_rear)(set_array, std::forward<Imu<double>>(imu));
+      (*_rear)(dxl_rad, std::forward<Imu<double>>(imu));
     }
 };

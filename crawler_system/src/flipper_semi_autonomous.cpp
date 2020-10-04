@@ -162,7 +162,7 @@ int main(int argc, char **argv) {
   //ros::Subscriber gyro_sub = n.subscribe("gyro", 10, RobotState::gyroCallback);
   ros::Subscriber controller_sub = n.subscribe("joy", 10, joyCallback);
   ros::Rate loop_rate(400);
-  semiAuto robot_model(n);
+  SemiAuto robot_model(n);
   dynamixel_workbench_msgs::DynamixelCommand srv;
 
   while (ros::ok()) {
