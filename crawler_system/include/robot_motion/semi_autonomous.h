@@ -36,6 +36,26 @@ class SemiAutoBase{
     enum class ImuMode{
       mode0, mode1, mode2, mode3
     };
+    std::tuple<bool, bool> touchObstacle(){
+      return std::forward_as_tuple(true, true);
+    };
+    ImuMode imuModeDetector(){
+      return ImuMode::mode0;
+    };
+    FlipperMode motionDetector(){
+      bool touch_right, touch_left;
+      std::tie(touch_right, touch_left) = touchObstacle();
+      if((touch_right == false or touch_left == false) and imuModeDetector() == ImuMode::mode2){
+        return FlipperMode::mode2;
+      }
+      if(touch_right == true and touch_left == true){
+        return FlipperMode::mode1;
+      }
+      if(touch_right == true or touch_left == true){
+        return FlipperMode::mode1_indiv;
+      }
+      return FlipperMode::mode0;
+    }
     FeedBackPattern _feedback_mode;
     ros::Subscriber _tof_sub;
     std::array<double, 4> _current_dxl_pose{};
@@ -70,33 +90,7 @@ class SemiAutoFront : public SemiAutoBase{
   public:
     using SemiAutoBase::SemiAutoBase;
     void operator()(double (&dxl_rad)[4], Imu<double> &&imu){
-      enum class FlipperMode{
-        mode0, mode1, mode2, mode3, mode0_indiv, mode1_indiv, mode2_indiv, mode3_indiv
-      };
-      enum class ImuMode{
-        mode0, mode1, mode2, mode3
-      };
-      auto touchObstacle = [=]() -> std::tuple<bool, bool>{
-        return std::forward_as_tuple(true, true);
-      };
-      auto imuModeDetector = [=](){
-        return ImuMode::mode0;
-      };
-      auto flipperModeJudge = [=](){
-        bool touch_right, touch_left;
-        std::tie(touch_right, touch_left) = touchObstacle();
-        if((touch_right == false or touch_left == false) and imuModeDetector() == ImuMode::mode2){
-          return FlipperMode::mode2;
-        }
-        if(touch_right == true and touch_left == true){
-          return FlipperMode::mode1;
-        }
-        if(touch_right == true or touch_left == true){
-          return FlipperMode::mode1_indiv;
-        }
-        return FlipperMode::mode0;
-      };
-      switch(flipperModeJudge()){
+      switch(motionDetector()){
         case FlipperMode::mode0:
           for(int i = 0; i < 2; ++i){
             dxl_rad[i] = M_PI / 4;          

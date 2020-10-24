@@ -4,29 +4,29 @@
  * @brief flipper制御の実装
 **/
 #include <cmath>
-#include <ros/ros.h>
-#include <ros/time.h>
-#include <sensor_msgs/JointState.h>
-#include <sensor_msgs/Joy.h>
-#include <std_msgs/Float64.h>
-#include <std_msgs/Float64MultiArray.h>
-#include <trajectory_msgs/JointTrajectory.h>
 #include <array>
 #include <tuple>
 #include <vector>
 #include <memory>
+#include <ros/ros.h>
+#include <ros/time.h>
+#include <std_msgs/Bool.h>
+#include <std_msgs/Float64.h>
+#include <std_msgs/Float64MultiArray.h>
+#include <sensor_msgs/JointState.h>
+#include <sensor_msgs/Joy.h>
+#include <trajectory_msgs/JointTrajectory.h>
+#include <dynamixel_workbench_msgs/DynamixelCommand.h>
 #include "robot_motion/flipper_util.h"
 #include "robot_motion/constant.h"
 #include "robot_motion/semi_autonomous.h"
 #include "robot_motion/rotation.h"
 #include "robot_motion/imu.h"
-#include <dynamixel_workbench_msgs/DynamixelCommand.h>
 
 using std::vector;
 
 //HACK:グローバル宣言の変数多すぎもっと参照渡し使おう
 //HACK:パラメータ関係を別のファイルにまとめる
-#include<ros/ros.h>
 
 enum class keyFlag{nomal, all, semi_auto};
 
@@ -153,6 +153,10 @@ void jointStateCallback(const sensor_msgs::JointState &jointstate) {
     current_dxl_torque[i] = jointstate.effort[dynamixel_num[i]];
   }
 }
+bool change_front;
+void frontCallback(const std_msgs::Bool &msg){
+  change_front = msg.data;
+}
 int main(int argc, char **argv) {
   ros::init(argc, argv, "semi_auto");
   ros::NodeHandle n;
@@ -161,6 +165,7 @@ int main(int argc, char **argv) {
   ros::Subscriber feedback_sub = n.subscribe("/dynamixel_workbench/joint_states", 10, jointStateCallback);
   //ros::Subscriber gyro_sub = n.subscribe("gyro", 10, RobotState::gyroCallback);
   ros::Subscriber controller_sub = n.subscribe("joy", 10, joyCallback);
+  ros::Subscriber change_front_sub = n.subscribe("/change_front", 10, frontCallback);
   ros::Rate loop_rate(400);
   SemiAuto robot_model(n);
   dynamixel_workbench_msgs::DynamixelCommand srv;
