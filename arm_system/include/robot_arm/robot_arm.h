@@ -101,13 +101,23 @@ namespace Arm3Dof{
             }
             Vector3d invKinema(Vector3d pos){
                 //逆運動学の計算
-                std::array<double, 3> theta;
+                //patarn1
+                /*std::array<double, 3> theta;
                 double sqrt_x2y2 = std::sqrt(pos(0) * pos(0) + pos(1) * pos(1));
                 double param_theta2 = ((pos(0) * pos(0)) + (pos(1) * pos(1)) + (pos(2) * pos(2)) - (L1 * L1) - (L2 * L2)) / (2 * L1 * L2);
                 theta[2] = atan2(-1 * sqrt(1 - (param_theta2 * param_theta2)), param_theta2);
                 theta[0] = atan2(pos(1), pos(0));
                 theta[1] = atan2((-1 * (L1 + L2 * cos(theta[2])) * sqrt_x2y2) - (L2 * sin(theta[2]) * pos(2)), -1 * (L2 * sin(theta[2])
                                     * sqrt_x2y2) + ((L1 + (L2 * cos(theta[2]))) * pos(2)));
+                Vector3d calc(theta[0], theta[1], theta[2]);
+                return std::move(calc);*/
+                //patarn2
+                std::array<double, 3> theta;
+                double sqrt_x2y2 = std::sqrt(pos(0) * pos(0) + pos(1) * pos(1));
+                double param_theta2 = ((pos(0) * pos(0)) + (pos(1) * pos(1)) + (pos(2) * pos(2)) - (L1 * L1) - (L2 * L2)) / (2 * L1 * L2);
+                theta[0] =  atan(pos(0) / pos(1));
+                theta[1] = -acos((pos(0)^2 + pos(1)^2 + pos(2)^2 - L1^2 - L2^2) / (2 * L1 * L2));
+                theta[2] = -asin((L1 + L2 * cos(theta[0])) / std::sqrt(pos(0)^2 + pos(1)^2 + pos(2)^2)) + atan(pos(2) / std::sqrt(pos(0)^2 + pos(1)^2)) + M_PI/2;
                 Vector3d calc(theta[0], theta[1], theta[2]);
                 return std::move(calc);
             }
